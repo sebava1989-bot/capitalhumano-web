@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "874802772669",
+    "project_id": "alma-ai-cc0f1",
+    "storage_bucket": "alma-ai-cc0f1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:874802772669:android:b82a1b090e2a2e1c7515d4",
+        "android_client_info": {
+          "package_name": "com.tuamigodigital.alma_ai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnNv7WzaUPgkmskJJVtRMbvf_-DX9kncI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
