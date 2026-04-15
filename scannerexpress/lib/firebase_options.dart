@@ -16,10 +16,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'PLACEHOLDER_API_KEY',
-    appId: 'PLACEHOLDER_APP_ID',
-    messagingSenderId: 'PLACEHOLDER_SENDER_ID',
+    apiKey: 'AIzaSyDhOEWWZDLVkz8wYjzK9TgrtIDrxuJl_gI',
+    appId: '1:603694623352:android:cb0b00bb92fa79b1d05b8d',
+    messagingSenderId: '603694623352',
     projectId: 'scannerexpress-tuamigodigital',
-    storageBucket: 'scannerexpress-tuamigodigital.appspot.com',
+    storageBucket: 'scannerexpress-tuamigodigital.firebasestorage.app',
   );
+
 }

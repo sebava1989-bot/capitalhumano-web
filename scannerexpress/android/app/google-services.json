@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "603694623352",
+    "project_id": "scannerexpress-tuamigodigital",
+    "storage_bucket": "scannerexpress-tuamigodigital.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:603694623352:android:cb0b00bb92fa79b1d05b8d",
+        "android_client_info": {
+          "package_name": "com.tuamigodigital.scannerexpress"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDhOEWWZDLVkz8wYjzK9TgrtIDrxuJl_gI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
