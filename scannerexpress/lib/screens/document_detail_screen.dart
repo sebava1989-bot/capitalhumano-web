@@ -61,7 +61,7 @@ class _DocumentDetailScreenState extends State<DocumentDetailScreen>
   }
 
   Future<void> _share() async {
-    await ShareXFiles([XFile(_doc.pdfLocalPath)], subject: _doc.name).share();
+    await Share.shareXFiles([XFile(_doc.pdfLocalPath)], subject: _doc.name);
   }
 
   Future<void> _delete() async {
