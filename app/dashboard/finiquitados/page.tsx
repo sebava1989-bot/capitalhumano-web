@@ -1,6 +1,6 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { Search, User, Calendar, Briefcase, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Search, User, Calendar, Briefcase, FileText, ChevronDown, ChevronUp, Upload, X } from 'lucide-react';
 import api from '@/lib/api';
 
 interface FiniquitadoWorker {
@@ -24,28 +24,77 @@ interface Doc {
 }
 
 const TYPE_LABELS: Record<string, string> = {
+  finiquito:   'Finiquito',
   liquidacion: 'Liquidación',
-  contrato: 'Contrato',
-  anexo: 'Anexo',
+  contrato:    'Contrato',
+  anexo:       'Anexo',
   certificado: 'Certificado',
-  otro: 'Otro',
+  otro:        'Otro',
+};
+
+const TYPE_EMOJI: Record<string, string> = {
+  finiquito:   '📋',
+  liquidacion: '💰',
+  contrato:    '📝',
+  anexo:       '📎',
+  certificado: '🏅',
+  otro:        '📄',
 };
 
 function WorkerCard({ worker }: { worker: FiniquitadoWorker }) {
   const [open, setOpen] = useState(false);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [loadingDocs, setLoadingDocs] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
+  const [uploadForm, setUploadForm] = useState({ type: 'finiquito', name: '', period: '' });
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function loadDocs() {
+    setLoadingDocs(true);
+    try {
+      const { data } = await api.get(`/documents/worker/${worker.id}`);
+      setDocs(data);
+    } catch { /* silencioso */ }
+    finally { setLoadingDocs(false); }
+  }
 
   async function toggleDocs() {
-    if (!open && docs.length === 0) {
-      setLoadingDocs(true);
-      try {
-        const { data } = await api.get(`/documents/worker/${worker.id}`);
-        setDocs(data);
-      } catch { /* silencioso */ }
-      finally { setLoadingDocs(false); }
-    }
+    if (!open && docs.length === 0) await loadDocs();
     setOpen(o => !o);
+  }
+
+  async function handleUpload(e: React.FormEvent) {
+    e.preventDefault();
+    const file = fileRef.current?.files?.[0];
+    if (!file) { setUploadError('Selecciona un archivo PDF'); return; }
+    if (file.size > 15 * 1024 * 1024) { setUploadError('El archivo no puede superar 15 MB'); return; }
+
+    setUploadError('');
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('workerId', worker.id);
+      fd.append('type', uploadForm.type);
+      fd.append('name', uploadForm.name || `${TYPE_LABELS[uploadForm.type]} - ${worker.full_name}`);
+      if (uploadForm.period) fd.append('period', uploadForm.period);
+
+      await api.post('/documents/upload', fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      setShowUpload(false);
+      setUploadForm({ type: 'finiquito', name: '', period: '' });
+      if (fileRef.current) fileRef.current.value = '';
+      await loadDocs();
+      if (!open) setOpen(true);
+    } catch (err: any) {
+      setUploadError(err.response?.data?.error || 'Error al subir documento');
+    } finally {
+      setUploading(false);
+    }
   }
 
   function calcAntigüedad() {
@@ -61,6 +110,7 @@ function WorkerCard({ worker }: { worker: FiniquitadoWorker }) {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-3">
+      {/* Cabecera del trabajador */}
       <div className="p-5">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
@@ -77,7 +127,15 @@ function WorkerCard({ worker }: { worker: FiniquitadoWorker }) {
               )}
             </div>
           </div>
-          <span className="px-2.5 py-1 bg-red-50 text-red-600 text-xs font-semibold rounded-full">Finiquitado</span>
+          <div className="flex flex-col items-end gap-2">
+            <span className="px-2.5 py-1 bg-red-50 text-red-600 text-xs font-semibold rounded-full">Finiquitado</span>
+            <button
+              onClick={() => { setShowUpload(u => !u); if (!open) { setOpen(true); loadDocs(); } }}
+              className="flex items-center gap-1.5 text-xs px-3 py-1.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors font-medium"
+            >
+              <Upload size={12} /> Subir documento
+            </button>
+          </div>
         </div>
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -106,12 +164,85 @@ function WorkerCard({ worker }: { worker: FiniquitadoWorker }) {
         </div>
       </div>
 
-      {/* Documentos toggle */}
+      {/* Formulario de subida */}
+      {showUpload && (
+        <div className="border-t border-sky-100 bg-sky-50 px-5 py-4">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-semibold text-sky-800 flex items-center gap-2">
+              <Upload size={14} /> Subir documento para {worker.full_name.split(' ')[0]}
+            </h4>
+            <button onClick={() => setShowUpload(false)} className="text-gray-400 hover:text-gray-600">
+              <X size={16} />
+            </button>
+          </div>
+          <form onSubmit={handleUpload} className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Tipo de documento</label>
+                <select
+                  value={uploadForm.type}
+                  onChange={e => setUploadForm(f => ({ ...f, type: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                >
+                  {Object.entries(TYPE_LABELS).map(([v, l]) => (
+                    <option key={v} value={v}>{l}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Período (opcional)</label>
+                <input
+                  value={uploadForm.period}
+                  onChange={e => setUploadForm(f => ({ ...f, period: e.target.value }))}
+                  placeholder="Ej: Abril 2026"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Nombre del documento (opcional)</label>
+              <input
+                value={uploadForm.name}
+                onChange={e => setUploadForm(f => ({ ...f, name: e.target.value }))}
+                placeholder={`${TYPE_LABELS[uploadForm.type]} - ${worker.full_name}`}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 bg-white"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Archivo PDF *</label>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".pdf,application/pdf"
+                required
+                className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-sky-100 file:text-sky-700 file:font-medium hover:file:bg-sky-200 cursor-pointer"
+              />
+            </div>
+            {uploadError && <p className="text-red-600 text-xs">{uploadError}</p>}
+            <div className="flex gap-2 pt-1">
+              <button type="button" onClick={() => setShowUpload(false)}
+                className="flex-1 border border-gray-300 rounded-lg py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors bg-white">
+                Cancelar
+              </button>
+              <button type="submit" disabled={uploading}
+                className="flex-1 bg-sky-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-sky-700 disabled:opacity-50 transition-colors">
+                {uploading ? 'Subiendo...' : 'Subir documento'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Toggle documentos */}
       <button
         onClick={toggleDocs}
         className="w-full flex items-center justify-between px-5 py-3 border-t border-gray-100 text-sm text-sky-600 hover:bg-sky-50 transition-colors font-medium"
       >
-        <span className="flex items-center gap-2"><FileText size={15} /> Ver historial de documentos</span>
+        <span className="flex items-center gap-2">
+          <FileText size={15} />
+          Historial de documentos
+          {docs.length > 0 && <span className="bg-sky-100 text-sky-700 text-xs px-2 py-0.5 rounded-full">{docs.length}</span>}
+        </span>
         {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
 
@@ -119,17 +250,28 @@ function WorkerCard({ worker }: { worker: FiniquitadoWorker }) {
         <div className="border-t border-gray-100 px-5 py-4 bg-gray-50">
           {loadingDocs && <p className="text-sm text-gray-400 text-center py-2">Cargando documentos...</p>}
           {!loadingDocs && docs.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-2">Sin documentos registrados</p>
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-400 mb-2">Sin documentos aún</p>
+              <button
+                onClick={() => setShowUpload(true)}
+                className="text-xs text-sky-600 hover:underline"
+              >
+                Subir el finiquito →
+              </button>
+            </div>
           )}
           {!loadingDocs && docs.map(doc => (
-            <div key={doc.id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-              <div>
-                <p className="text-sm font-medium text-gray-800">{doc.name}</p>
-                <p className="text-xs text-gray-400">
-                  {TYPE_LABELS[doc.type] || doc.type}
-                  {doc.period ? ` · ${doc.period}` : ''}
-                  {' · '}{new Date(doc.created_at).toLocaleDateString('es-CL')}
-                </p>
+            <div key={doc.id} className="flex items-center justify-between py-2.5 border-b border-gray-100 last:border-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-lg shrink-0">{TYPE_EMOJI[doc.type] || '📄'}</span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">{doc.name}</p>
+                  <p className="text-xs text-gray-400">
+                    {TYPE_LABELS[doc.type] || doc.type}
+                    {doc.period ? ` · ${doc.period}` : ''}
+                    {' · '}{new Date(doc.created_at).toLocaleDateString('es-CL')}
+                  </p>
+                </div>
               </div>
               <a href={doc.file_url} target="_blank" rel="noreferrer"
                 className="text-xs px-3 py-1.5 bg-sky-600 text-white rounded-lg hover:bg-sky-700 transition-colors ml-3 shrink-0">
@@ -163,7 +305,7 @@ export default function FiniquitadosPage() {
     <div className="p-8">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Trabajadores Finiquitados</h2>
-        <p className="text-sm text-gray-500 mt-1">Historial completo con liquidaciones, contratos y documentos</p>
+        <p className="text-sm text-gray-500 mt-1">Sube el finiquito y documentos de cada ex trabajador</p>
       </div>
 
       <div className="relative mb-5">
