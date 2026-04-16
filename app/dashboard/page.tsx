@@ -4,7 +4,8 @@ import { Users, FileText, ClipboardList, Clock, Building2, Download, Smartphone 
 import api from '@/lib/api';
 import Link from 'next/link';
 
-const APK_URL = 'https://github.com/sebava1989-bot/capitalhumano-backend-/releases/download/v1.0.0/capitalhumano-worker-v1.0.0.apk';
+const APK_WORKER_URL = 'https://github.com/sebava1989-bot/capitalhumano-backend-/releases/download/v1.0.0/capitalhumano-worker-v1.0.0.apk';
+const APK_ADMIN_URL = 'https://github.com/sebava1989-bot/capitalhumano-backend-/releases/download/v1.0.0-admin/capitalhumano-admin-v1.0.0.apk';
 
 interface Stats {
   workers: { active: number; total: number };
@@ -81,28 +82,52 @@ export default function DashboardPage() {
       )}
 
       {/* APK Download Section */}
-      <div className="bg-sky-50 border border-sky-200 rounded-xl p-5">
-        <div className="flex items-start gap-4">
-          <div className="bg-sky-500 p-3 rounded-lg shrink-0">
-            <Smartphone size={22} className="text-white" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Worker APK */}
+        <div className="bg-sky-50 border border-sky-200 rounded-xl p-5">
+          <div className="flex items-start gap-4">
+            <div className="bg-sky-500 p-3 rounded-lg shrink-0">
+              <Smartphone size={20} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 mb-1">App Trabajadores</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Para instalar en los celulares de tus trabajadores. Ingresan con código <span className="font-mono font-bold text-sky-700">{stats.company.company_code}</span> y su RUT.
+              </p>
+              <a
+                href={APK_WORKER_URL}
+                download="capitalhumano-worker.apk"
+                className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <Download size={15} />
+                Descargar APK
+              </a>
+              <p className="text-xs text-gray-400 mt-2">Android 6.0+ · v1.0.0</p>
+            </div>
           </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900 mb-1">App para Trabajadores</h3>
-            <p className="text-sm text-gray-600 mb-3">
-              Descarga e instala la app en los celulares Android de tus trabajadores.
-              Ellos ingresan con el código de empresa <span className="font-mono font-bold text-sky-700">{stats.company.company_code}</span> y su RUT.
-            </p>
-            <a
-              href={APK_URL}
-              download="capitalhumano-worker.apk"
-              className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-            >
-              <Download size={16} />
-              Descargar APK (Android)
-            </a>
-            <p className="text-xs text-gray-500 mt-2">
-              Versión 1.0.0 · Requiere Android 6.0 o superior · Habilitar &quot;Instalar apps desconocidas&quot; en ajustes
-            </p>
+        </div>
+
+        {/* Admin APK */}
+        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
+          <div className="flex items-start gap-4">
+            <div className="bg-indigo-600 p-3 rounded-lg shrink-0">
+              <Smartphone size={20} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 mb-1">App Administrador</h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Para gestionar tu empresa desde el celular. Accede al panel completo desde Android.
+              </p>
+              <a
+                href={APK_ADMIN_URL}
+                download="capitalhumano-admin.apk"
+                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+              >
+                <Download size={15} />
+                Descargar APK
+              </a>
+              <p className="text-xs text-gray-400 mt-2">Android 6.0+ · v1.0.0</p>
+            </div>
           </div>
         </div>
       </div>
