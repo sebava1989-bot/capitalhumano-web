@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Building2, Key, ImageIcon, Upload, CheckCircle, X } from 'lucide-react';
+import { Building2, Key, ImageIcon, Upload, CheckCircle, X, Pencil } from 'lucide-react';
 import api from '@/lib/api';
 
 function SignatureUpload() {
@@ -86,6 +86,11 @@ export default function SettingsPage() {
   const [uploadOk, setUploadOk] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editingCode, setEditingCode] = useState(false);
+  const [newCode, setNewCode] = useState('');
+  const [savingCode, setSavingCode] = useState(false);
+  const [codeError, setCodeError] = useState('');
+  const [codeOk, setCodeOk] = useState(false);
 
   useEffect(() => {
     const data = localStorage.getItem('ch_company');
@@ -103,6 +108,28 @@ export default function SettingsPage() {
     const reader = new FileReader();
     reader.onload = () => setLogoPreview(reader.result as string);
     reader.readAsDataURL(file);
+  }
+
+  async function handleSaveCode() {
+    if (!newCode.trim()) return;
+    setSavingCode(true); setCodeError(''); setCodeOk(false);
+    try {
+      const { data } = await api.put('/dashboard/company-code', { companyCode: newCode.trim() });
+      const stored = localStorage.getItem('ch_company');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const updated = { ...parsed, companyCode: data.companyCode };
+        localStorage.setItem('ch_company', JSON.stringify(updated));
+        setCompany(updated);
+      }
+      setCodeOk(true);
+      setEditingCode(false);
+      setNewCode('');
+    } catch (err: any) {
+      setCodeError(err.response?.data?.error || 'Error al actualizar código');
+    } finally {
+      setSavingCode(false);
+    }
   }
 
   async function handleUploadLogo() {
@@ -181,13 +208,52 @@ export default function SettingsPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
-        <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-          <Key size={18} className="text-sky-600" /> Código de acceso para trabajadores
-        </h3>
-        <p className="text-sm text-gray-500 mb-3">Comparte este código con tus trabajadores para que puedan iniciar sesión en la app móvil.</p>
-        <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 text-center">
-          <p className="text-3xl font-mono font-bold text-sky-700 tracking-widest">{company?.companyCode || '——'}</p>
+        <div className="flex items-start justify-between mb-2">
+          <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+            <Key size={18} className="text-sky-600" /> Código de acceso para trabajadores
+          </h3>
+          {!editingCode && (
+            <button onClick={() => { setEditingCode(true); setNewCode(company?.companyCode || ''); setCodeOk(false); }}
+              className="flex items-center gap-1.5 text-sm text-sky-600 hover:underline font-medium">
+              <Pencil size={14} /> Cambiar
+            </button>
+          )}
         </div>
+        <p className="text-sm text-gray-500 mb-3">
+          Comparte este código con tus trabajadores para que puedan iniciar sesión en la app móvil.
+          Usa las iniciales de tu empresa para que sea fácil de recordar.
+        </p>
+
+        {editingCode ? (
+          <div className="space-y-3">
+            <div className="flex gap-2">
+              <input
+                value={newCode}
+                onChange={e => setNewCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8))}
+                placeholder="Ej: VS, RRHH, CORP..."
+                maxLength={8}
+                className="flex-1 border border-gray-300 rounded-lg px-3 py-2 font-mono text-lg font-bold text-sky-700 tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+            <p className="text-xs text-gray-400">Entre 2 y 8 caracteres. Solo letras y números. Si ya existe, agrega un número (ej: VS2).</p>
+            {codeError && <p className="text-red-600 text-sm">{codeError}</p>}
+            <div className="flex gap-2">
+              <button onClick={() => { setEditingCode(false); setCodeError(''); }}
+                className="flex-1 border border-gray-300 rounded-lg py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={handleSaveCode} disabled={savingCode || newCode.length < 2}
+                className="flex-1 bg-sky-600 text-white rounded-lg py-2 text-sm font-semibold hover:bg-sky-700 disabled:opacity-50 transition-colors">
+                {savingCode ? 'Guardando...' : 'Guardar código'}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 text-center">
+            <p className="text-3xl font-mono font-bold text-sky-700 tracking-widest">{company?.companyCode || '——'}</p>
+            {codeOk && <p className="flex items-center justify-center gap-1 text-green-600 text-sm mt-2"><CheckCircle size={14} /> Código actualizado</p>}
+          </div>
+        )}
       </div>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6">
