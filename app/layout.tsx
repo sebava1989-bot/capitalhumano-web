@@ -15,6 +15,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "CapitalHumano",
   description: "Gestión integral de recursos humanos",
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'apple-mobile-web-app-title': 'CH Worker',
+  },
 };
 
 export default function RootLayout({
@@ -24,9 +30,14 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="es"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <link rel="manifest" href="/worker-manifest.json" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <meta name="theme-color" content="#0071e3" />
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

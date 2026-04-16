@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, User, Calendar, Phone, Mail, Briefcase } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Phone, Mail, Briefcase, UserX } from 'lucide-react';
 import api from '@/lib/api';
 
 interface Worker {
@@ -12,6 +12,7 @@ interface Worker {
   phone: string;
   position: string;
   start_date: string;
+  end_date?: string;
   active: boolean;
   created_at: string;
 }
@@ -24,6 +25,9 @@ export default function WorkerProfilePage() {
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ fullName: '', email: '', phone: '', position: '', startDate: '', active: true });
   const [saving, setSaving] = useState(false);
+  const [showFiniquito, setShowFiniquito] = useState(false);
+  const [finiquitoForm, setFiniquitoForm] = useState({ endDate: '', terminationReason: '' });
+  const [finiquitando, setFiniquitando] = useState(false);
 
   useEffect(() => {
     api.get(`/workers/${id}`)
@@ -53,6 +57,20 @@ export default function WorkerProfilePage() {
       alert(err.response?.data?.error || 'Error al guardar');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleFiniquito(e: React.FormEvent) {
+    e.preventDefault();
+    if (!confirm(`¿Confirmas el finiquito de ${worker?.full_name}? Esta acción desactivará su acceso a la app.`)) return;
+    setFiniquitando(true);
+    try {
+      await api.post(`/workers/${id}/finiquito`, finiquitoForm);
+      router.push('/dashboard/finiquitados');
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Error al finiquitar');
+    } finally {
+      setFiniquitando(false);
     }
   }
 
@@ -86,10 +104,18 @@ export default function WorkerProfilePage() {
               }`}>{worker.active ? 'Activo' : 'Inactivo'}</span>
             </div>
           </div>
-          <button onClick={() => setEditing(!editing)}
-            className="text-sm text-sky-600 hover:underline font-medium">
-            {editing ? 'Cancelar' : 'Editar'}
-          </button>
+          <div className="flex gap-2">
+            {worker.active && (
+              <button onClick={() => setShowFiniquito(true)}
+                className="flex items-center gap-1.5 text-sm text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg font-medium transition-colors">
+                <UserX size={15} /> Finiquitar
+              </button>
+            )}
+            <button onClick={() => setEditing(!editing)}
+              className="text-sm text-sky-600 hover:underline font-medium">
+              {editing ? 'Cancelar' : 'Editar'}
+            </button>
+          </div>
         </div>
 
         {editing ? (
@@ -168,6 +194,51 @@ export default function WorkerProfilePage() {
           </div>
         )}
       </div>
+      {/* Modal finiquito */}
+      {showFiniquito && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md">
+            <h3 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+              <UserX size={20} className="text-red-500" /> Finiquitar trabajador
+            </h3>
+            <p className="text-sm text-gray-500 mb-5">
+              Se desactivará el acceso de <strong>{worker?.full_name}</strong>. Sus documentos quedarán en el historial.
+            </p>
+            <form onSubmit={handleFiniquito} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de término *</label>
+                <input
+                  type="date"
+                  value={finiquitoForm.endDate}
+                  onChange={e => setFiniquitoForm(f => ({ ...f, endDate: e.target.value }))}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Motivo de término (opcional)</label>
+                <textarea
+                  value={finiquitoForm.terminationReason}
+                  onChange={e => setFiniquitoForm(f => ({ ...f, terminationReason: e.target.value }))}
+                  placeholder="Ej: Renuncia voluntaria, término de contrato, etc."
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400 resize-none text-sm"
+                />
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button type="button" onClick={() => setShowFiniquito(false)}
+                  className="flex-1 border border-gray-300 rounded-lg py-2 text-gray-700 hover:bg-gray-50 transition-colors text-sm">
+                  Cancelar
+                </button>
+                <button type="submit" disabled={finiquitando}
+                  className="flex-1 bg-red-600 text-white rounded-lg py-2 hover:bg-red-700 disabled:opacity-50 transition-colors text-sm font-semibold">
+                  {finiquitando ? 'Procesando...' : 'Confirmar finiquito'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

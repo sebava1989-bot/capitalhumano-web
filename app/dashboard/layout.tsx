@@ -2,11 +2,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Users, FileText, ClipboardList, LogOut, LayoutDashboard, Settings, HeadphonesIcon, CreditCard, Award } from 'lucide-react';
+import { Users, FileText, ClipboardList, LogOut, LayoutDashboard, Settings, HeadphonesIcon, CreditCard, Award, UserX } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', label: 'Inicio', icon: LayoutDashboard },
   { href: '/dashboard/workers', label: 'Trabajadores', icon: Users },
+  { href: '/dashboard/finiquitados', label: 'Finiquitados', icon: UserX },
   { href: '/dashboard/documents', label: 'Documentos', icon: FileText },
   { href: '/dashboard/certificates', label: 'Certificados', icon: Award },
   { href: '/dashboard/requests', label: 'Solicitudes', icon: ClipboardList },
