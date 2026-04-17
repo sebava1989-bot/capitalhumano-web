@@ -1,16 +1,29 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Topbar from '@/components/topbar'
-import { MEMBERS, getPaymentStatus, type Member } from '@/lib/mock-data'
+import { apiGet, apiPost, apiPatch } from '@/lib/api'
 import { Search, UserPlus, CheckCircle, XCircle, CreditCard } from 'lucide-react'
 import Link from 'next/link'
 
+interface Member {
+  id: number
+  full_name: string
+  rut: string
+  level: number
+  points: number
+  streak: number
+  last_workout: string
+  active: boolean
+  phone: string
+  subscription_status: 'paid' | 'overdue' | 'due_soon' | 'pending'
+}
+
 const STATUS_COLORS = {
-  paid:     { label: 'Al día',       cls: 'bg-green-50 text-green-600' },
-  due_soon: { label: 'Próx. pago',   cls: 'bg-amber-50 text-amber-600' },
-  overdue:  { label: 'Mora',         cls: 'bg-red-50 text-red-500' },
-  pending:  { label: 'Pendiente',    cls: 'bg-gray-50 text-[#6b7280]' },
+  paid:     { label: 'Al día',     cls: 'bg-green-50 text-green-600' },
+  due_soon: { label: 'Próx. pago', cls: 'bg-amber-50 text-amber-600' },
+  overdue:  { label: 'Mora',       cls: 'bg-red-50 text-red-500' },
+  pending:  { label: 'Pendiente',  cls: 'bg-gray-50 text-[#6b7280]' },
 }
 
 function levelName(level: number) {
@@ -20,39 +33,40 @@ function levelName(level: number) {
 }
 
 export default function MembersPage() {
-  const [members, setMembers] = useState(MEMBERS)
+  const [members, setMembers] = useState<Member[]>([])
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState({ name: '', rut: '', phone: '', password: '' })
+  const [form, setForm] = useState({ full_name: '', rut: '', phone: '', password: '' })
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    apiGet<Member[]>('/members').then(data => { setMembers(data); setLoading(false) }).catch(console.error)
+  }, [])
 
   const filtered = members.filter(m =>
-    m.name.toLowerCase().includes(search.toLowerCase()) ||
+    m.full_name.toLowerCase().includes(search.toLowerCase()) ||
     m.rut.includes(search)
   )
 
-  function toggleActive(id: number) {
-    setMembers(prev => prev.map(m => m.id === id ? { ...m, active: !m.active } : m))
+  async function toggleActive(id: number, currentActive: boolean) {
+    await apiPatch(`/members/${id}`, { active: !currentActive })
+    setMembers(prev => prev.map(m => m.id === id ? { ...m, active: !currentActive } : m))
   }
 
-  function addMember() {
-    if (!form.name || !form.rut) return
-    const newMember: Member = {
-      id: Date.now(),
-      name: form.name,
+  async function addMember() {
+    if (!form.full_name || !form.rut || !form.password) return
+    const created = await apiPost<Member>('/members', {
+      full_name: form.full_name,
       rut: form.rut,
-      phone: form.phone || '',
-      email: '',
-      level: 1, points: 0, streak: 0,
-      lastWorkout: new Date().toISOString().split('T')[0],
-      active: true,
-      subscriptionPrice: 25000,
-      paymentDueDay: 5,
-      lastPaymentDate: new Date().toISOString().split('T')[0],
-    }
-    setMembers(prev => [newMember, ...prev])
-    setForm({ name: '', rut: '', phone: '', password: '' })
+      phone: form.phone,
+      password: form.password,
+    })
+    setMembers(prev => [{ ...created, level: 1, points: 0, streak: 0, last_workout: '', subscription_status: 'pending' }, ...prev])
+    setForm({ full_name: '', rut: '', phone: '', password: '' })
     setShowModal(false)
   }
+
+  if (loading) return <div className="p-8 text-[#6b7280] text-sm">Cargando miembros...</div>
 
   return (
     <>
@@ -87,14 +101,13 @@ export default function MembersPage() {
           </thead>
           <tbody>
             {filtered.map(m => {
-              const payStatus = getPaymentStatus(m)
-              const payCfg = STATUS_COLORS[payStatus]
+              const payCfg = STATUS_COLORS[m.subscription_status]
               return (
                 <tr key={m.id} className="border-b border-[#f5f5f7] last:border-0 hover:bg-[#fafafa]">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-xs font-extrabold text-[#FF4D00]">{m.name[0]}</div>
-                      <span className="text-sm font-semibold text-[#1a1a1a]">{m.name}</span>
+                      <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-xs font-extrabold text-[#FF4D00]">{m.full_name[0]}</div>
+                      <span className="text-sm font-semibold text-[#1a1a1a]">{m.full_name}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3 text-sm text-[#6b7280]">{m.rut}</td>
@@ -105,7 +118,7 @@ export default function MembersPage() {
                   </td>
                   <td className="px-4 py-3 text-sm font-bold text-[#FF4D00]">{m.points.toLocaleString()}</td>
                   <td className="px-4 py-3 text-sm text-[#6b7280]">🔥 {m.streak}d</td>
-                  <td className="px-4 py-3 text-sm text-[#6b7280]">{m.lastWorkout}</td>
+                  <td className="px-4 py-3 text-sm text-[#6b7280]">{m.last_workout || '—'}</td>
                   <td className="px-4 py-3">
                     <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${payCfg.cls}`}>{payCfg.label}</span>
                   </td>
@@ -118,7 +131,7 @@ export default function MembersPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
                       <button
-                        onClick={() => toggleActive(m.id)}
+                        onClick={() => toggleActive(m.id, m.active)}
                         className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
                           m.active ? 'border-red-200 text-red-400 hover:bg-red-50' : 'border-green-200 text-green-600 hover:bg-green-50'
                         }`}
@@ -143,7 +156,7 @@ export default function MembersPage() {
             <h2 className="text-lg font-extrabold text-[#1a1a1a] mb-5">Agregar miembro</h2>
             <div className="space-y-4">
               {[
-                { label: 'Nombre completo', key: 'name', placeholder: 'Ana González' },
+                { label: 'Nombre completo', key: 'full_name', placeholder: 'Ana González' },
                 { label: 'RUT', key: 'rut', placeholder: '12345678-9' },
                 { label: 'Teléfono', key: 'phone', placeholder: '+56912345678' },
               ].map(({ label, key, placeholder }) => (
