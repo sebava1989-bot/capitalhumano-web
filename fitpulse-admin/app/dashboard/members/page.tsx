@@ -79,6 +79,7 @@ export default function MembersPage() {
     })
     setMembers(prev => [{
       ...created,
+      phone: form.phone,
       level: 1, points: 0, streak: 0, last_workout: '',
       subscription_status: 'pending' as const
     }, ...prev])
