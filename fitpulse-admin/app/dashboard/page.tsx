@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import StatCard from '@/components/stat-card'
 import BarChart from '@/components/bar-chart'
 import Topbar from '@/components/topbar'
-import { apiGet } from '@/lib/api'
+import { apiGet, apiPatch } from '@/lib/api'
 import { getGymInfo } from '@/lib/auth'
 
 interface DashboardData {
@@ -20,13 +20,37 @@ interface DashboardData {
   recent_activity: { full_name: string; date: string; routine_name: string }[]
 }
 
+interface ReferralStat {
+  id: number
+  full_name: string
+  referral_code: string
+  referral_count: number
+  points_awarded: number
+}
+
 export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null)
+  const [referrals, setReferrals] = useState<ReferralStat[]>([])
+  const [referralPoints, setReferralPoints] = useState(300)
+  const [editingPoints, setEditingPoints] = useState(false)
+  const [pointsInput, setPointsInput] = useState('300')
   const gym = getGymInfo()
 
   useEffect(() => {
     apiGet<DashboardData>('/dashboard').then(setData).catch(console.error)
+    apiGet<ReferralStat[]>('/admin/referrals').then(setReferrals).catch(console.error)
+    apiGet<{ referral_points: number }>('/admin/referral-points')
+      .then(d => { setReferralPoints(d.referral_points); setPointsInput(String(d.referral_points)) })
+      .catch(console.error)
   }, [])
+
+  async function saveReferralPoints() {
+    const pts = parseInt(pointsInput)
+    if (!pts || pts < 50 || pts > 2000) return
+    await apiPatch<{ ok: boolean; referral_points: number }>('/admin/referral-points', { referral_points: pts })
+    setReferralPoints(pts)
+    setEditingPoints(false)
+  }
 
   if (!data) return <div className="p-8 text-[#6b7280] text-sm">Cargando...</div>
 
@@ -142,6 +166,68 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Referidos */}
+      <div className="mt-6 grid grid-cols-[1.6fr_1fr] gap-4">
+        <div className="bg-white rounded-2xl border border-[#e5e7eb] p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-[#1a1a1a]">🔗 Top referidores</h3>
+            <span className="text-xs text-[#6b7280]">{referrals.length} miembros con referidos</span>
+          </div>
+          {referrals.length === 0 ? (
+            <p className="text-sm text-[#6b7280]">Aún no hay referidos. ¡Comparte los códigos!</p>
+          ) : (
+            <div className="space-y-3">
+              {referrals.slice(0, 5).map(r => (
+                <div key={r.id} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-xs font-extrabold text-[#FF4D00] shrink-0">
+                    {r.full_name[0]}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-[#1a1a1a] truncate">{r.full_name}</p>
+                    <p className="text-xs text-[#6b7280]">Código: {r.referral_code}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold text-[#FF4D00]">{r.referral_count} referido{r.referral_count !== 1 ? 's' : ''}</p>
+                    <p className="text-xs text-[#6b7280]">+{r.points_awarded} pts</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white rounded-2xl border border-[#e5e7eb] p-5">
+          <h3 className="text-sm font-bold text-[#1a1a1a] mb-4">⚙️ Puntos por referido</h3>
+          <p className="text-xs text-[#6b7280] mb-3">Puntos que gana un miembro cuando trae a alguien nuevo al gym.</p>
+          {editingPoints ? (
+            <div className="flex gap-2 items-center">
+              <input
+                type="number"
+                value={pointsInput}
+                onChange={e => setPointsInput(e.target.value)}
+                min={50}
+                max={2000}
+                className="flex-1 px-3 py-2 rounded-xl border border-[#e5e7eb] bg-[#f5f5f7] text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4D00]"
+              />
+              <button onClick={saveReferralPoints} className="px-3 py-2 rounded-xl bg-[#FF4D00] text-white text-sm font-bold hover:bg-[#CC3D00]">
+                Guardar
+              </button>
+              <button onClick={() => setEditingPoints(false)} className="px-3 py-2 rounded-xl border border-[#e5e7eb] text-sm text-[#6b7280] hover:bg-[#f5f5f7]">
+                ✕
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between">
+              <p className="text-3xl font-extrabold text-[#FF4D00]">{referralPoints} <span className="text-base font-semibold text-[#6b7280]">pts</span></p>
+              <button onClick={() => setEditingPoints(true)} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-[#e5e7eb] text-[#6b7280] hover:bg-[#f5f5f7]">
+                Editar
+              </button>
+            </div>
+          )}
+          <p className="text-xs text-[#6b7280] mt-3">Total entregado: <span className="font-bold text-[#1a1a1a]">{referrals.reduce((a,r)=>a+r.points_awarded,0).toLocaleString()} pts</span></p>
         </div>
       </div>
     </>
