@@ -40,7 +40,8 @@ export default function MembersPage() {
   const [promoMsg, setPromoMsg] = useState('')
   const [promoTarget, setPromoTarget] = useState<'all' | 'active'>('active')
   const [sendingIndex, setSendingIndex] = useState<number | null>(null)
-  const [form, setForm] = useState({ full_name: '', rut: '', phone: '', password: '' })
+  const [form, setForm] = useState({ full_name: '', rut: '', phone: '', password: '', referral_code: '' })
+  const [referrerToast, setReferrerToast] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   const TEMPLATES = [
@@ -66,14 +67,26 @@ export default function MembersPage() {
 
   async function addMember() {
     if (!form.full_name || !form.rut || !form.password) return
-    const created = await apiPost<Member>('/members', {
+    const created = await apiPost<{
+      id: number; full_name: string; rut: string; active: boolean;
+      referral_code: string; referrer_name: string | null
+    }>('/members', {
       full_name: form.full_name,
       rut: form.rut,
       phone: form.phone,
       password: form.password,
+      referral_code: form.referral_code || undefined,
     })
-    setMembers(prev => [{ ...created, level: 1, points: 0, streak: 0, last_workout: '', subscription_status: 'pending' }, ...prev])
-    setForm({ full_name: '', rut: '', phone: '', password: '' })
+    setMembers(prev => [{
+      ...created,
+      level: 1, points: 0, streak: 0, last_workout: '',
+      subscription_status: 'pending' as const
+    }, ...prev])
+    if (created.referrer_name) {
+      setReferrerToast(`✅ ${created.referrer_name} ganó puntos por este referido`)
+      setTimeout(() => setReferrerToast(null), 5000)
+    }
+    setForm({ full_name: '', rut: '', phone: '', password: '', referral_code: '' })
     setShowModal(false)
   }
 
@@ -82,6 +95,12 @@ export default function MembersPage() {
   return (
     <>
       <Topbar title="Miembros" subtitle={`${members.filter(m => m.active).length} activos · ${members.length} total`} />
+
+      {referrerToast && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-xl text-sm font-semibold text-green-700">
+          {referrerToast}
+        </div>
+      )}
 
       <div className="flex items-center gap-3 mb-5">
         <div className="flex-1 relative">
@@ -361,6 +380,17 @@ export default function MembersPage() {
                   />
                 </div>
               ))}
+              <div>
+                <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">
+                  Código de referido <span className="text-[#6b7280] font-normal">(opcional)</span>
+                </label>
+                <input
+                  value={form.referral_code}
+                  onChange={e => setForm(f => ({ ...f, referral_code: e.target.value }))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[#e5e7eb] bg-[#f5f5f7] text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4D00]"
+                  placeholder="GYM01-0001"
+                />
+              </div>
               <div>
                 <label className="block text-sm font-semibold text-[#1a1a1a] mb-1.5">Contraseña inicial</label>
                 <input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
