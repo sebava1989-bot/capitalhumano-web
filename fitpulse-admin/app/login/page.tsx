@@ -10,13 +10,18 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (login(email, password)) {
+    setLoading(true)
+    setError('')
+    const result = await login(email, password)
+    setLoading(false)
+    if (result.ok) {
       router.push('/dashboard')
     } else {
-      setError('Completa email y contraseña')
+      setError(result.error || 'Error al iniciar sesión')
     }
   }
 
@@ -55,11 +60,11 @@ export default function LoginPage() {
           {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
           <button
             type="submit"
-            className="w-full py-3 rounded-xl bg-[#FF4D00] text-white font-bold text-sm hover:bg-[#CC3D00] transition-colors"
+            disabled={loading}
+            className="w-full py-3 rounded-xl bg-[#FF4D00] text-white font-bold text-sm hover:bg-[#CC3D00] transition-colors disabled:opacity-60"
           >
-            Ingresar al panel
+            {loading ? 'Ingresando...' : 'Ingresar al panel'}
           </button>
-          <p className="text-center text-xs text-[#6b7280] mt-4">Demo: cualquier email y contraseña</p>
         </form>
       </div>
     </div>
