@@ -42,7 +42,7 @@ export default function CertificatesPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <div className="flex items-center gap-3 mb-2">
         <Award size={28} className="text-sky-600" />
         <h2 className="text-2xl font-bold text-gray-900">Certificados</h2>

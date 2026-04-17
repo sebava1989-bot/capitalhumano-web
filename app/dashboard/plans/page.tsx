@@ -39,7 +39,7 @@ export default function PlansPage() {
   }, []);
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Mi Plan</h2>
       <p className="text-gray-500 mb-8">
         Plan actual: <span className="font-semibold capitalize text-sky-700">{company?.plan || 'freemium'}</span>

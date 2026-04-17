@@ -15,7 +15,7 @@ export default function SoportePage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl">
+    <div className="p-4 md:p-8 max-w-3xl">
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Soporte</h2>
       <p className="text-gray-500 mb-8">Estamos aquí para ayudarte. Respuesta en menos de 24 horas hábiles.</p>
 

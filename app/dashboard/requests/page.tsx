@@ -28,7 +28,7 @@ export default function RequestsPage() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Solicitudes</h2>
 
       <div className="flex gap-2 mb-6">

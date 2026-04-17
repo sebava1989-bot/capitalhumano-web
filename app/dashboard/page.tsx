@@ -25,8 +25,8 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <div className="p-8 text-gray-500">Cargando...</div>;
-  if (!stats) return <div className="p-8 text-red-500">Error al cargar datos</div>;
+  if (loading) return <div className="p-4 md:p-8 text-gray-500">Cargando...</div>;
+  if (!stats) return <div className="p-4 md:p-8 text-red-500">Error al cargar datos</div>;
 
   const cards = [
     { label: 'Trabajadores activos', value: stats.workers.active, icon: Users, color: 'bg-sky-500', href: '/dashboard/workers' },
@@ -36,7 +36,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Panel de Control</h2>

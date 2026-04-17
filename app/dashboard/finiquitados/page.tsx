@@ -302,7 +302,7 @@ export default function FiniquitadosPage() {
   );
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Trabajadores Finiquitados</h2>
         <p className="text-sm text-gray-500 mt-1">Sube el finiquito y documentos de cada ex trabajador</p>

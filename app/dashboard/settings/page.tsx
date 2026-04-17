@@ -152,7 +152,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="p-4 md:p-8 max-w-2xl">
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Configuración</h2>
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">

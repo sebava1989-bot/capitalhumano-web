@@ -129,7 +129,7 @@ export default function DocumentsPage() {
   const typeLabel = (t: string) => DOC_TYPES.find(d => d.value === t)?.label || t;
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Documentos</h2>
