@@ -39,6 +39,7 @@ export default function MembersPage() {
   const [showPromoModal, setShowPromoModal] = useState(false)
   const [promoMsg, setPromoMsg] = useState('')
   const [promoTarget, setPromoTarget] = useState<'all' | 'active'>('active')
+  const [sendingIndex, setSendingIndex] = useState<number | null>(null)
   const [form, setForm] = useState({ full_name: '', rut: '', phone: '', password: '' })
   const [loading, setLoading] = useState(true)
 
@@ -166,97 +167,179 @@ export default function MembersPage() {
         </table>
       </div>
 
-      {showPromoModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl my-4">
-            <h2 className="text-lg font-extrabold text-[#1a1a1a] mb-1">Enviar promoción por WhatsApp</h2>
-            <p className="text-xs text-[#6b7280] mb-5">Elige una plantilla o escribe tu mensaje. Se abrirá un link por cada miembro.</p>
+      {showPromoModal && (() => {
+        const targets = members.filter(m => m.phone && (promoTarget === 'all' || m.active))
+        const isSending = sendingIndex !== null
+        const isDone = sendingIndex !== null && sendingIndex >= targets.length
 
-            {/* Plantillas */}
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-[#1a1a1a] mb-2">Plantilla</p>
-              <div className="grid grid-cols-2 gap-2">
-                {TEMPLATES.map(t => (
-                  <button
-                    key={t.label}
-                    onClick={() => setPromoMsg(t.text)}
-                    className={`text-left px-3 py-2 rounded-xl border text-xs font-medium transition-colors ${
-                      promoMsg === t.text && t.text !== ''
-                        ? 'border-green-400 bg-green-50 text-green-700'
-                        : 'border-[#e5e7eb] text-[#6b7280] hover:bg-[#f5f5f7]'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+        function startSendAll() {
+          if (!promoMsg.trim() || targets.length === 0) return
+          setSendingIndex(0)
+          const first = targets[0]
+          const msg = promoMsg.replace(/\{nombre\}/gi, first.full_name.split(' ')[0])
+          window.open(`https://wa.me/${first.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+        }
+
+        function sendNext() {
+          if (sendingIndex === null) return
+          const next = sendingIndex + 1
+          if (next >= targets.length) { setSendingIndex(next); return }
+          setSendingIndex(next)
+          const m = targets[next]
+          const msg = promoMsg.replace(/\{nombre\}/gi, m.full_name.split(' ')[0])
+          window.open(`https://wa.me/${m.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`, '_blank')
+        }
+
+        function closePromo() {
+          setShowPromoModal(false)
+          setSendingIndex(null)
+        }
+
+        return (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl my-4">
+              <h2 className="text-lg font-extrabold text-[#1a1a1a] mb-1">Enviar promoción por WhatsApp</h2>
+              <p className="text-xs text-[#6b7280] mb-5">Elige una plantilla o escribe tu mensaje. Cada envío abre WhatsApp en una nueva pestaña.</p>
+
+              {/* Plantillas */}
+              <div className="mb-4">
+                <p className="text-sm font-semibold text-[#1a1a1a] mb-2">Plantilla</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {TEMPLATES.map(t => (
+                    <button
+                      key={t.label}
+                      onClick={() => { setPromoMsg(t.text); setSendingIndex(null) }}
+                      className={`text-left px-3 py-2 rounded-xl border text-xs font-medium transition-colors ${
+                        promoMsg === t.text && t.text !== ''
+                          ? 'border-green-400 bg-green-50 text-green-700'
+                          : 'border-[#e5e7eb] text-[#6b7280] hover:bg-[#f5f5f7]'
+                      }`}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Mensaje */}
-            <div className="mb-4">
-              <p className="text-sm font-semibold text-[#1a1a1a] mb-1.5">Mensaje <span className="text-[#6b7280] font-normal">(usa {'{nombre}'} para personalizar)</span></p>
-              <textarea
-                value={promoMsg}
-                onChange={e => setPromoMsg(e.target.value)}
-                rows={4}
-                className="w-full px-4 py-3 rounded-xl border border-[#e5e7eb] bg-[#f5f5f7] text-sm focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
-                placeholder="Escribe tu mensaje aquí..."
-              />
-            </div>
-
-            {/* Destinatarios */}
-            <div className="mb-5">
-              <p className="text-sm font-semibold text-[#1a1a1a] mb-2">Enviar a</p>
-              <div className="flex gap-2">
-                {[
-                  { key: 'active' as const, label: `Activos (${members.filter(m => m.active && m.phone).length})` },
-                  { key: 'all'    as const, label: `Todos con teléfono (${members.filter(m => m.phone).length})` },
-                ].map(opt => (
-                  <button
-                    key={opt.key}
-                    onClick={() => setPromoTarget(opt.key)}
-                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
-                      promoTarget === opt.key ? 'bg-green-500 text-white' : 'bg-white border border-[#e5e7eb] text-[#6b7280] hover:bg-[#f5f5f7]'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
+              {/* Mensaje */}
+              <div className="mb-4">
+                <p className="text-sm font-semibold text-[#1a1a1a] mb-1.5">Mensaje <span className="text-[#6b7280] font-normal">(usa {'{nombre}'} para personalizar)</span></p>
+                <textarea
+                  value={promoMsg}
+                  onChange={e => { setPromoMsg(e.target.value); setSendingIndex(null) }}
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl border border-[#e5e7eb] bg-[#f5f5f7] text-sm focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
+                  placeholder="Escribe tu mensaje aquí..."
+                />
               </div>
-            </div>
 
-            {/* Lista de miembros con botón WA individual */}
-            {promoMsg.trim() && (
-              <div className="mb-5 max-h-48 overflow-y-auto space-y-2 border border-[#e5e7eb] rounded-xl p-3">
-                {members
-                  .filter(m => m.phone && (promoTarget === 'all' || m.active))
-                  .map(m => {
+              {/* Destinatarios */}
+              <div className="mb-5">
+                <p className="text-sm font-semibold text-[#1a1a1a] mb-2">Enviar a</p>
+                <div className="flex gap-2">
+                  {[
+                    { key: 'active' as const, label: `Activos (${members.filter(m => m.active && m.phone).length})` },
+                    { key: 'all'    as const, label: `Todos con teléfono (${members.filter(m => m.phone).length})` },
+                  ].map(opt => (
+                    <button
+                      key={opt.key}
+                      onClick={() => { setPromoTarget(opt.key); setSendingIndex(null) }}
+                      className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                        promoTarget === opt.key ? 'bg-green-500 text-white' : 'bg-white border border-[#e5e7eb] text-[#6b7280] hover:bg-[#f5f5f7]'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Modo envío masivo */}
+              {promoMsg.trim() && !isSending && (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-sm font-bold text-green-800">Enviar a todos ({targets.length} contactos)</p>
+                    <p className="text-xs text-green-600 mt-0.5">Se abrirá WhatsApp uno por uno. Tú confirmas cada envío.</p>
+                  </div>
+                  <button
+                    onClick={startSendAll}
+                    disabled={targets.length === 0}
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500 text-white text-sm font-bold hover:bg-green-600 disabled:opacity-50 whitespace-nowrap"
+                  >
+                    <Megaphone size={14} /> Enviar a todos
+                  </button>
+                </div>
+              )}
+
+              {/* Progreso de envío masivo */}
+              {isSending && (
+                <div className="mb-4 p-4 border border-green-300 rounded-xl">
+                  {isDone ? (
+                    <div className="text-center">
+                      <p className="text-2xl mb-1">🎉</p>
+                      <p className="text-sm font-bold text-green-700">¡Listo! Enviaste a los {targets.length} contactos.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center justify-between mb-3">
+                        <p className="text-sm font-bold text-[#1a1a1a]">
+                          Enviando {(sendingIndex ?? 0) + 1} de {targets.length}
+                        </p>
+                        <span className="text-xs text-[#6b7280]">{targets.length - (sendingIndex ?? 0) - 1} restantes</span>
+                      </div>
+                      {/* Barra de progreso */}
+                      <div className="w-full bg-[#f5f5f7] rounded-full h-2 mb-3">
+                        <div
+                          className="bg-green-500 h-2 rounded-full transition-all"
+                          style={{ width: `${(((sendingIndex ?? 0) + 1) / targets.length) * 100}%` }}
+                        />
+                      </div>
+                      {/* Miembro actual */}
+                      <div className="flex items-center gap-2 mb-3 p-2 bg-green-50 rounded-lg">
+                        <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center text-xs font-extrabold text-green-600">
+                          {targets[sendingIndex ?? 0]?.full_name[0]}
+                        </div>
+                        <span className="text-sm font-semibold text-[#1a1a1a]">{targets[sendingIndex ?? 0]?.full_name}</span>
+                        <span className="text-xs text-green-600 ml-auto">WhatsApp abierto ✓</span>
+                      </div>
+                      <button
+                        onClick={sendNext}
+                        className="w-full py-2.5 rounded-xl bg-green-500 text-white text-sm font-bold hover:bg-green-600 transition-colors"
+                      >
+                        Siguiente → {targets[(sendingIndex ?? 0) + 1]?.full_name.split(' ')[0]}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Lista individual */}
+              {promoMsg.trim() && !isSending && (
+                <div className="mb-5 max-h-36 overflow-y-auto space-y-2 border border-[#e5e7eb] rounded-xl p-3">
+                  {targets.map(m => {
                     const msg = promoMsg.replace(/\{nombre\}/gi, m.full_name.split(' ')[0])
                     const url = `https://wa.me/${m.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`
                     return (
                       <div key={m.id} className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-full bg-orange-50 flex items-center justify-center text-xs font-extrabold text-[#FF4D00] shrink-0">{m.full_name[0]}</div>
                         <span className="flex-1 text-sm text-[#1a1a1a] truncate">{m.full_name}</span>
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600"
-                        >
+                        <a href={url} target="_blank" rel="noreferrer"
+                          className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600">
                           <MessageCircle size={11} /> Enviar
                         </a>
                       </div>
                     )
                   })}
-              </div>
-            )}
+                </div>
+              )}
 
-            <div className="flex gap-3">
-              <button onClick={() => setShowPromoModal(false)} className="flex-1 py-2.5 rounded-xl border border-[#e5e7eb] text-sm text-[#6b7280] hover:bg-[#f5f5f7]">Cerrar</button>
+              <div className="flex gap-3">
+                <button onClick={closePromo} className="flex-1 py-2.5 rounded-xl border border-[#e5e7eb] text-sm text-[#6b7280] hover:bg-[#f5f5f7]">Cerrar</button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
