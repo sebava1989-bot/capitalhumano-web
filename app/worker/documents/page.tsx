@@ -54,7 +54,7 @@ export default function WorkerDocuments() {
   return (
     <div>
       {/* Header */}
-      <div style={{ background: '#fff', padding: '56px 20px 16px', borderBottom: '0.5px solid #e5e5ea' }}>
+      <div style={{ background: '#fff', padding: 'calc(env(safe-area-inset-top) + 16px) 20px 16px', borderBottom: '0.5px solid #e5e5ea' }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1c1c1e', margin: 0 }}>Documentos</h1>
         <p style={{ fontSize: 14, color: '#8e8e93', margin: '4px 0 0' }}>Tus liquidaciones, contratos y más</p>
       </div>

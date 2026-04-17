@@ -50,9 +50,16 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
   if (!ready && !isLogin) return null;
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#f2f2f7', display: 'flex', flexDirection: 'column', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' }}>
-      {/* Safe area top */}
-      <div style={{ flex: 1, overflowY: 'auto', paddingBottom: isLogin ? 0 : 80 }}>
+    <div style={{
+      height: '100dvh', background: '#f2f2f7', display: 'flex', flexDirection: 'column',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      overflow: 'hidden',
+    }}>
+      {/* Scrollable content */}
+      <div style={{
+        flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden',
+        paddingBottom: isLogin ? 0 : 'calc(env(safe-area-inset-bottom) + 64px)',
+      }}>
         {children}
       </div>
 
@@ -60,19 +67,20 @@ export default function WorkerLayout({ children }: { children: React.ReactNode }
       {!isLogin && (
         <nav style={{
           position: 'fixed', bottom: 0, left: 0, right: 0,
-          background: 'rgba(255,255,255,0.92)',
+          background: 'rgba(255,255,255,0.95)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           borderTop: '0.5px solid rgba(0,0,0,0.15)',
           display: 'flex',
           paddingBottom: 'env(safe-area-inset-bottom)',
+          zIndex: 100,
         }}>
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = pathname.startsWith(href);
             return (
               <Link key={href} href={href} style={{
                 flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center',
-                gap: 2, padding: '8px 0 4px', textDecoration: 'none',
+                gap: 2, padding: '10px 0 6px', textDecoration: 'none',
               }}>
                 <Icon active={active} />
                 <span style={{ fontSize: 10, color: active ? '#0071e3' : '#8e8e93', fontWeight: active ? 600 : 400 }}>{label}</span>

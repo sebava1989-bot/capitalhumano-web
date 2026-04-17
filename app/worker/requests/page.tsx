@@ -80,7 +80,7 @@ function RequestsContent() {
   return (
     <div>
       {/* Header */}
-      <div style={{ background: '#fff', padding: '56px 20px 16px', borderBottom: '0.5px solid #e5e5ea' }}>
+      <div style={{ background: '#fff', padding: 'calc(env(safe-area-inset-top) + 16px) 20px 16px', borderBottom: '0.5px solid #e5e5ea' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
           <div>
             <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1c1c1e', margin: 0 }}>Solicitudes</h1>

@@ -40,7 +40,7 @@ export default function WorkerHome() {
       {/* Header */}
       <div style={{
         background: 'linear-gradient(160deg, #0071e3 0%, #004aad 100%)',
-        padding: '56px 24px 28px',
+        padding: 'calc(env(safe-area-inset-top) + 20px) 24px 28px',
         borderRadius: '0 0 28px 28px',
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
