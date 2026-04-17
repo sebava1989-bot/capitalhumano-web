@@ -1,84 +1,69 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/api_service.dart';
 import 'workout_session_screen.dart';
 
-final _demoRoutines = [
-  {
-    'id': 1,
-    'name': 'Pecho y Tríceps',
-    'day': 'Martes / Viernes',
-    'duration': '45-55 min',
-    'exercises': 6,
-    'level': 'Intermedio',
-    'icon': '💪',
-    'color': AppTheme.primary,
-    'exerciseList': [
-      {'name': 'Press banca plano', 'sets': 4, 'reps': 10, 'rest': 90},
-      {'name': 'Press inclinado mancuernas', 'sets': 3, 'reps': 12, 'rest': 75},
-      {'name': 'Aperturas en máquina', 'sets': 3, 'reps': 15, 'rest': 60},
-      {'name': 'Fondos en paralelas', 'sets': 3, 'reps': 12, 'rest': 75},
-      {'name': 'Press francés', 'sets': 3, 'reps': 12, 'rest': 60},
-      {'name': 'Extensión tríceps polea', 'sets': 3, 'reps': 15, 'rest': 45},
-    ],
-  },
-  {
-    'id': 2,
-    'name': 'Piernas y Glúteos',
-    'day': 'Lunes / Jueves',
-    'duration': '50-65 min',
-    'exercises': 7,
-    'level': 'Avanzado',
-    'icon': '🦵',
-    'color': AppTheme.accent,
-    'exerciseList': [
-      {'name': 'Sentadilla libre', 'sets': 4, 'reps': 8, 'rest': 120},
-      {'name': 'Prensa de piernas', 'sets': 4, 'reps': 12, 'rest': 90},
-      {'name': 'Extensiones de cuádriceps', 'sets': 3, 'reps': 15, 'rest': 60},
-      {'name': 'Curl femoral tumbado', 'sets': 3, 'reps': 12, 'rest': 60},
-      {'name': 'Hip thrust', 'sets': 4, 'reps': 12, 'rest': 90},
-      {'name': 'Elevación de talones', 'sets': 4, 'reps': 20, 'rest': 45},
-      {'name': 'Peso muerto rumano', 'sets': 3, 'reps': 10, 'rest': 90},
-    ],
-  },
-  {
-    'id': 3,
-    'name': 'Espalda y Bíceps',
-    'day': 'Miércoles / Sábado',
-    'duration': '45-55 min',
-    'exercises': 6,
-    'level': 'Intermedio',
-    'icon': '🏋️',
-    'color': const Color(0xFF9C27B0),
-    'exerciseList': [
-      {'name': 'Dominadas asistidas', 'sets': 4, 'reps': 8, 'rest': 90},
-      {'name': 'Remo con barra', 'sets': 4, 'reps': 10, 'rest': 90},
-      {'name': 'Jalón al pecho polea', 'sets': 3, 'reps': 12, 'rest': 75},
-      {'name': 'Remo en máquina', 'sets': 3, 'reps': 12, 'rest': 60},
-      {'name': 'Curl bíceps barra', 'sets': 3, 'reps': 12, 'rest': 60},
-      {'name': 'Curl martillo mancuernas', 'sets': 3, 'reps': 12, 'rest': 60},
-    ],
-  },
-  {
-    'id': 4,
-    'name': 'Cardio HIIT',
-    'day': 'Miércoles',
-    'duration': '30 min',
-    'exercises': 5,
-    'level': 'Principiante',
-    'icon': '🏃',
-    'color': AppTheme.success,
-    'exerciseList': [
-      {'name': 'Burpees', 'sets': 4, 'reps': 10, 'rest': 60},
-      {'name': 'Mountain climbers', 'sets': 4, 'reps': 20, 'rest': 45},
-      {'name': 'Saltos de caja', 'sets': 3, 'reps': 12, 'rest': 60},
-      {'name': 'Sprints en cinta', 'sets': 6, 'reps': 1, 'rest': 90},
-      {'name': 'Saltar la cuerda', 'sets': 3, 'reps': 1, 'rest': 60},
-    ],
-  },
-];
+const _routineColors = [AppTheme.primary, AppTheme.accent, Color(0xFF9C27B0), AppTheme.success];
+const _routineIcons = ['💪', '🦵', '🏋️', '🏃'];
 
-class RoutinesScreen extends StatelessWidget {
+String _routineLevel(int exerciseCount) {
+  if (exerciseCount <= 4) return 'Principiante';
+  if (exerciseCount <= 6) return 'Intermedio';
+  return 'Avanzado';
+}
+
+Map<String, dynamic> _mapRoutine(Map<String, dynamic> r, int index) {
+  final exercises = (r['exercises'] as List<dynamic>?) ?? [];
+  return {
+    'id': r['id'] as int,
+    'name': r['name'] as String,
+    'day': r['day_of_week'] ?? '',
+    'duration': '${exercises.length * 7}-${exercises.length * 10} min',
+    'exercises': exercises.length,
+    'level': _routineLevel(exercises.length),
+    'icon': _routineIcons[index % _routineIcons.length],
+    'color': _routineColors[index % _routineColors.length],
+    'exerciseList': exercises.map((e) => {
+      'name': e['name'],
+      'sets': e['sets'],
+      'reps': e['reps'],
+      'rest': e['rest_seconds'],
+    }).toList(),
+  };
+}
+
+class RoutinesScreen extends StatefulWidget {
   const RoutinesScreen({super.key});
+
+  @override
+  State<RoutinesScreen> createState() => _RoutinesScreenState();
+}
+
+class _RoutinesScreenState extends State<RoutinesScreen> {
+  List<Map<String, dynamic>> _routines = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRoutines();
+  }
+
+  Future<void> _loadRoutines() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final data = await ApiService.get('/routines') as List<dynamic>;
+      setState(() {
+        _routines = data.asMap().entries
+            .map((e) => _mapRoutine(e.value as Map<String, dynamic>, e.key))
+            .toList();
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() { _error = 'No se pudo cargar las rutinas'; _loading = false; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -121,15 +106,33 @@ class RoutinesScreen extends StatelessWidget {
             ),
           ),
 
-          SliverPadding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) => _RoutineCard(routine: _demoRoutines[i]),
-                childCount: _demoRoutines.length,
+          if (_loading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+            )
+          else if (_error != null)
+            SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_error!, style: const TextStyle(color: AppTheme.textSecondary)),
+                    const SizedBox(height: 16),
+                    ElevatedButton(onPressed: _loadRoutines, child: const Text('Reintentar')),
+                  ],
+                ),
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => _RoutineCard(routine: _routines[i]),
+                  childCount: _routines.length,
+                ),
               ),
             ),
-          ),
         ],
       ),
     );

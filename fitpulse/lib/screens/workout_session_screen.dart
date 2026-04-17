@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class WorkoutSessionScreen extends StatefulWidget {
   final Map<String, dynamic> routine;
@@ -49,11 +51,35 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
     return count;
   }
 
-  void _finishWorkout() {
+  Future<void> _finishWorkout() async {
     _stopwatch.stop();
     final minutes = _stopwatch.elapsed.inMinutes;
-    final points = 50 + (_completedSets * 5) + (minutes > 30 ? 20 : 0);
+    int points = 50 + (_completedSets * 5) + (minutes > 30 ? 20 : 0);
 
+    try {
+      final routineId = widget.routine['id'] as int;
+      final result = await ApiService.post('/workouts', {
+        'routine_id': routineId,
+        'duration_minutes': minutes,
+      }) as Map<String, dynamic>;
+      points = result['points_earned'] as int;
+      final user = await AuthService.getUser();
+      if (user != null) {
+        await AuthService.updateUserCache({
+          'id': user.id,
+          'full_name': user.fullName,
+          'rut': user.rut,
+          'gym_code': user.gymCode,
+          'gym_name': user.gymName,
+          'points': result['new_total_points'],
+          'streak': result['new_streak'],
+          'level': result['new_level'],
+          'rank_position': user.rankPosition,
+        });
+      }
+    } catch (_) {}
+
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -64,8 +90,8 @@ class _WorkoutSessionScreenState extends State<WorkoutSessionScreen> {
         durationMinutes: minutes,
         pointsEarned: points,
         onClose: () {
-          Navigator.pop(context); // cierra dialog
-          Navigator.pop(context); // vuelve a rutinas
+          Navigator.pop(context);
+          Navigator.pop(context);
         },
       ),
     );

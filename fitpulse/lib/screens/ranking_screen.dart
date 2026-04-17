@@ -1,22 +1,42 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../services/api_service.dart';
 
-// Datos demo para la demo al gimnasio
-final _demoRanking = [
-  {'name': 'Carlos Muñoz', 'points': 2840, 'streak': 21, 'level': 7},
-  {'name': 'Valentina Ríos', 'points': 2610, 'streak': 18, 'level': 6},
-  {'name': 'Diego Soto', 'points': 2340, 'streak': 14, 'level': 6},
-  {'name': 'Camila Torres', 'points': 1980, 'streak': 9, 'level': 5},
-  {'name': 'Matías Lagos', 'points': 1750, 'streak': 12, 'level': 4},
-  {'name': 'Fernanda Vera', 'points': 1520, 'streak': 7, 'level': 4},
-  {'name': 'Sebastián Paz', 'points': 1380, 'streak': 5, 'level': 3},
-  {'name': 'Javiera Fuentes', 'points': 1200, 'streak': 8, 'level': 3},
-  {'name': 'Nicolás Araya', 'points': 980, 'streak': 3, 'level': 2},
-  {'name': 'Isidora Méndez', 'points': 720, 'streak': 4, 'level': 2},
-];
-
-class RankingScreen extends StatelessWidget {
+class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
+
+  @override
+  State<RankingScreen> createState() => _RankingScreenState();
+}
+
+class _RankingScreenState extends State<RankingScreen> {
+  List<Map<String, dynamic>> _ranking = [];
+  bool _loading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRanking();
+  }
+
+  Future<void> _loadRanking() async {
+    setState(() { _loading = true; _error = null; });
+    try {
+      final data = await ApiService.get('/ranking') as List<dynamic>;
+      setState(() {
+        _ranking = data.map((e) => {
+          'name': e['full_name'],
+          'points': e['points'],
+          'streak': e['streak'],
+          'level': e['level'],
+        }).toList();
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() { _error = 'No se pudo cargar el ranking'; _loading = false; });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +44,6 @@ class RankingScreen extends StatelessWidget {
       backgroundColor: AppTheme.secondary,
       body: CustomScrollView(
         slivers: [
-          // Header
           SliverAppBar(
             expandedHeight: 160,
             pinned: true,
@@ -60,43 +79,51 @@ class RankingScreen extends StatelessWidget {
             ),
           ),
 
-          // Top 3 podio
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  // 2do lugar
-                  Expanded(child: _PodiumItem(rank: 2, data: _demoRanking[1], height: 90)),
-                  const SizedBox(width: 8),
-                  // 1er lugar
-                  Expanded(child: _PodiumItem(rank: 1, data: _demoRanking[0], height: 120)),
-                  const SizedBox(width: 8),
-                  // 3er lugar
-                  Expanded(child: _PodiumItem(rank: 3, data: _demoRanking[2], height: 70)),
-                ],
+          if (_loading)
+            const SliverFillRemaining(
+              child: Center(child: CircularProgressIndicator(color: AppTheme.primary)),
+            )
+          else if (_error != null)
+            SliverFillRemaining(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(_error!, style: const TextStyle(color: AppTheme.textSecondary)),
+                    const SizedBox(height: 16),
+                    ElevatedButton(onPressed: _loadRanking, child: const Text('Reintentar')),
+                  ],
+                ),
+              ),
+            )
+          else if (_ranking.length >= 3) ...[
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(child: _PodiumItem(rank: 2, data: _ranking[1], height: 90)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _PodiumItem(rank: 1, data: _ranking[0], height: 120)),
+                    const SizedBox(width: 8),
+                    Expanded(child: _PodiumItem(rank: 3, data: _ranking[2], height: 70)),
+                  ],
+                ),
               ),
             ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
-          // Lista 4 en adelante
-          SliverPadding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, i) {
-                  final item = _demoRanking[i + 3];
-                  return _RankingItem(rank: i + 4, data: item);
-                },
-                childCount: _demoRanking.length - 3,
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              sliver: SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, i) => _RankingItem(rank: i + 4, data: _ranking[i + 3]),
+                  childCount: _ranking.length - 3,
+                ),
               ),
             ),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
         ],
       ),
     );
@@ -129,7 +156,6 @@ class _PodiumItem extends StatelessWidget {
       children: [
         Text(_medal, style: const TextStyle(fontSize: 24)),
         const SizedBox(height: 6),
-        // Avatar
         Container(
           width: 44, height: 44,
           decoration: BoxDecoration(
@@ -138,14 +164,13 @@ class _PodiumItem extends StatelessWidget {
             border: Border.all(color: _color, width: 2),
           ),
           child: Center(
-            child: Text(
-              name[0].toUpperCase(),
-              style: TextStyle(color: _color, fontSize: 18, fontWeight: FontWeight.w800),
-            ),
+            child: Text(name[0].toUpperCase(),
+                style: TextStyle(color: _color, fontSize: 18, fontWeight: FontWeight.w800)),
           ),
         ),
         const SizedBox(height: 6),
-        Text(name, style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
+        Text(name,
+            style: const TextStyle(color: AppTheme.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
             overflow: TextOverflow.ellipsis),
         Text('${data['points']} pts',
             style: TextStyle(color: _color, fontSize: 11, fontWeight: FontWeight.w700)),

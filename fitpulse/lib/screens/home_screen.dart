@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../models/user_model.dart';
 import '../services/auth_service.dart';
+import '../services/api_service.dart';
 import '../theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,6 +22,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUser() async {
+    try {
+      final data = await ApiService.get('/me') as Map<String, dynamic>;
+      await AuthService.updateUserCache(data);
+    } catch (_) {}
     final user = await AuthService.getUser();
     if (mounted) setState(() => _user = user);
   }
