@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FitPulse Admin — Mockup</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',sans-serif; background:#f5f5f7; min-height:100vh; display:flex; flex-direction:column; }
+
+.top-bar {
+  background:#fff;
+  border-bottom:1px solid #e5e7eb;
+  padding:10px 20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:12px;
+  color:#6b7280;
+}
+.top-bar strong { color:#1a1a1a; }
+
+.layout { display:flex; flex:1; overflow:hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width:220px;
+  background:#fff;
+  border-right:1px solid #e5e7eb;
+  display:flex;
+  flex-direction:column;
+  padding:20px 0;
+  flex-shrink:0;
+}
+.sidebar-logo {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 20px 20px;
+  border-bottom:1px solid #f0f0f2;
+  margin-bottom:12px;
+}
+.logo-icon {
+  width:36px; height:36px;
+  background:linear-gradient(135deg,#FF4D00,#CC3D00);
+  border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:18px;
+}
+.logo-text { font-size:15px; font-weight:800; color:#1a1a1a; }
+.logo-sub { font-size:10px; color:#6b7280; font-weight:500; }
+
+.nav-section { padding:0 12px; margin-bottom:4px; }
+.nav-label { font-size:10px; font-weight:700; color:#9ca3af; text-transform:uppercase; letter-spacing:.06em; padding:0 8px; margin-bottom:4px; }
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 10px; border-radius:10px;
+  font-size:13px; font-weight:500; color:#6b7280;
+  cursor:pointer; margin-bottom:2px;
+  transition:all .15s;
+}
+.nav-item:hover { background:#f5f5f7; color:#1a1a1a; }
+.nav-item.active { background:#fff4f0; color:#FF4D00; font-weight:700; }
+.nav-icon { font-size:16px; width:20px; text-align:center; }
+
+.sidebar-bottom {
+  margin-top:auto;
+  padding:12px;
+  border-top:1px solid #f0f0f2;
+}
+.gym-badge {
+  background:#f5f5f7;
+  border-radius:10px;
+  padding:10px 12px;
+  display:flex; align-items:center; gap:10px;
+}
+.gym-avatar {
+  width:32px; height:32px;
+  background:linear-gradient(135deg,#FF4D00,#CC3D00);
+  border-radius:8px;
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-weight:800; font-size:13px;
+}
+.gym-name { font-size:12px; font-weight:700; color:#1a1a1a; }
+.gym-plan { font-size:10px; color:#6b7280; }
+
+/* MAIN CONTENT */
+.main {
+  flex:1;
+  overflow-y:auto;
+  padding:28px;
+}
+.page-title { font-size:22px; font-weight:800; color:#1a1a1a; margin-bottom:4px; }
+.page-sub { font-size:13px; color:#6b7280; margin-bottom:24px; }
+
+/* STAT CARDS */
+.stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+.stat-card {
+  background:#fff;
+  border-radius:16px;
+  padding:18px;
+  border:1px solid #e5e7eb;
+}
+.stat-label { font-size:11px; color:#6b7280; font-weight:600; text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px; }
+.stat-value { font-size:28px; font-weight:800; color:#1a1a1a; margin-bottom:4px; }
+.stat-change { font-size:11px; font-weight:600; }
+.stat-change.up { color:#00a650; }
+.stat-change.down { color:#ef4444; }
+.stat-icon { font-size:22px; float:right; margin-top:-4px; }
+
+/* ROW: chart + list */
+.row2 { display:grid; grid-template-columns:1.6fr 1fr; gap:14px; margin-bottom:24px; }
+
+.card {
+  background:#fff;
+  border-radius:16px;
+  border:1px solid #e5e7eb;
+  padding:20px;
+}
+.card-title { font-size:14px; font-weight:700; color:#1a1a1a; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; }
+.card-title span { font-size:11px; color:#6b7280; font-weight:500; }
+
+/* Chart fake */
+.chart-area { height:140px; display:flex; align-items:flex-end; gap:8px; }
+.bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; }
+.bar { width:100%; border-radius:6px 6px 0 0; background:#FF4D00; opacity:.15; min-height:10px; transition:all .3s; }
+.bar.active { opacity:1; }
+.bar-label { font-size:9px; color:#9ca3af; }
+
+/* Members list */
+.member-item {
+  display:flex; align-items:center; gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid #f5f5f7;
+}
+.member-item:last-child { border-bottom:none; }
+.member-av {
+  width:32px; height:32px;
+  border-radius:50%;
+  background:#fff4f0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:800; color:#FF4D00;
+  flex-shrink:0;
+}
+.member-name { font-size:13px; font-weight:600; color:#1a1a1a; }
+.member-sub { font-size:11px; color:#6b7280; }
+.member-pts { font-size:12px; font-weight:700; color:#FF4D00; margin-left:auto; }
+
+/* Alert cards */
+.alerts-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.alert-card {
+  background:#fff;
+  border-radius:16px;
+  border:1px solid #e5e7eb;
+  padding:16px;
+}
+.alert-header { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.alert-dot { width:8px; height:8px; border-radius:50%; }
+.alert-dot.red { background:#ef4444; }
+.alert-dot.yellow { background:#f59e0b; }
+.alert-title { font-size:13px; font-weight:700; color:#1a1a1a; }
+
+.alert-item {
+  display:flex; align-items:center; gap:8px;
+  padding:6px 0;
+  border-bottom:1px solid #f5f5f7;
+  font-size:12px;
+}
+.alert-item:last-child { border-bottom:none; }
+.alert-item-av {
+  width:26px; height:26px;
+  border-radius:50%;
+  background:#f5f5f7;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:700; color:#6b7280;
+}
+.alert-item-name { font-weight:600; color:#1a1a1a; flex:1; }
+.alert-item-days { font-size:11px; color:#ef4444; font-weight:600; }
+.alert-item-days.warn { color:#f59e0b; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  Panel administrador · <strong>PowerGym Santiago</strong> · Código: <strong>GYM01</strong>
+  &nbsp;|&nbsp; Miércoles 16 abril 2026 &nbsp;|&nbsp;
+  <span style="margin-left:auto;display:flex;align-items:center;gap:6px;">
+    <span style="width:8px;height:8px;background:#00a650;border-radius:50%;display:inline-block;"></span>
+    En línea
+  </span>
+</div>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">⚡</div>
+      <div>
+        <div class="logo-text">FitPulse</div>
+        <div class="logo-sub">Panel Admin</div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active"><span class="nav-icon">📊</span> Dashboard</div>
+      <div class="nav-item"><span class="nav-icon">👥</span> Miembros</div>
+      <div class="nav-item"><span class="nav-icon">🏋️</span> Rutinas</div>
+      <div class="nav-item"><span class="nav-icon">🏆</span> Ranking</div>
+    </div>
+
+    <div class="nav-section" style="margin-top:12px;">
+      <div class="nav-label">Análisis</div>
+      <div class="nav-item"><span class="nav-icon">📈</span> Reportes</div>
+      <div class="nav-item"><span class="nav-icon">⚠️</span> Alertas <span style="margin-left:auto;background:#ef4444;color:#fff;font-size:9px;padding:1px 6px;border-radius:20px;font-weight:700;">3</span></div>
+    </div>
+
+    <div class="nav-section" style="margin-top:12px;">
+      <div class="nav-label">Cuenta</div>
+      <div class="nav-item"><span class="nav-icon">⚙️</span> Configuración</div>
+      <div class="nav-item"><span class="nav-icon">💳</span> Suscripción</div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="gym-badge">
+        <div class="gym-avatar">P</div>
+        <div>
+          <div class="gym-name">PowerGym</div>
+          <div class="gym-plan">Plan PRO · activo</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page-title">Bienvenido, Pedro 👋</div>
+    <div class="page-sub">Aquí está el resumen de tu gimnasio hoy</div>
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Miembros activos <span class="stat-icon">👥</span></div>
+        <div class="stat-value">47</div>
+        <div class="stat-change up">↑ 3 nuevos este mes</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Entrenamientos hoy <span class="stat-icon">🏋️</span></div>
+        <div class="stat-value">12</div>
+        <div class="stat-change up">↑ vs 8 ayer</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Racha promedio <span class="stat-icon">🔥</span></div>
+        <div class="stat-value">8.4</div>
+        <div class="stat-change up">↑ días seguidos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">En riesgo abandono <span class="stat-icon">⚠️</span></div>
+        <div class="stat-value" style="color:#ef4444;">5</div>
+        <div class="stat-change down">sin entrenar +7 días</div>
+      </div>
+    </div>
+
+    <!-- CHART + MEMBERS -->
+    <div class="row2">
+      <div class="card">
+        <div class="card-title">Entrenamientos por día <span>últimos 7 días</span></div>
+        <div class="chart-area">
+          <div class="bar-wrap"><div class="bar" style="height:55px;"></div><div class="bar-label">L</div></div>
+          <div class="bar-wrap"><div class="bar" style="height:80px;"></div><div class="bar-label">M</div></div>
+          <div class="bar" style="display:none"></div>
+          <div class="bar-wrap"><div class="bar" style="height:40px;"></div><div class="bar-label">X</div></div>
+          <div class="bar-wrap"><div class="bar" style="height:95px;"></div><div class="bar-label">J</div></div>
+          <div class="bar-wrap"><div class="bar" style="height:110px;"></div><div class="bar-label">V</div></div>
+          <div class="bar-wrap"><div class="bar" style="height:65px;"></div><div class="bar-label">S</div></div>
+          <div class="bar-wrap"><div class="bar active" style="height:75px;"></div><div class="bar-label">D</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Top miembros <span>este mes</span></div>
+        <div class="member-item">
+          <div class="member-av">C</div>
+          <div>
+            <div class="member-name">Carlos Muñoz</div>
+            <div class="member-sub">🔥 21 días racha</div>
+          </div>
+          <div class="member-pts">2,840 pts</div>
+        </div>
+        <div class="member-item">
+          <div class="member-av">V</div>
+          <div>
+            <div class="member-name">Valentina Ríos</div>
+            <div class="member-sub">🔥 18 días racha</div>
+          </div>
+          <div class="member-pts">2,610 pts</div>
+        </div>
+        <div class="member-item">
+          <div class="member-av">D</div>
+          <div>
+            <div class="member-name">Diego Soto</div>
+            <div class="member-sub">🔥 14 días racha</div>
+          </div>
+          <div class="member-pts">2,340 pts</div>
+        </div>
+        <div class="member-item">
+          <div class="member-av">C</div>
+          <div>
+            <div class="member-name">Camila Torres</div>
+            <div class="member-sub">🔥 9 días racha</div>
+          </div>
+          <div class="member-pts">1,980 pts</div>
+        </div>
+        <div class="member-item">
+          <div class="member-av">M</div>
+          <div>
+            <div class="member-name">Matías Lagos</div>
+            <div class="member-sub">🔥 12 días racha</div>
+          </div>
+          <div class="member-pts">1,750 pts</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ALERTS -->
+    <div class="alerts-row">
+      <div class="alert-card">
+        <div class="alert-header">
+          <div class="alert-dot red"></div>
+          <div class="alert-title">Miembros sin entrenar (7+ días)</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-item-av">J</div>
+          <div class="alert-item-name">Javiera Fuentes</div>
+          <div class="alert-item-days">12 días</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-item-av">N</div>
+          <div class="alert-item-name">Nicolás Araya</div>
+          <div class="alert-item-days">10 días</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-item-av">I</div>
+          <div class="alert-item-name">Isidora Méndez</div>
+          <div class="alert-item-days">8 días</div>
+        </div>
+      </div>
+
+      <div class="alert-card">
+        <div class="alert-header">
+          <div class="alert-dot yellow"></div>
+          <div class="alert-title">Actividad reciente del gym</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-item-av">✅</div>
+          <div class="alert-item-name">Carlos completó "Pecho y Tríceps"</div>
+          <div class="alert-item-days warn">hace 2h</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-item-av">🆕</div>
+          <div class="alert-item-name">Nuevo miembro: Ana González</div>
+          <div class="alert-item-days warn">hoy</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-item-av">🏆</div>
+          <div class="alert-item-name">Valentina alcanzó Nivel 6</div>
+          <div class="alert-item-days warn">ayer</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

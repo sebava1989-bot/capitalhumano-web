@@ -1,0 +1,152 @@
+<h2>¿Cómo quieres que se vea el panel del dueño del gym?</h2>
+<p class="subtitle">Elige el estilo de layout que más te guste</p>
+
+<div class="cards">
+
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0f172a;border-radius:8px;padding:12px;font-family:monospace;height:200px;display:flex;gap:8px;">
+        <!-- Sidebar layout -->
+        <div style="width:60px;background:#1e293b;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:6px;">
+          <div style="width:36px;height:36px;background:#FF4D00;border-radius:6px;margin:0 auto;"></div>
+          <div style="height:6px;background:#334155;border-radius:3px;"></div>
+          <div style="height:6px;background:#FF4D00;border-radius:3px;"></div>
+          <div style="height:6px;background:#334155;border-radius:3px;"></div>
+          <div style="height:6px;background:#334155;border-radius:3px;"></div>
+          <div style="height:6px;background:#334155;border-radius:3px;"></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;gap:6px;">
+            <div style="flex:1;height:50px;background:#1e293b;border-radius:6px;padding:8px;">
+              <div style="height:6px;background:#FF4D00;border-radius:2px;width:60%;margin-bottom:4px;"></div>
+              <div style="height:16px;background:#fff;border-radius:2px;width:80%;font-size:11px;color:#0f172a;display:flex;align-items:center;padding:0 4px;">47</div>
+            </div>
+            <div style="flex:1;height:50px;background:#1e293b;border-radius:6px;padding:8px;">
+              <div style="height:6px;background:#22d3ee;border-radius:2px;width:70%;margin-bottom:4px;"></div>
+              <div style="height:16px;background:#fff;border-radius:2px;width:80%;font-size:11px;color:#0f172a;display:flex;align-items:center;padding:0 4px;">89%</div>
+            </div>
+            <div style="flex:1;height:50px;background:#1e293b;border-radius:6px;padding:8px;">
+              <div style="height:6px;background:#a3e635;border-radius:2px;width:50%;margin-bottom:4px;"></div>
+              <div style="height:16px;background:#fff;border-radius:2px;width:80%;font-size:11px;color:#0f172a;display:flex;align-items:center;padding:0 4px;">1,240</div>
+            </div>
+          </div>
+          <div style="flex:1;background:#1e293b;border-radius:6px;padding:8px;">
+            <div style="height:6px;background:#475569;border-radius:2px;width:40%;margin-bottom:6px;"></div>
+            <div style="display:flex;flex-direction:column;gap:4px;">
+              <div style="height:8px;background:#334155;border-radius:2px;"></div>
+              <div style="height:8px;background:#334155;border-radius:2px;width:90%;"></div>
+              <div style="height:8px;background:#334155;border-radius:2px;width:80%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Sidebar + Dashboard</h3>
+      <p>Menú lateral fijo con navegación clara. Dashboard central con cards de estadísticas, tabla de miembros y gráficos. Estilo app profesional.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0f172a;border-radius:8px;padding:12px;font-family:monospace;height:200px;display:flex;flex-direction:column;gap:8px;">
+        <!-- Top nav layout -->
+        <div style="height:28px;background:#1e293b;border-radius:6px;display:flex;align-items:center;padding:0 10px;gap:12px;">
+          <div style="width:20px;height:20px;background:#FF4D00;border-radius:4px;"></div>
+          <div style="height:5px;background:#FF4D00;border-radius:2px;width:40px;"></div>
+          <div style="height:5px;background:#334155;border-radius:2px;width:40px;"></div>
+          <div style="height:5px;background:#334155;border-radius:2px;width:40px;"></div>
+          <div style="height:5px;background:#334155;border-radius:2px;width:40px;"></div>
+          <div style="margin-left:auto;width:20px;height:20px;background:#334155;border-radius:50%;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+          <div style="height:50px;background:#1e293b;border-radius:6px;padding:8px;">
+            <div style="height:5px;background:#FF4D00;border-radius:2px;width:70%;margin-bottom:4px;"></div>
+            <div style="height:14px;background:#fff;border-radius:2px;font-size:11px;color:#0f172a;"></div>
+          </div>
+          <div style="height:50px;background:#1e293b;border-radius:6px;padding:8px;">
+            <div style="height:5px;background:#22d3ee;border-radius:2px;width:60%;margin-bottom:4px;"></div>
+            <div style="height:14px;background:#fff;border-radius:2px;"></div>
+          </div>
+          <div style="height:50px;background:#1e293b;border-radius:6px;padding:8px;">
+            <div style="height:5px;background:#a3e635;border-radius:2px;width:80%;margin-bottom:4px;"></div>
+            <div style="height:14px;background:#fff;border-radius:2px;"></div>
+          </div>
+        </div>
+        <div style="flex:1;display:grid;grid-template-columns:2fr 1fr;gap:6px;">
+          <div style="background:#1e293b;border-radius:6px;padding:8px;">
+            <div style="height:5px;background:#475569;border-radius:2px;width:50%;margin-bottom:6px;"></div>
+            <div style="height:8px;background:#334155;border-radius:2px;margin-bottom:3px;"></div>
+            <div style="height:8px;background:#334155;border-radius:2px;margin-bottom:3px;width:90%;"></div>
+            <div style="height:8px;background:#334155;border-radius:2px;width:80%;"></div>
+          </div>
+          <div style="background:#1e293b;border-radius:6px;padding:8px;">
+            <div style="height:5px;background:#475569;border-radius:2px;width:60%;margin-bottom:6px;"></div>
+            <div style="width:50px;height:50px;border-radius:50%;border:4px solid #FF4D00;border-right-color:#334155;margin:0 auto;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Top Nav + Grid</h3>
+      <p>Barra de navegación superior y contenido en grid. Más espacio horizontal para tablas y gráficos. Ideal para pantallas grandes y múltiples secciones.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#0f172a;border-radius:8px;padding:12px;font-family:monospace;height:200px;display:flex;gap:8px;">
+        <!-- Wide sidebar layout -->
+        <div style="width:90px;background:#1e293b;border-radius:6px;padding:8px;display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+            <div style="width:20px;height:20px;background:#FF4D00;border-radius:4px;flex-shrink:0;"></div>
+            <div style="height:5px;background:#fff;border-radius:2px;flex:1;"></div>
+          </div>
+          <div style="height:28px;background:#FF4D00;border-radius:5px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+            <div style="width:8px;height:8px;background:#fff;border-radius:2px;flex-shrink:0;"></div>
+            <div style="height:4px;background:#fff;border-radius:2px;flex:1;opacity:0.8;"></div>
+          </div>
+          <div style="height:24px;background:#334155;border-radius:5px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+            <div style="width:8px;height:8px;background:#94a3b8;border-radius:2px;flex-shrink:0;"></div>
+            <div style="height:4px;background:#475569;border-radius:2px;flex:1;"></div>
+          </div>
+          <div style="height:24px;background:#334155;border-radius:5px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+            <div style="width:8px;height:8px;background:#94a3b8;border-radius:2px;flex-shrink:0;"></div>
+            <div style="height:4px;background:#475569;border-radius:2px;flex:1;"></div>
+          </div>
+          <div style="height:24px;background:#334155;border-radius:5px;display:flex;align-items:center;padding:0 6px;gap:4px;">
+            <div style="width:8px;height:8px;background:#94a3b8;border-radius:2px;flex-shrink:0;"></div>
+            <div style="height:4px;background:#475569;border-radius:2px;flex:1;"></div>
+          </div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+          <div style="height:24px;background:#1e293b;border-radius:6px;display:flex;align-items:center;padding:0 8px;">
+            <div style="height:5px;background:#fff;border-radius:2px;width:120px;"></div>
+            <div style="margin-left:auto;height:16px;background:#FF4D00;border-radius:4px;width:50px;"></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;">
+            <div style="height:42px;background:#1e293b;border-radius:6px;padding:6px;">
+              <div style="height:4px;background:#FF4D00;border-radius:2px;width:60%;margin-bottom:4px;"></div>
+              <div style="height:12px;background:#fff;border-radius:2px;width:70%;"></div>
+            </div>
+            <div style="height:42px;background:#1e293b;border-radius:6px;padding:6px;">
+              <div style="height:4px;background:#22d3ee;border-radius:2px;width:70%;margin-bottom:4px;"></div>
+              <div style="height:12px;background:#fff;border-radius:2px;width:60%;"></div>
+            </div>
+          </div>
+          <div style="flex:1;background:#1e293b;border-radius:6px;padding:8px;">
+            <div style="height:4px;background:#475569;border-radius:2px;width:30%;margin-bottom:6px;"></div>
+            <div style="height:6px;background:#334155;border-radius:2px;margin-bottom:3px;"></div>
+            <div style="height:6px;background:#334155;border-radius:2px;width:90%;margin-bottom:3px;"></div>
+            <div style="height:6px;background:#334155;border-radius:2px;width:80%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Sidebar Ancho + Etiquetas</h3>
+      <p>Sidebar más amplio con íconos y texto visible siempre. Más orientado a aplicación de gestión empresarial. Mejor para usuarios que cambian de sección frecuentemente.</p>
+    </div>
+  </div>
+
+</div>
