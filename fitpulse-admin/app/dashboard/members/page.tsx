@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Topbar from '@/components/topbar'
 import { apiGet, apiPost, apiPatch } from '@/lib/api'
-import { Search, UserPlus, CheckCircle, XCircle, CreditCard } from 'lucide-react'
+import { Search, UserPlus, CheckCircle, XCircle, CreditCard, Megaphone, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 interface Member {
@@ -36,8 +36,18 @@ export default function MembersPage() {
   const [members, setMembers] = useState<Member[]>([])
   const [search, setSearch] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [showPromoModal, setShowPromoModal] = useState(false)
+  const [promoMsg, setPromoMsg] = useState('')
+  const [promoTarget, setPromoTarget] = useState<'all' | 'active'>('active')
   const [form, setForm] = useState({ full_name: '', rut: '', phone: '', password: '' })
   const [loading, setLoading] = useState(true)
+
+  const TEMPLATES = [
+    { label: '🎉 Descuento mensualidad', text: '¡Hola {nombre}! Este mes tenemos un 20% de descuento en tu mensualidad si pagas antes del día 10. ¡No te lo pierdas! 💪 — PowerGym' },
+    { label: '🏋️ Clase gratis', text: '¡Hola {nombre}! Te invitamos a una clase grupal GRATIS este sábado a las 10:00. ¡Trae a un amigo! 🔥 — PowerGym' },
+    { label: '🌟 Promoción referido', text: '¡Hola {nombre}! Si traes a un amigo al gym este mes, ambos obtienen 1 semana gratis. ¡Aprovecha! 💪 — PowerGym' },
+    { label: '✍️ Mensaje personalizado', text: '' },
+  ]
 
   useEffect(() => {
     apiGet<Member[]>('/members').then(data => { setMembers(data); setLoading(false) }).catch(console.error)
@@ -82,6 +92,12 @@ export default function MembersPage() {
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-[#e5e7eb] bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#FF4D00] focus:border-transparent"
           />
         </div>
+        <button
+          onClick={() => setShowPromoModal(true)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-green-500 text-white text-sm font-semibold hover:bg-green-600 transition-colors"
+        >
+          <Megaphone size={15} /> Enviar promoción
+        </button>
         <button
           onClick={() => setShowModal(true)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#FF4D00] text-white text-sm font-semibold hover:bg-[#CC3D00] transition-colors"
@@ -149,6 +165,98 @@ export default function MembersPage() {
           </tbody>
         </table>
       </div>
+
+      {showPromoModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl my-4">
+            <h2 className="text-lg font-extrabold text-[#1a1a1a] mb-1">Enviar promoción por WhatsApp</h2>
+            <p className="text-xs text-[#6b7280] mb-5">Elige una plantilla o escribe tu mensaje. Se abrirá un link por cada miembro.</p>
+
+            {/* Plantillas */}
+            <div className="mb-4">
+              <p className="text-sm font-semibold text-[#1a1a1a] mb-2">Plantilla</p>
+              <div className="grid grid-cols-2 gap-2">
+                {TEMPLATES.map(t => (
+                  <button
+                    key={t.label}
+                    onClick={() => setPromoMsg(t.text)}
+                    className={`text-left px-3 py-2 rounded-xl border text-xs font-medium transition-colors ${
+                      promoMsg === t.text && t.text !== ''
+                        ? 'border-green-400 bg-green-50 text-green-700'
+                        : 'border-[#e5e7eb] text-[#6b7280] hover:bg-[#f5f5f7]'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Mensaje */}
+            <div className="mb-4">
+              <p className="text-sm font-semibold text-[#1a1a1a] mb-1.5">Mensaje <span className="text-[#6b7280] font-normal">(usa {'{nombre}'} para personalizar)</span></p>
+              <textarea
+                value={promoMsg}
+                onChange={e => setPromoMsg(e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 rounded-xl border border-[#e5e7eb] bg-[#f5f5f7] text-sm focus:outline-none focus:ring-2 focus:ring-green-400 resize-none"
+                placeholder="Escribe tu mensaje aquí..."
+              />
+            </div>
+
+            {/* Destinatarios */}
+            <div className="mb-5">
+              <p className="text-sm font-semibold text-[#1a1a1a] mb-2">Enviar a</p>
+              <div className="flex gap-2">
+                {[
+                  { key: 'active' as const, label: `Activos (${members.filter(m => m.active && m.phone).length})` },
+                  { key: 'all'    as const, label: `Todos con teléfono (${members.filter(m => m.phone).length})` },
+                ].map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => setPromoTarget(opt.key)}
+                    className={`px-4 py-2 rounded-xl text-sm font-semibold transition-colors ${
+                      promoTarget === opt.key ? 'bg-green-500 text-white' : 'bg-white border border-[#e5e7eb] text-[#6b7280] hover:bg-[#f5f5f7]'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Lista de miembros con botón WA individual */}
+            {promoMsg.trim() && (
+              <div className="mb-5 max-h-48 overflow-y-auto space-y-2 border border-[#e5e7eb] rounded-xl p-3">
+                {members
+                  .filter(m => m.phone && (promoTarget === 'all' || m.active))
+                  .map(m => {
+                    const msg = promoMsg.replace(/\{nombre\}/gi, m.full_name.split(' ')[0])
+                    const url = `https://wa.me/${m.phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`
+                    return (
+                      <div key={m.id} className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-full bg-orange-50 flex items-center justify-center text-xs font-extrabold text-[#FF4D00] shrink-0">{m.full_name[0]}</div>
+                        <span className="flex-1 text-sm text-[#1a1a1a] truncate">{m.full_name}</span>
+                        <a
+                          href={url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-green-500 text-white hover:bg-green-600"
+                        >
+                          <MessageCircle size={11} /> Enviar
+                        </a>
+                      </div>
+                    )
+                  })}
+              </div>
+            )}
+
+            <div className="flex gap-3">
+              <button onClick={() => setShowPromoModal(false)} className="flex-1 py-2.5 rounded-xl border border-[#e5e7eb] text-sm text-[#6b7280] hover:bg-[#f5f5f7]">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
