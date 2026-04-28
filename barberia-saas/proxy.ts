@@ -12,8 +12,8 @@ export async function proxy(request: NextRequest) {
       cookies: {
         getAll() { return request.cookies.getAll() },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value)
+          cookiesToSet.forEach(({ name, value, options }) =>
+            request.cookies.set({ name, value, ...options })
           )
           supabaseResponse = NextResponse.next({ request })
           cookiesToSet.forEach(({ name, value, options }) =>
@@ -30,36 +30,44 @@ export async function proxy(request: NextRequest) {
   const slugMatch = pathname.match(/^\/([^/]+)\/(.+)/)
 
   if (slugMatch) {
+    const slug = slugMatch[1]
     const section = slugMatch[2].split('/')[0]
 
     if (['admin', 'barbero', 'cliente'].includes(section) && !user) {
-      const loginUrl = new URL(`/${slugMatch[1]}/reservar`, request.url)
+      const loginUrl = new URL(`/${slug}/reservar`, request.url)
       loginUrl.searchParams.set('login', 'true')
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
     }
 
-    if (section === 'admin' && user) {
-      const { data: userData } = await supabase
+    if ((section === 'admin' || section === 'barbero') && user) {
+      const { data: userData, error } = await supabase
         .from('users')
-        .select('rol')
+        .select('rol, barberia_id')
         .eq('id', user.id)
         .single()
 
-      if (userData?.rol !== 'admin' && userData?.rol !== 'superadmin') {
-        return NextResponse.redirect(new URL(`/${slugMatch[1]}/cliente`, request.url))
+      if (error) {
+        return NextResponse.redirect(new URL(`/${slug}/reservar`, request.url))
       }
-    }
 
-    if (section === 'barbero' && user) {
-      const { data: userData } = await supabase
-        .from('users')
-        .select('rol')
-        .eq('id', user.id)
-        .single()
+      const isSuperadmin = userData?.rol === 'superadmin'
+      const belongsToTenant = userData?.barberia_id != null
 
-      if (userData?.rol !== 'barbero' && userData?.rol !== 'admin' && userData?.rol !== 'superadmin') {
-        return NextResponse.redirect(new URL(`/${slugMatch[1]}/cliente`, request.url))
+      if (section === 'admin') {
+        const canAccess = isSuperadmin || (userData?.rol === 'admin' && belongsToTenant)
+        if (!canAccess) {
+          return NextResponse.redirect(new URL(`/${slug}/cliente`, request.url))
+        }
+      }
+
+      if (section === 'barbero') {
+        const canAccess = isSuperadmin || (
+          ['barbero', 'admin'].includes(userData?.rol ?? '') && belongsToTenant
+        )
+        if (!canAccess) {
+          return NextResponse.redirect(new URL(`/${slug}/cliente`, request.url))
+        }
       }
     }
   }
