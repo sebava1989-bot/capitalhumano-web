@@ -26,7 +26,7 @@ export function useRealtimeSlots(
         .eq('barbero_id', barberoId)
         .eq('barberia_id', barberiaId)
         .eq('fecha', fechaStr)
-        .single()
+        .maybeSingle()
 
       const bookedSlots: Slot[] = Array.isArray(data?.slots) ? (data.slots as unknown as Slot[]) : []
       const allSlots = generateSlots('09:00', '18:00', duracionMin)

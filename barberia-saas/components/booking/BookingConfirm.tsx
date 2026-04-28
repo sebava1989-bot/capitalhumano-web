@@ -7,6 +7,7 @@ import { es } from 'date-fns/locale'
 import { useParams } from 'next/navigation'
 import { toast } from 'sonner'
 import type { Json } from '@/types/database'
+import { crearReserva } from '@/app/[slug]/reservar/actions'
 
 interface Props {
   barberia: { id: string; nombre: string; colores: Json }
@@ -41,23 +42,27 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
       const [h, m] = hora.split(':').map(Number)
       fechaHora.setHours(h, m, 0, 0)
 
-      const { error } = await supabase.from('reservas').insert({
-        barberia_id: barberia.id,
-        cliente_id: user.id,
-        barbero_id: barbero.id,
-        servicio_id: servicio.id,
-        fecha_hora: fechaHora.toISOString(),
+      const result = await crearReserva({
+        barberiaId: barberia.id,
+        barberoId: barbero.id,
+        servicioId: servicio.id,
+        servicioNombre: servicio.nombre,
+        barberoNombre: barbero.nombre,
+        barberiaNombre: (barberia as unknown as { nombre: string }).nombre,
         precio: servicio.precio,
-        descuento: 0,
-        precio_final: servicio.precio,
-        estado: 'confirmada' as const,
-        origen: 'web' as const,
-        ref_code: refCode ?? null,
+        fechaHora: fechaHora.toISOString(),
+        refCode: refCode ?? null,
+        clienteNombre: '',
+        horaSlot: hora,
       })
 
-      if (error) {
+      if (result.error) {
         toast.error('No pudimos confirmar tu reserva. Intenta de nuevo.')
         return
+      }
+
+      if (result.emailError) {
+        console.error('Email error:', result.emailError)
       }
 
       setConfirmed(true)
@@ -72,6 +77,7 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) confirmar()
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showLogin])
 
   if (confirmed) {

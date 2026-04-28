@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
 import { CopyReferralButton } from '@/components/cliente/CopyReferralButton'
+import { CalificarReservaForm } from '@/components/cliente/CalificarReservaForm'
 
 export default async function ClientePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -30,7 +31,7 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
 
   const { data: historial } = await supabase
     .from('reservas')
-    .select('id, fecha_hora, estado, precio_final, servicios(nombre), barberos(nombre)')
+    .select('id, fecha_hora, estado, precio_final, calificacion, servicios(nombre), barberos(nombre)')
     .eq('cliente_id', user.id)
     .eq('barberia_id', barberia.id)
     .in('estado', ['completada', 'cancelada'])
@@ -79,19 +80,32 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
         <p className="text-zinc-400 text-xs uppercase tracking-wide mb-3">Historial</p>
         <div className="space-y-2">
           {historial?.map(r => (
-            <div key={r.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3 flex justify-between items-center">
-              <div>
-                <p className="text-white text-sm font-medium">{(r.servicios as unknown as { nombre: string })?.nombre}</p>
-                <p className="text-zinc-400 text-xs">
-                  {new Date(r.fecha_hora).toLocaleDateString('es-CL')} · {(r.barberos as unknown as { nombre: string })?.nombre}
-                </p>
+            <div key={r.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-white text-sm font-medium">{(r.servicios as unknown as { nombre: string })?.nombre}</p>
+                  <p className="text-zinc-400 text-xs">
+                    {new Date(r.fecha_hora).toLocaleDateString('es-CL')} · {(r.barberos as unknown as { nombre: string })?.nombre}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-white text-sm">${(r.precio_final ?? 0).toLocaleString('es-CL')}</p>
+                  <span className={`text-xs ${r.estado === 'completada' ? 'text-green-400' : 'text-red-400'}`}>
+                    {r.estado}
+                  </span>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="text-white text-sm">${(r.precio_final ?? 0).toLocaleString('es-CL')}</p>
-                <span className={`text-xs ${r.estado === 'completada' ? 'text-green-400' : 'text-red-400'}`}>
-                  {r.estado}
-                </span>
-              </div>
+              {r.estado === 'completada' && (
+                r.calificacion ? (
+                  <div className="mt-2 flex gap-0.5">
+                    {[1,2,3,4,5].map(i => (
+                      <span key={i} className={`text-sm ${i <= (r.calificacion as number) ? 'text-yellow-400' : 'text-zinc-700'}`}>★</span>
+                    ))}
+                  </div>
+                ) : (
+                  <CalificarReservaForm reservaId={r.id} slug={slug} />
+                )
+              )}
             </div>
           ))}
           {!historial?.length && <p className="text-zinc-500 text-sm">Aún no tienes reservas pasadas</p>}
