@@ -148,6 +148,7 @@ export interface Database {
           cliente_email: string | null
           cliente_nombre: string | null
           origen: 'web' | 'admin' | 'suscripcion'
+          ref_code: string | null
           created_at: string
         }
         Insert: {
@@ -165,6 +166,7 @@ export interface Database {
           cliente_email?: string | null
           cliente_nombre?: string | null
           origen?: 'web' | 'admin' | 'suscripcion'
+          ref_code?: string | null
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['reservas']['Insert']>

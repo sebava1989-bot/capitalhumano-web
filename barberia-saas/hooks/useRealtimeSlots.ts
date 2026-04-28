@@ -24,6 +24,7 @@ export function useRealtimeSlots(
         .from('disponibilidad')
         .select('slots')
         .eq('barbero_id', barberoId)
+        .eq('barberia_id', barberiaId)
         .eq('fecha', fechaStr)
         .single()
 
@@ -46,7 +47,8 @@ export function useRealtimeSlots(
           filter: `barbero_id=eq.${barberoId}`,
         },
         payload => {
-          const bookedSlots: Slot[] = Array.isArray(payload.new.slots) ? (payload.new.slots as unknown as Slot[]) : []
+          if (payload.new.barberia_id !== barberiaId) return
+          const bookedSlots: Slot[] = Array.isArray(payload.new.slots) ? payload.new.slots : []
           const allSlots = generateSlots('09:00', '18:00', duracionMin)
           setAvailableSlots(getAvailableSlots(allSlots, bookedSlots))
         }

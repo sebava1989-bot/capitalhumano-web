@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { OtpLoginModal } from '@/components/auth/OtpLoginModal'
 import { format } from 'date-fns'
@@ -25,7 +25,7 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
   const [showLogin, setShowLogin] = useState(false)
   const [loading, setLoading] = useState(false)
   const [confirmed, setConfirmed] = useState(false)
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
 
   async function confirmar() {
     setLoading(true)
@@ -52,6 +52,7 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
         precio_final: servicio.precio,
         estado: 'confirmada' as const,
         origen: 'web' as const,
+        ref_code: refCode ?? null,
       })
 
       if (error) {
@@ -64,6 +65,14 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (showLogin) return
+    if (confirmed || loading) return
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) confirmar()
+    })
+  }, [showLogin])
 
   if (confirmed) {
     return (
