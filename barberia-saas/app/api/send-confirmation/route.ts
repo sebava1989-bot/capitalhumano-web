@@ -4,8 +4,18 @@ import { ReservationConfirmed } from '@/emails/ReservationConfirmed'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
+let resend: Resend | null = null
+function getResend() {
+  if (!resend) resend = new Resend(process.env.RESEND_API_KEY)
+  return resend
+}
+
 export async function POST(request: Request) {
-  const resend = new Resend(process.env.RESEND_API_KEY)
+  const secret = request.headers.get('x-internal-secret')
+  if (!secret || secret !== process.env.INTERNAL_API_SECRET) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
   let reservaId: string
   try {
     const body = await request.json()
@@ -39,7 +49,7 @@ export async function POST(request: Request) {
   const barberoNombre = (reserva.barberos as unknown as Record<string, string>).nombre
   const barberiaNombre = (reserva.barberias as unknown as Record<string, string>).nombre
 
-  const { error: sendError } = await resend.emails.send({
+  const { error: sendError } = await getResend().emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: reserva.cliente_email,
     subject: `✅ Reserva confirmada — ${barberiaNombre}`,
@@ -50,7 +60,9 @@ export async function POST(request: Request) {
       fecha: fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' }),
       hora: fecha.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
       barberiaNombre,
-      precio: `$${reserva.precio_final.toLocaleString('es-CL')}`,
+      precio: reserva.precio_final != null
+        ? `$${reserva.precio_final.toLocaleString('es-CL')}`
+        : 'Consultar en local',
     })),
   })
 
