@@ -13,6 +13,7 @@ export async function crearAlianza(formData: FormData) {
   const serviciosRaw = formData.getAll('servicio_ids').map(s => s as string)
   const descuentoPct = formData.get('descuento_pct')
   const codigoAcceso = formData.get('codigo_acceso') as string
+  const maxUsos = formData.get('max_usos_por_cliente')
 
   const { error } = await supabase.from('alianzas').insert({
     barberia_id: barberia.id,
@@ -25,6 +26,7 @@ export async function crearAlianza(formData: FormData) {
     servicio_ids: serviciosRaw.length > 0 ? serviciosRaw : null,
     requiere_codigo: formData.get('requiere_codigo') === 'true',
     codigo_acceso: codigoAcceso || null,
+    max_usos_por_cliente: maxUsos ? parseInt(maxUsos as string) : null,
   })
   if (error) return { error: error.message }
   revalidatePath(`/${slug}/admin/alianzas`)

@@ -10,6 +10,7 @@ interface Alianza {
   beneficio: string | null; activo: boolean
   descuento_pct: number | null; dias_semana: number[] | null
   servicio_ids: string[] | null; requiere_codigo: boolean; codigo_acceso: string | null
+  max_usos_por_cliente: number | null
 }
 
 interface Servicio { id: string; nombre: string }
@@ -25,6 +26,7 @@ export default function AlianzasPage() {
   const slug = Array.isArray(params.slug) ? params.slug[0] : (params.slug ?? '')
   const [alianzas, setAlianzas] = useState<Alianza[]>([])
   const [servicios, setServicios] = useState<Servicio[]>([])
+  const [usosMap, setUsosMap] = useState<Record<string, number>>({})
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [requiereCodigo, setRequiereCodigo] = useState(false)
@@ -40,6 +42,19 @@ export default function AlianzasPage() {
     ])
     setAlianzas(alianzasData ?? [])
     setServicios(serviciosData ?? [])
+
+    // Cargar conteo de usos por alianza
+    if (alianzasData?.length) {
+      const { data: usos } = await supabase
+        .from('alianza_usos')
+        .select('alianza_id')
+        .in('alianza_id', alianzasData.map(a => a.id))
+      const map: Record<string, number> = {}
+      for (const u of usos ?? []) {
+        map[u.alianza_id] = (map[u.alianza_id] ?? 0) + 1
+      }
+      setUsosMap(map)
+    }
   }
 
   useEffect(() => { load() }, [slug])
@@ -142,6 +157,15 @@ export default function AlianzasPage() {
               </div>
             )}
 
+            {/* Límite de usos */}
+            <div>
+              <label className="text-zinc-400 text-xs uppercase tracking-wide block mb-1">Máx. usos por cliente</label>
+              <input name="max_usos_por_cliente" type="number" min="1"
+                className="w-32 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm"
+                placeholder="Sin límite" />
+              <p className="text-zinc-600 text-xs mt-0.5">Dejar vacío = ilimitado</p>
+            </div>
+
             {/* Requiere código */}
             <div className="flex items-center gap-3">
               <button type="button" onClick={() => setRequiereCodigo(!requiereCodigo)}
@@ -200,6 +224,14 @@ export default function AlianzasPage() {
                     Solo {a.dias_semana.map(d => DIAS_LABEL[d]).join(', ')}
                   </p>
                 )}
+                <div className="flex items-center gap-3 mt-1">
+                  <span className="text-zinc-600 text-xs">
+                    Usada {usosMap[a.id] ?? 0} {(usosMap[a.id] ?? 0) === 1 ? 'vez' : 'veces'}
+                  </span>
+                  {a.max_usos_por_cliente && (
+                    <span className="text-zinc-600 text-xs">· máx. {a.max_usos_por_cliente} por cliente</span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 flex-shrink-0">
                 <button onClick={() => toggleAlianza(a.id, !a.activo, slug).then(() =>

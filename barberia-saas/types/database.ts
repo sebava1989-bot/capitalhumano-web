@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      alianza_usos: {
+        Row: {
+          alianza_id: string
+          cliente_id: string
+          created_at: string
+          id: string
+          reserva_id: string
+        }
+        Insert: {
+          alianza_id: string
+          cliente_id: string
+          created_at?: string
+          id?: string
+          reserva_id: string
+        }
+        Update: {
+          alianza_id?: string
+          cliente_id?: string
+          created_at?: string
+          id?: string
+          reserva_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alianza_usos_alianza_id_fkey"
+            columns: ["alianza_id"]
+            isOneToOne: false
+            referencedRelation: "alianzas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alianza_usos_reserva_id_fkey"
+            columns: ["reserva_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alianzas: {
         Row: {
           activo: boolean
@@ -25,6 +64,7 @@ export type Database = {
           descuento_pct: number | null
           dias_semana: number[] | null
           id: string
+          max_usos_por_cliente: number | null
           nombre: string
           requiere_codigo: boolean
           servicio_ids: string[] | null
@@ -40,6 +80,7 @@ export type Database = {
           descuento_pct?: number | null
           dias_semana?: number[] | null
           id?: string
+          max_usos_por_cliente?: number | null
           nombre: string
           requiere_codigo?: boolean
           servicio_ids?: string[] | null
@@ -55,6 +96,7 @@ export type Database = {
           descuento_pct?: number | null
           dias_semana?: number[] | null
           id?: string
+          max_usos_por_cliente?: number | null
           nombre?: string
           requiere_codigo?: boolean
           servicio_ids?: string[] | null

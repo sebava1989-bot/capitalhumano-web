@@ -7,6 +7,7 @@ export interface DescuentoAlianza {
   descuentoPct: number
   monto: number
   requiereCodigo: boolean
+  maxUsosPorCliente: number | null
 }
 
 export async function calcularDescuentoAlianza(
@@ -19,7 +20,7 @@ export async function calcularDescuentoAlianza(
 
   const { data: alianzas } = await supabase
     .from('alianzas')
-    .select('id, nombre, descuento_pct, dias_semana, servicio_ids, requiere_codigo, codigo_acceso')
+    .select('id, nombre, descuento_pct, dias_semana, servicio_ids, requiere_codigo, codigo_acceso, max_usos_por_cliente')
     .eq('barberia_id', barberiaId)
     .eq('activo', true)
     .not('descuento_pct', 'is', null)
@@ -54,5 +55,6 @@ export async function calcularDescuentoAlianza(
     descuentoPct: aplicable.descuento_pct as number,
     monto,
     requiereCodigo: aplicable.requiere_codigo,
+    maxUsosPorCliente: (aplicable as { max_usos_por_cliente?: number | null }).max_usos_por_cliente ?? null,
   }
 }

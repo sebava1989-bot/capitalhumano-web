@@ -57,9 +57,22 @@ export async function crearReserva(input: ReservaInput) {
     input.barberiaId, input.servicioId, input.fechaHora, input.alianzaCodigo
   )
   if (alianzaResult) {
-    alianzaDescuento = alianzaResult.monto
-    alianzaId = alianzaResult.alianzaId
-    descuento += alianzaDescuento
+    // Verificar que el cliente no haya agotado los usos permitidos
+    const maxUsos = alianzaResult.maxUsosPorCliente
+    let usosPrevios = 0
+    if (maxUsos !== null) {
+      const { count } = await adminSupabase
+        .from('alianza_usos')
+        .select('id', { count: 'exact', head: true })
+        .eq('alianza_id', alianzaResult.alianzaId)
+        .eq('cliente_id', user.id)
+      usosPrevios = count ?? 0
+    }
+    if (maxUsos === null || usosPrevios < maxUsos) {
+      alianzaDescuento = alianzaResult.monto
+      alianzaId = alianzaResult.alianzaId
+      descuento += alianzaDescuento
+    }
   }
 
   const precioFinal = input.precio - descuento
@@ -81,6 +94,15 @@ export async function crearReserva(input: ReservaInput) {
   }).select('id').single()
 
   if (error) return { error: error.message }
+
+  // Registrar uso del descuento de alianza
+  if (alianzaId) {
+    await adminSupabase.from('alianza_usos').insert({
+      alianza_id: alianzaId,
+      cliente_id: user.id,
+      reserva_id: reserva.id,
+    })
+  }
 
   // Marcar slot como ocupado en disponibilidad
   const fechaDate = new Date(input.fechaHora)
