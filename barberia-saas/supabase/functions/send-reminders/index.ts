@@ -61,21 +61,21 @@ Deno.serve(async () => {
     const barberoNombre  = (r.barberos as Record<string, string>).nombre
     const barberiaNombre = (r.barberias as Record<string, string>).nombre
 
-    try {
-      await resend.emails.send({
-        from: Deno.env.get('RESEND_FROM_EMAIL')!,
-        to: r.cliente_email,
-        subject: `⏰ Recordatorio: tu cita en ${barberiaNombre} es mañana a las ${hora}`,
-        html: buildReminderHtml({
-          clienteNombre: r.cliente_nombre ?? 'Cliente',
-          servicio: servicioNombre,
-          barbero: barberoNombre,
-          hora,
-        }),
-      })
+    const { error: emailErr } = await resend.emails.send({
+      from: Deno.env.get('RESEND_FROM_EMAIL')!,
+      to: r.cliente_email,
+      subject: `⏰ Recordatorio: tu cita en ${barberiaNombre} es mañana a las ${hora}`,
+      html: buildReminderHtml({
+        clienteNombre: r.cliente_nombre ?? 'Cliente',
+        servicio: servicioNombre,
+        barbero: barberoNombre,
+        hora,
+      }),
+    })
+    if (emailErr) {
+      console.error(`Failed reminder for reserva ${r.id}:`, emailErr)
+    } else {
       sent++
-    } catch (err) {
-      console.error(`Failed reminder for reserva ${r.id}:`, err)
     }
   }
 
