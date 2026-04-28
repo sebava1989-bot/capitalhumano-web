@@ -30,9 +30,8 @@ create policy "users_select_own" on users for select
 create policy "users_insert_self" on users for insert with check (id = auth.uid());
 create policy "users_update_own" on users for update using (id = auth.uid());
 
--- barberos: visible para todos en la misma barbería
-create policy "barberos_select" on barberos for select
-  using (barberia_id = get_my_barberia_id() or get_my_rol() = 'superadmin');
+-- barberos: lectura pública (necesario para el formulario de booking)
+create policy "barberos_select" on barberos for select using (activo = true);
 create policy "barberos_write_admin" on barberos for all
   using (get_my_rol() in ('admin','superadmin') and barberia_id = get_my_barberia_id());
 

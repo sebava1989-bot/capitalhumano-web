@@ -68,6 +68,7 @@ create table disponibilidad (
   barberia_id uuid not null references barberias(id) on delete cascade,
   fecha date not null,
   slots jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique(barbero_id, fecha)
 );

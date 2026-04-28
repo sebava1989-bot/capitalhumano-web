@@ -110,6 +110,7 @@ export interface Database {
           barberia_id: string
           fecha: string
           slots: Json
+          created_at: string
           updated_at: string
         }
         Insert: {
@@ -118,6 +119,7 @@ export interface Database {
           barberia_id: string
           fecha: string
           slots?: Json
+          created_at?: string
           updated_at?: string
         }
         Update: Partial<Database['public']['Tables']['disponibilidad']['Insert']>
