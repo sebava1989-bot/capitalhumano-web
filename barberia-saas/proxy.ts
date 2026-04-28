@@ -33,7 +33,7 @@ export async function proxy(request: NextRequest) {
     const slug = slugMatch[1]
     const section = slugMatch[2].split('/')[0]
 
-    if (['admin', 'barbero', 'cliente'].includes(section) && !user) {
+    if (['admin', 'barbero', 'cliente', 'reservar'].includes(section) && !user) {
       const loginUrl = new URL(`/${slug}/login`, request.url)
       loginUrl.searchParams.set('redirect', pathname)
       return NextResponse.redirect(loginUrl)
