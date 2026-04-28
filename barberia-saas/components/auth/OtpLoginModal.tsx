@@ -17,20 +17,29 @@ export function OtpLoginModal({ open, onClose, redirectTo, slug }: OtpLoginModal
   const [nombre, setNombre] = useState('')
   const [step, setStep] = useState<'email' | 'sent'>('email')
   const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
   const supabase = createClient()
 
   async function handleSendOtp() {
     if (!email || !nombre) return
     setLoading(true)
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(redirectTo)}`,
-        data: { nombre, barberia_slug: slug },
-      },
-    })
-    setLoading(false)
-    if (!error) setStep('sent')
+    setErrorMsg('')
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/api/auth/callback?next=${encodeURIComponent(redirectTo)}`,
+          data: { nombre, barberia_slug: slug },
+        },
+      })
+      if (error) {
+        setErrorMsg('No pudimos enviar el link. Verifica tu email e intenta de nuevo.')
+      } else {
+        setStep('sent')
+      }
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -61,6 +70,9 @@ export function OtpLoginModal({ open, onClose, redirectTo, slug }: OtpLoginModal
             >
               {loading ? 'Enviando...' : 'Continuar'}
             </Button>
+            {errorMsg && (
+              <p className="text-red-400 text-sm">{errorMsg}</p>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
