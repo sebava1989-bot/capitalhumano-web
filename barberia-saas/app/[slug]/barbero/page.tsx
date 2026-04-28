@@ -10,7 +10,18 @@ async function updateEstado(formData: FormData) {
   const estado = formData.get('estado') as string
   const slug = formData.get('slug') as string
   if (!id || !['completada', 'no_show'].includes(estado)) return
-  await supabase.from('reservas').update({ estado: estado as 'completada' | 'no_show' }).eq('id', id)
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data: barbero } = await supabase
+    .from('barberos').select('id').eq('user_id', user.id).maybeSingle()
+  if (!barbero) return
+
+  await supabase.from('reservas')
+    .update({ estado: estado as 'completada' | 'no_show' })
+    .eq('id', id)
+    .eq('barbero_id', barbero.id)
   revalidatePath(`/${slug}/barbero`)
 }
 
@@ -22,7 +33,7 @@ export default async function BarberoPage({ params }: { params: Promise<{ slug: 
   if (!user) redirect(`/${slug}/reservar?login=true`)
 
   const { data: barberia } = await supabase
-    .from('barberias').select('id').eq('slug', slug).single()
+    .from('barberias').select('id').eq('slug', slug).maybeSingle()
   if (!barberia) notFound()
 
   const { data: barbero } = await supabase

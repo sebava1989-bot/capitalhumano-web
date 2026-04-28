@@ -6,7 +6,7 @@ export default async function ClientesPage({ params }: { params: Promise<{ slug:
   const supabase = await createClient()
 
   const { data: barberia } = await supabase
-    .from('barberias').select('id').eq('slug', slug).single()
+    .from('barberias').select('id').eq('slug', slug).maybeSingle()
   if (!barberia) notFound()
 
   const { data: clientes } = await supabase

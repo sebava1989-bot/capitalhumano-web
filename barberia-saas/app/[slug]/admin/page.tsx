@@ -9,7 +9,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
   const supabase = await createClient()
 
   const { data: barberia } = await supabase
-    .from('barberias').select('id, nombre').eq('slug', slug).single()
+    .from('barberias').select('id, nombre').eq('slug', slug).maybeSingle()
   if (!barberia) notFound()
 
   const today = new Date()

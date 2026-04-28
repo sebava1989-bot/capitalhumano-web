@@ -6,17 +6,23 @@ async function upsertServicio(formData: FormData) {
   'use server'
   const supabase = await createClient()
   const id = formData.get('id') as string | null
-  const barberia_id = formData.get('barberia_id') as string
   const slug = formData.get('slug') as string
 
   const nombre = formData.get('nombre') as string
   const duracion_min = Number(formData.get('duracion_min'))
   const precio = Number(formData.get('precio'))
 
-  if (!nombre || !barberia_id || isNaN(duracion_min) || isNaN(precio) || precio <= 0 || duracion_min <= 0) return
+  if (!nombre || !slug || isNaN(duracion_min) || isNaN(precio) || precio <= 0 || duracion_min <= 0) return
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  const { data: barberia } = await supabase
+    .from('barberias').select('id').eq('slug', slug).maybeSingle()
+  if (!barberia) return
 
   const payload = {
-    barberia_id,
+    barberia_id: barberia.id,
     nombre,
     descripcion: (formData.get('descripcion') as string) || null,
     duracion_min,
@@ -25,7 +31,7 @@ async function upsertServicio(formData: FormData) {
   }
 
   if (id) {
-    await supabase.from('servicios').update(payload).eq('id', id)
+    await supabase.from('servicios').update(payload).eq('id', id).eq('barberia_id', barberia.id)
   } else {
     await supabase.from('servicios').insert(payload)
   }
@@ -37,7 +43,7 @@ export default async function ServiciosPage({ params }: { params: Promise<{ slug
   const supabase = await createClient()
 
   const { data: barberia } = await supabase
-    .from('barberias').select('id').eq('slug', slug).single()
+    .from('barberias').select('id').eq('slug', slug).maybeSingle()
   if (!barberia) notFound()
 
   const { data: servicios } = await supabase
@@ -47,7 +53,6 @@ export default async function ServiciosPage({ params }: { params: Promise<{ slug
     <div>
       <h1 className="text-2xl font-bold mb-6">Servicios</h1>
       <form action={upsertServicio} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 grid grid-cols-2 gap-3">
-        <input type="hidden" name="barberia_id" value={barberia.id} />
         <input type="hidden" name="slug" value={slug} />
         <input name="nombre" placeholder="Nombre del servicio" required
           className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm col-span-2" />
