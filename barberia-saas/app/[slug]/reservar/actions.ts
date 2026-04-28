@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
+import { calcularDescuentoAlianza } from './descuento'
 
 interface ReservaInput {
   barberiaId: string
@@ -15,6 +16,7 @@ interface ReservaInput {
   refCode?: string | null
   clienteNombre: string
   horaSlot: string
+  alianzaCodigo?: string
 }
 
 export async function crearReserva(input: ReservaInput) {
@@ -48,6 +50,18 @@ export async function crearReserva(input: ReservaInput) {
       }
     }
   }
+  // Descuento por alianza (se suma al de referido si ambos aplican)
+  let alianzaDescuento = 0
+  let alianzaId: string | null = null
+  const alianzaResult = await calcularDescuentoAlianza(
+    input.barberiaId, input.servicioId, input.fechaHora, input.alianzaCodigo
+  )
+  if (alianzaResult) {
+    alianzaDescuento = alianzaResult.monto
+    alianzaId = alianzaResult.alianzaId
+    descuento += alianzaDescuento
+  }
+
   const precioFinal = input.precio - descuento
 
   const { data: reserva, error } = await supabase.from('reservas').insert({
@@ -95,9 +109,14 @@ export async function crearReserva(input: ReservaInput) {
   const fecha = new Date(input.fechaHora)
   const fechaStr = fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
   const horaStr = fecha.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
-  const descuentoHtml = descuento > 0
-    ? `<p style="color:#4ade80">🎉 Descuento por referido aplicado: -$${descuento.toLocaleString('es-CL')}</p>`
-    : ''
+  const descuentoItems = [
+    input.refCode && descuento - alianzaDescuento > 0
+      ? `<li style="color:#4ade80">Descuento referido: -$${(descuento - alianzaDescuento).toLocaleString('es-CL')}</li>`
+      : '',
+    alianzaDescuento > 0 && alianzaResult
+      ? `<li style="color:#4ade80">Dcto. alianza (${alianzaResult.nombre}): -$${alianzaDescuento.toLocaleString('es-CL')}</li>`
+      : '',
+  ].filter(Boolean).join('')
 
   const { error: emailErr } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
@@ -113,10 +132,9 @@ export async function crearReserva(input: ReservaInput) {
         <li>Fecha: ${fechaStr}</li>
         <li>Hora: ${horaStr}</li>
         <li>Precio: $${input.precio.toLocaleString('es-CL')}</li>
-        ${descuento > 0 ? `<li style="color:#4ade80">Descuento referido: -$${descuento.toLocaleString('es-CL')}</li>` : ''}
+        ${descuentoItems}
         <li><strong>Total: $${precioFinal.toLocaleString('es-CL')}</strong></li>
       </ul>
-      ${descuentoHtml}
       <p style="color:#888;font-size:12px">Si necesitas cancelar, responde este correo.</p>
     `,
   })

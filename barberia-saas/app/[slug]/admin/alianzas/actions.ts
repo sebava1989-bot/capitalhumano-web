@@ -9,13 +9,22 @@ export async function crearAlianza(formData: FormData) {
     .from('barberias').select('id').eq('slug', slug).maybeSingle()
   if (!barberia) return { error: 'Barbería no encontrada' }
 
+  const diasRaw = formData.getAll('dias_semana').map(d => parseInt(d as string))
+  const serviciosRaw = formData.getAll('servicio_ids').map(s => s as string)
+  const descuentoPct = formData.get('descuento_pct')
+  const codigoAcceso = formData.get('codigo_acceso') as string
+
   const { error } = await supabase.from('alianzas').insert({
     barberia_id: barberia.id,
     nombre: formData.get('nombre') as string,
     descripcion: formData.get('descripcion') as string || null,
     tipo: formData.get('tipo') as string,
     beneficio: formData.get('beneficio') as string || null,
-    logo_url: formData.get('logo_url') as string || null,
+    descuento_pct: descuentoPct ? parseInt(descuentoPct as string) : null,
+    dias_semana: diasRaw.length > 0 ? diasRaw : null,
+    servicio_ids: serviciosRaw.length > 0 ? serviciosRaw : null,
+    requiere_codigo: formData.get('requiere_codigo') === 'true',
+    codigo_acceso: codigoAcceso || null,
   })
   if (error) return { error: error.message }
   revalidatePath(`/${slug}/admin/alianzas`)

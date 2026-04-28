@@ -19,7 +19,7 @@ export default async function BarberiaLanding({ params }: { params: Promise<{ sl
     .eq('barberia_id', barberia.id).eq('activo', true)
 
   const { data: alianzas } = await supabase
-    .from('alianzas').select('id, nombre, descripcion, logo_url, tipo, beneficio')
+    .from('alianzas').select('id, nombre, descripcion, tipo, beneficio, descuento_pct')
     .eq('barberia_id', barberia.id).eq('activo', true)
 
   return (
@@ -78,12 +78,14 @@ export default async function BarberiaLanding({ params }: { params: Promise<{ sl
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {alianzas.map(a => (
               <div key={a.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-3">
-                {a.logo_url
-                  ? <img src={a.logo_url} alt={a.nombre} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
-                  : <div className="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center text-2xl flex-shrink-0">🤝</div>
-                }
+                <div className="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center text-2xl flex-shrink-0">🤝</div>
                 <div className="min-w-0">
-                  <p className="text-white font-medium">{a.nombre}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-white font-medium">{a.nombre}</p>
+                    {a.descuento_pct && (
+                      <span className="bg-yellow-400/20 text-yellow-400 text-xs px-1.5 py-0.5 rounded-full font-medium">-{a.descuento_pct}%</span>
+                    )}
+                  </div>
                   {a.descripcion && <p className="text-zinc-400 text-xs">{a.descripcion}</p>}
                   {a.beneficio && (
                     <p className="text-yellow-400 text-xs font-medium mt-0.5">{a.beneficio}</p>

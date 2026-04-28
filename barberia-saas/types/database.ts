@@ -19,33 +19,45 @@ export type Database = {
           activo: boolean
           barberia_id: string
           beneficio: string | null
+          codigo_acceso: string | null
           created_at: string
           descripcion: string | null
+          descuento_pct: number | null
+          dias_semana: number[] | null
           id: string
-          logo_url: string | null
           nombre: string
+          requiere_codigo: boolean
+          servicio_ids: string[] | null
           tipo: string
         }
         Insert: {
           activo?: boolean
           barberia_id: string
           beneficio?: string | null
+          codigo_acceso?: string | null
           created_at?: string
           descripcion?: string | null
+          descuento_pct?: number | null
+          dias_semana?: number[] | null
           id?: string
-          logo_url?: string | null
           nombre: string
+          requiere_codigo?: boolean
+          servicio_ids?: string[] | null
           tipo?: string
         }
         Update: {
           activo?: boolean
           barberia_id?: string
           beneficio?: string | null
+          codigo_acceso?: string | null
           created_at?: string
           descripcion?: string | null
+          descuento_pct?: number | null
+          dias_semana?: number[] | null
           id?: string
-          logo_url?: string | null
           nombre?: string
+          requiere_codigo?: boolean
+          servicio_ids?: string[] | null
           tipo?: string
         }
         Relationships: [
