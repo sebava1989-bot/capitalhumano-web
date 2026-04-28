@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { StatsCards } from '@/components/admin/StatsCards'
+import { AgendaCalendar } from '@/components/admin/AgendaCalendar'
 import { startOfDay, endOfDay, startOfMonth } from 'date-fns'
 
 export default async function AdminDashboard({ params }: { params: Promise<{ slug: string }> }) {
@@ -50,20 +51,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
 
       <div className="mt-8">
         <h2 className="text-lg font-semibold mb-4">Agenda de hoy</h2>
-        <div className="space-y-2">
-          {agendaHoy?.map(r => (
-            <div key={r.id} className="flex items-center gap-4 bg-zinc-900 border border-zinc-800 rounded-xl p-3">
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${r.estado === 'completada' ? 'bg-green-500' : 'bg-yellow-400'}`} />
-              <span className="text-white font-mono text-sm w-12">
-                {new Date(r.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
-              </span>
-              <span className="text-white flex-1">{r.cliente_nombre ?? 'Sin nombre'}</span>
-              <span className="text-zinc-400 text-sm">{(r.servicios as unknown as { nombre: string })?.nombre}</span>
-              <span className="text-zinc-500 text-sm">{(r.barberos as unknown as { nombre: string })?.nombre}</span>
-            </div>
-          ))}
-          {!agendaHoy?.length && <p className="text-zinc-500 text-sm">No hay citas para hoy</p>}
-        </div>
+        <AgendaCalendar items={agendaHoy ?? []} />
       </div>
     </div>
   )
