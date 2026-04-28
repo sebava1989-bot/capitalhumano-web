@@ -14,6 +14,32 @@ export type Database = {
   }
   public: {
     Tables: {
+      alianza_clientes: {
+        Row: {
+          alianza_id: string
+          cliente_id: string
+          created_at: string
+        }
+        Insert: {
+          alianza_id: string
+          cliente_id: string
+          created_at?: string
+        }
+        Update: {
+          alianza_id?: string
+          cliente_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alianza_clientes_alianza_id_fkey"
+            columns: ["alianza_id"]
+            isOneToOne: false
+            referencedRelation: "alianzas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alianza_usos: {
         Row: {
           alianza_id: string

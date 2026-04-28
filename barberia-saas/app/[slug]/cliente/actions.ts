@@ -1,6 +1,16 @@
 'use server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+
+export async function actualizarPerfil(nombre: string, telefono: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autenticado' }
+  const admin = createAdminClient()
+  await admin.from('users').upsert({ id: user.id, nombre, telefono, rol: 'cliente' })
+  return { ok: true }
+}
 
 export async function calificarReserva(formData: FormData) {
   const supabase = await createClient()

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { asignarAlianza, quitarAlianza } from '@/app/[slug]/admin/clientes/actions'
 
 export type Segmento = 'nuevo' | 'frecuente' | 'inactivo'
 
@@ -7,18 +8,26 @@ export interface ClienteSegmentado {
   id: string
   nombre: string
   email: string
+  telefono: string
   totalVisitas: number
   visitasCompletadas: number
   ultimaVisita: string | null
   primerVisita: string | null
   gastoTotal: number
   segmento: Segmento
+  alianzasAsignadas: string[]
+}
+
+interface AlianzaDisponible { id: string; nombre: string; descuento_pct: number | null }
+
+interface Props {
+  clientes: ClienteSegmentado[]
+  alianzasDisponibles: AlianzaDisponible[]
+  slug: string
 }
 
 const SEGMENTO_LABEL: Record<Segmento, string> = {
-  nuevo: 'Nuevo',
-  frecuente: 'Frecuente',
-  inactivo: 'Inactivo',
+  nuevo: 'Nuevo', frecuente: 'Frecuente', inactivo: 'Inactivo',
 }
 
 const SEGMENTO_COLOR: Record<Segmento, string> = {
@@ -29,7 +38,61 @@ const SEGMENTO_COLOR: Record<Segmento, string> = {
 
 type Filtro = 'todos' | Segmento
 
-export function ClientesSegmentados({ clientes }: { clientes: ClienteSegmentado[] }) {
+function AlianzaCell({ cliente, alianzas, slug }: { cliente: ClienteSegmentado; alianzas: AlianzaDisponible[]; slug: string }) {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const asignadas = cliente.alianzasAsignadas
+
+  async function toggle(alianzaId: string) {
+    setLoading(true)
+    if (asignadas.includes(alianzaId)) {
+      await quitarAlianza(cliente.id, alianzaId, slug)
+    } else {
+      await asignarAlianza(cliente.id, alianzaId, slug)
+    }
+    setLoading(false)
+    setOpen(false)
+  }
+
+  const asignadaNombre = alianzas.find(a => asignadas.includes(a.id))?.nombre
+
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen(!open)} disabled={loading}
+        className={`text-xs px-2 py-1 rounded-lg transition-colors ${
+          asignadaNombre
+            ? 'bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30'
+            : 'bg-zinc-800 text-zinc-500 hover:text-white'
+        }`}>
+        {loading ? '…' : asignadaNombre ? `🤝 ${asignadaNombre}` : '+ Alianza'}
+      </button>
+      {open && (
+        <div className="absolute right-0 top-8 z-20 bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl min-w-[180px]">
+          {alianzas.length === 0 && (
+            <p className="text-zinc-500 text-xs p-3">No hay alianzas con descuento</p>
+          )}
+          {alianzas.map(a => (
+            <button key={a.id} onClick={() => toggle(a.id)}
+              className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-800 flex items-center justify-between gap-2 ${
+                asignadas.includes(a.id) ? 'text-yellow-400' : 'text-white'
+              }`}>
+              <span>{a.nombre}</span>
+              <span className="text-zinc-500 text-xs">
+                {asignadas.includes(a.id) ? '✓ Quitar' : `${a.descuento_pct}%`}
+              </span>
+            </button>
+          ))}
+          <button onClick={() => setOpen(false)}
+            className="w-full text-center text-zinc-600 text-xs py-2 hover:text-zinc-400 border-t border-zinc-800">
+            Cerrar
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Props) {
   const [filtro, setFiltro] = useState<Filtro>('todos')
 
   const conteos = {
@@ -45,19 +108,12 @@ export function ClientesSegmentados({ clientes }: { clientes: ClienteSegmentado[
     <div>
       <div className="flex gap-2 mb-6 flex-wrap">
         {(['todos', 'frecuente', 'nuevo', 'inactivo'] as const).map(f => (
-          <button
-            key={f}
-            onClick={() => setFiltro(f)}
+          <button key={f} onClick={() => setFiltro(f)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              filtro === f
-                ? 'bg-yellow-400 text-black'
-                : 'bg-zinc-800 text-zinc-400 hover:text-white'
-            }`}
-          >
+              filtro === f ? 'bg-yellow-400 text-black' : 'bg-zinc-800 text-zinc-400 hover:text-white'
+            }`}>
             {f === 'todos' ? 'Todos' : SEGMENTO_LABEL[f]}
-            <span className={`ml-1.5 text-xs ${filtro === f ? 'text-black/60' : 'text-zinc-600'}`}>
-              {conteos[f]}
-            </span>
+            <span className={`ml-1.5 text-xs ${filtro === f ? 'text-black/60' : 'text-zinc-600'}`}>{conteos[f]}</span>
           </button>
         ))}
       </div>
@@ -67,10 +123,14 @@ export function ClientesSegmentados({ clientes }: { clientes: ClienteSegmentado[
           <thead className="border-b border-zinc-800">
             <tr>
               <th className="text-left p-3 text-zinc-400 font-medium">Cliente</th>
+              <th className="text-left p-3 text-zinc-400 font-medium hidden lg:table-cell">Teléfono</th>
               <th className="text-left p-3 text-zinc-400 font-medium hidden md:table-cell">Visitas</th>
-              <th className="text-left p-3 text-zinc-400 font-medium hidden md:table-cell">Gasto total</th>
+              <th className="text-left p-3 text-zinc-400 font-medium hidden md:table-cell">Gasto</th>
               <th className="text-left p-3 text-zinc-400 font-medium hidden sm:table-cell">Última visita</th>
               <th className="text-left p-3 text-zinc-400 font-medium">Segmento</th>
+              {alianzasDisponibles.length > 0 && (
+                <th className="text-left p-3 text-zinc-400 font-medium">Alianza</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -87,25 +147,31 @@ export function ClientesSegmentados({ clientes }: { clientes: ClienteSegmentado[
                     </div>
                   </div>
                 </td>
+                <td className="p-3 text-zinc-400 text-xs hidden lg:table-cell">
+                  {c.telefono || <span className="text-zinc-700">—</span>}
+                </td>
                 <td className="p-3 text-zinc-300 hidden md:table-cell">
                   {c.visitasCompletadas}
                   {c.totalVisitas > c.visitasCompletadas && (
-                    <span className="text-zinc-600 text-xs"> (+{c.totalVisitas - c.visitasCompletadas} pend.)</span>
+                    <span className="text-zinc-600 text-xs"> (+{c.totalVisitas - c.visitasCompletadas})</span>
                   )}
                 </td>
                 <td className="p-3 text-yellow-400 font-medium hidden md:table-cell">
                   ${Math.round(c.gastoTotal / 1000)}k
                 </td>
                 <td className="p-3 text-zinc-400 hidden sm:table-cell">
-                  {c.ultimaVisita
-                    ? new Date(c.ultimaVisita).toLocaleDateString('es-CL')
-                    : '—'}
+                  {c.ultimaVisita ? new Date(c.ultimaVisita).toLocaleDateString('es-CL') : '—'}
                 </td>
                 <td className="p-3">
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${SEGMENTO_COLOR[c.segmento]}`}>
                     {SEGMENTO_LABEL[c.segmento]}
                   </span>
                 </td>
+                {alianzasDisponibles.length > 0 && (
+                  <td className="p-3">
+                    <AlianzaCell cliente={c} alianzas={alianzasDisponibles} slug={slug} />
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
