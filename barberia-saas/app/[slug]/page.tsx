@@ -18,6 +18,10 @@ export default async function BarberiaLanding({ params }: { params: Promise<{ sl
     .from('barberos').select('id, nombre, foto_url')
     .eq('barberia_id', barberia.id).eq('activo', true)
 
+  const { data: alianzas } = await supabase
+    .from('alianzas').select('id, nombre, descripcion, logo_url, tipo, beneficio')
+    .eq('barberia_id', barberia.id).eq('activo', true)
+
   return (
     <main className="min-h-screen bg-zinc-950 text-white">
       <section className="flex flex-col items-center justify-center min-h-[40vh] px-4 py-16 text-center">
@@ -62,6 +66,29 @@ export default async function BarberiaLanding({ params }: { params: Promise<{ sl
                   }
                 </div>
                 <p className="text-white text-sm font-medium">{b.nombre}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      {alianzas && alianzas.length > 0 && (
+        <section className="max-w-2xl mx-auto px-4 py-8 pb-16">
+          <h2 className="text-2xl font-bold mb-2 text-center">Alianzas</h2>
+          <p className="text-zinc-400 text-center text-sm mb-6">Beneficios exclusivos para nuestros clientes</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {alianzas.map(a => (
+              <div key={a.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 flex items-center gap-3">
+                {a.logo_url
+                  ? <img src={a.logo_url} alt={a.nombre} className="w-12 h-12 rounded-lg object-cover flex-shrink-0" />
+                  : <div className="w-12 h-12 rounded-lg bg-zinc-700 flex items-center justify-center text-2xl flex-shrink-0">🤝</div>
+                }
+                <div className="min-w-0">
+                  <p className="text-white font-medium">{a.nombre}</p>
+                  {a.descripcion && <p className="text-zinc-400 text-xs">{a.descripcion}</p>}
+                  {a.beneficio && (
+                    <p className="text-yellow-400 text-xs font-medium mt-0.5">{a.beneficio}</p>
+                  )}
+                </div>
               </div>
             ))}
           </div>

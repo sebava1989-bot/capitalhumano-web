@@ -5,6 +5,8 @@ import { AgendaCalendar } from '@/components/admin/AgendaCalendar'
 import { TopServicios } from '@/components/admin/TopServicios'
 import { TopClientes } from '@/components/admin/TopClientes'
 import { startOfDay, endOfDay, startOfMonth } from 'date-fns'
+import { Suspense } from 'react'
+import { PrediccionDemanda } from './prediccion'
 
 export default async function AdminDashboard({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -72,6 +74,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <TopServicios items={topServicios} />
         <TopClientes items={topClientes} />
+      </div>
+
+      <div className="mt-4">
+        <Suspense fallback={null}>
+          <PrediccionDemanda barberiaId={barberia.id} />
+        </Suspense>
       </div>
 
       <div className="mt-8">

@@ -1,8 +1,10 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { CopyReferralButton } from '@/components/cliente/CopyReferralButton'
 import { CalificarReservaForm } from '@/components/cliente/CalificarReservaForm'
+import { RecomendacionIA } from './recomendacion'
 
 export default async function ClientePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -49,6 +51,10 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
           <p className="text-zinc-400 text-sm">{barberia.nombre}</p>
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <RecomendacionIA clienteId={user.id} barberiaNombre={barberia.nombre} />
+      </Suspense>
 
       {proximaCita && (
         <div className="bg-zinc-900 border border-yellow-400/30 rounded-xl p-4 mb-4">
