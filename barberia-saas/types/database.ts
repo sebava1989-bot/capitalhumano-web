@@ -1,6 +1,9 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export interface Database {
+  __InternalSupabase: {
+    PostgrestVersion: "12"
+  }
   public: {
     Tables: {
       barberias: {
@@ -27,6 +30,7 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['barberias']['Insert']>
+        Relationships: []
       }
       users: {
         Row: {
@@ -54,6 +58,7 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['users']['Insert']>
+        Relationships: []
       }
       barberos: {
         Row: {
@@ -77,6 +82,7 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['barberos']['Insert']>
+        Relationships: []
       }
       servicios: {
         Row: {
@@ -102,6 +108,7 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['servicios']['Insert']>
+        Relationships: []
       }
       disponibilidad: {
         Row: {
@@ -123,6 +130,7 @@ export interface Database {
           updated_at?: string
         }
         Update: Partial<Database['public']['Tables']['disponibilidad']['Insert']>
+        Relationships: []
       }
       reservas: {
         Row: {
@@ -160,6 +168,7 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['reservas']['Insert']>
+        Relationships: []
       }
       notificaciones: {
         Row: {
@@ -185,7 +194,11 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['notificaciones']['Insert']>
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
     }
     Functions: {
       get_my_barberia_id: {
