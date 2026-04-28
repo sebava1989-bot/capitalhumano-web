@@ -14,8 +14,12 @@ async function updateEstado(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
+  const { data: barberia } = await supabase
+    .from('barberias').select('id').eq('slug', slug).maybeSingle()
+  if (!barberia) return
+
   const { data: barbero } = await supabase
-    .from('barberos').select('id').eq('user_id', user.id).maybeSingle()
+    .from('barberos').select('id').eq('user_id', user.id).eq('barberia_id', barberia.id).maybeSingle()
   if (!barbero) return
 
   await supabase.from('reservas')
