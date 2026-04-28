@@ -272,6 +272,54 @@ export type Database = {
           },
         ]
       }
+      descuentos_masivos: {
+        Row: {
+          barberia_id: string
+          canjeado: boolean
+          cliente_id: string
+          created_at: string
+          descuento_pct: number
+          id: string
+          motivo: string
+          reserva_canje_id: string | null
+        }
+        Insert: {
+          barberia_id: string
+          canjeado?: boolean
+          cliente_id: string
+          created_at?: string
+          descuento_pct: number
+          id?: string
+          motivo?: string
+          reserva_canje_id?: string | null
+        }
+        Update: {
+          barberia_id?: string
+          canjeado?: boolean
+          cliente_id?: string
+          created_at?: string
+          descuento_pct?: number
+          id?: string
+          motivo?: string
+          reserva_canje_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "descuentos_masivos_barberia_id_fkey"
+            columns: ["barberia_id"]
+            isOneToOne: false
+            referencedRelation: "barberias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "descuentos_masivos_reserva_canje_id_fkey"
+            columns: ["reserva_canje_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       disponibilidad: {
         Row: {
           barberia_id: string

@@ -17,11 +17,17 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
     .from('barberias').select('id, nombre').eq('slug', slug).single()
   if (!barberia) notFound()
 
-  const [{ data: userData }, { data: premios }] = await Promise.all([
+  const [{ data: userData }, { data: premios }, { data: descuentosMasivos }] = await Promise.all([
     supabase.from('users').select('nombre, referral_code').eq('id', user.id).single(),
     supabase.from('referido_premios')
-      .select('id, descuento_pct, canjeado, created_at')
+      .select('id, descuento_pct, created_at')
       .eq('referidor_id', user.id)
+      .eq('barberia_id', barberia.id)
+      .eq('canjeado', false)
+      .order('created_at', { ascending: false }),
+    supabase.from('descuentos_masivos')
+      .select('id, descuento_pct, motivo, created_at')
+      .eq('cliente_id', user.id)
       .eq('barberia_id', barberia.id)
       .eq('canjeado', false)
       .order('created_at', { ascending: false }),
@@ -86,6 +92,21 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
             <CopyReferralButton referralCode={userData.referral_code} slug={slug} />
           </div>
           <p className="text-zinc-500 text-xs mt-2">Comparte tu código — cuando un amigo haga su primera cita, ¡tú ganas un descuento!</p>
+        </div>
+      )}
+
+      {descuentosMasivos && descuentosMasivos.length > 0 && (
+        <div className="bg-zinc-900 border border-yellow-400/30 rounded-xl p-4 mb-4">
+          <p className="text-zinc-400 text-xs uppercase tracking-wide mb-2">🎁 Descuentos disponibles</p>
+          {descuentosMasivos.map(d => (
+            <div key={d.id} className="flex items-center justify-between py-1">
+              <div>
+                <p className="text-yellow-400 font-bold text-lg">{d.descuento_pct}% de descuento</p>
+                <p className="text-zinc-500 text-xs">{d.motivo}</p>
+              </div>
+              <span className="text-zinc-500 text-xs">Se aplica en tu próxima reserva</span>
+            </div>
+          ))}
         </div>
       )}
 

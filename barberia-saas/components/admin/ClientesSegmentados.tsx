@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { asignarAlianza, quitarAlianza } from '@/app/[slug]/admin/clientes/actions'
+import { asignarAlianza, quitarAlianza, cargarDescuentoMasivo } from '@/app/[slug]/admin/clientes/actions'
+import { toast } from 'sonner'
 
 export type Segmento = 'nuevo' | 'frecuente' | 'inactivo'
 
@@ -25,6 +26,7 @@ interface Props {
   clientes: ClienteSegmentado[]
   alianzasDisponibles: AlianzaDisponible[]
   slug: string
+  barberiaId: string
 }
 
 const SEGMENTO_LABEL: Record<Segmento, string> = {
@@ -93,9 +95,14 @@ function AlianzaCell({ cliente, alianzas, slug }: { cliente: ClienteSegmentado; 
   )
 }
 
-export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Props) {
+export function ClientesSegmentados({ clientes, alianzasDisponibles, slug, barberiaId }: Props) {
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [busqueda, setBusqueda] = useState('')
+  const [showDcto, setShowDcto] = useState(false)
+  const [dctoMotivo, setDctoMotivo] = useState('')
+  const [dctoPct, setDctoPct] = useState(10)
+  const [dctoMensaje, setDctoMensaje] = useState('')
+  const [dctoLoading, setDctoLoading] = useState(false)
 
   const filtrados = busqueda.trim()
     ? clientes.filter(c => {
@@ -116,6 +123,19 @@ export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Pro
 
   const visibles = filtro === 'todos' ? filtrados : filtrados.filter(c => c.segmento === filtro)
 
+  async function aplicarDescuento() {
+    if (!visibles.length || dctoPct < 1 || dctoPct > 100) return
+    setDctoLoading(true)
+    const motivo = dctoMotivo.trim() || `Descuento ${filtro === 'todos' ? 'general' : filtro}`
+    const result = await cargarDescuentoMasivo(barberiaId, visibles.map(c => c.id), dctoPct, motivo, slug, dctoMensaje.trim() || undefined)
+    setDctoLoading(false)
+    if (result?.error) { toast.error(result.error); return }
+    toast.success(`${dctoPct}% cargado y notificado a ${result?.total} cliente${result?.total === 1 ? '' : 's'}`)
+    setShowDcto(false)
+    setDctoMotivo('')
+    setDctoMensaje('')
+  }
+
   return (
     <div>
       <input
@@ -124,7 +144,7 @@ export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Pro
         placeholder="Buscar por nombre, email, teléfono o código..."
         className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors mb-4"
       />
-      <div className="flex gap-2 mb-6 flex-wrap">
+      <div className="flex gap-2 mb-4 flex-wrap items-center justify-between">
         {(['todos', 'frecuente', 'nuevo', 'inactivo'] as const).map(f => (
           <button key={f} onClick={() => setFiltro(f)}
             className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
@@ -134,7 +154,56 @@ export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Pro
             <span className={`ml-1.5 text-xs ${filtro === f ? 'text-black/60' : 'text-zinc-600'}`}>{conteos[f]}</span>
           </button>
         ))}
+        {visibles.length > 0 && (
+          <button onClick={() => setShowDcto(!showDcto)}
+            className="px-3 py-1.5 bg-zinc-800 text-zinc-300 text-sm rounded-xl hover:bg-zinc-700 hover:text-white transition-colors whitespace-nowrap">
+            🎁 Cargar descuento
+          </button>
+        )}
       </div>
+
+      {showDcto && (
+        <div className="mb-4 bg-zinc-900 border border-zinc-700 rounded-xl p-4 space-y-3">
+          <p className="text-white text-sm font-medium">
+            Cargar descuento a{' '}
+            <span className="text-yellow-400">{visibles.length} cliente{visibles.length !== 1 ? 's' : ''}</span>
+            {filtro !== 'todos' && <span className="text-zinc-400"> ({SEGMENTO_LABEL[filtro as Segmento]}s)</span>}
+          </p>
+          <div className="flex gap-3 items-end flex-wrap">
+            <div>
+              <label className="text-zinc-500 text-xs block mb-1">Descuento %</label>
+              <input type="number" min={1} max={100} value={dctoPct}
+                onChange={e => setDctoPct(Number(e.target.value))}
+                className="w-20 bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm text-center focus:outline-none focus:border-yellow-400" />
+            </div>
+            <div className="flex-1 min-w-[160px]">
+              <label className="text-zinc-500 text-xs block mb-1">Motivo (opcional)</label>
+              <input value={dctoMotivo} onChange={e => setDctoMotivo(e.target.value)}
+                placeholder={`Descuento ${filtro === 'todos' ? 'general' : filtro}`}
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-yellow-400" />
+            </div>
+            <button onClick={aplicarDescuento} disabled={dctoLoading}
+              className="px-4 py-2 bg-yellow-400 text-black text-sm font-bold rounded-lg hover:bg-yellow-300 disabled:opacity-50 transition-colors">
+              {dctoLoading ? 'Enviando…' : 'Aplicar y notificar'}
+            </button>
+            <button onClick={() => setShowDcto(false)}
+              className="px-3 py-2 bg-zinc-800 text-zinc-400 text-sm rounded-lg hover:text-white">
+              Cancelar
+            </button>
+          </div>
+          <div>
+            <label className="text-zinc-500 text-xs block mb-1">Mensaje para el email (opcional — si lo dejas en blanco, la IA genera uno)</label>
+            <textarea
+              value={dctoMensaje}
+              onChange={e => setDctoMensaje(e.target.value)}
+              rows={2}
+              placeholder="Ej: Celebramos tu fidelidad con este descuento especial. ¡Nos vemos pronto!"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-yellow-400 resize-none"
+            />
+          </div>
+          <p className="text-zinc-600 text-xs">El descuento se aplica automáticamente en la próxima reserva de cada cliente y se les notifica por email.</p>
+        </div>
+      )}
 
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
         <table className="w-full text-sm">

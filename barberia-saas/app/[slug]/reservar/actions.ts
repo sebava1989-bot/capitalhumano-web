@@ -80,6 +80,40 @@ export async function crearReserva(input: ReservaInput) {
     }
   }
 
+  // Descuento masivo pendiente (cargado por el admin a segmentos)
+  let descuentoMasivoId: string | null = null
+  const { data: dctoMasivo } = await adminSupabase
+    .from('descuentos_masivos')
+    .select('id, descuento_pct')
+    .eq('barberia_id', input.barberiaId)
+    .eq('cliente_id', user.id)
+    .eq('canjeado', false)
+    .order('created_at')
+    .limit(1)
+    .maybeSingle()
+  if (dctoMasivo) {
+    descuento += Math.round(input.precio * dctoMasivo.descuento_pct / 100)
+    descuentoMasivoId = dctoMasivo.id
+  }
+
+  // Premio de referido pendiente (solo si no hay descuento masivo ya aplicado)
+  let premioReferidoId: string | null = null
+  if (!descuentoMasivoId) {
+    const { data: premio } = await adminSupabase
+      .from('referido_premios')
+      .select('id, descuento_pct')
+      .eq('barberia_id', input.barberiaId)
+      .eq('referidor_id', user.id)
+      .eq('canjeado', false)
+      .order('created_at')
+      .limit(1)
+      .maybeSingle()
+    if (premio) {
+      descuento += Math.round(input.precio * premio.descuento_pct / 100)
+      premioReferidoId = premio.id
+    }
+  }
+
   const precioFinal = input.precio - descuento
 
   const { data: reserva, error } = await supabase.from('reservas').insert({
@@ -117,6 +151,18 @@ export async function crearReserva(input: ReservaInput) {
       cliente_id: user.id,
       reserva_id: reserva.id,
     })
+  }
+
+  // Marcar descuentos como canjeados
+  if (descuentoMasivoId) {
+    await adminSupabase.from('descuentos_masivos')
+      .update({ canjeado: true, reserva_canje_id: reserva.id })
+      .eq('id', descuentoMasivoId)
+  }
+  if (premioReferidoId) {
+    await adminSupabase.from('referido_premios')
+      .update({ canjeado: true, reserva_canje_id: reserva.id })
+      .eq('id', premioReferidoId)
   }
 
   // Marcar slot como ocupado en disponibilidad
