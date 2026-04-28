@@ -43,12 +43,19 @@ create policy "servicios_write_admin" on servicios for all
 -- disponibilidad: lectura pública (para el booking), escritura admin/barbero
 create policy "disponibilidad_select" on disponibilidad for select using (true);
 create policy "disponibilidad_write" on disponibilidad for all
-  using (get_my_rol() in ('admin','barbero','superadmin'));
+  using (
+    get_my_rol() in ('admin','barbero','superadmin')
+    and barberia_id = get_my_barberia_id()
+  );
 
 -- reservas: cliente ve las suyas, barbero/admin ven su barbería
 create policy "reservas_select_cliente" on reservas for select
   using (cliente_id = auth.uid() or barberia_id = get_my_barberia_id());
-create policy "reservas_insert_public" on reservas for insert with check (true);
+create policy "reservas_insert_public" on reservas for insert
+  with check (
+    estado in ('pendiente', 'confirmada')
+    and exists (select 1 from barberias where id = barberia_id and activo = true)
+  );
 create policy "reservas_update_admin_barbero" on reservas for update
   using (get_my_rol() in ('admin','barbero','superadmin') and barberia_id = get_my_barberia_id());
 
@@ -57,3 +64,7 @@ create policy "notificaciones_select" on notificaciones for select
   using (usuario_id = auth.uid());
 create policy "notificaciones_update" on notificaciones for update
   using (usuario_id = auth.uid());
+
+-- INSERT only via service role (Edge Functions); normal users cannot insert
+create policy "notificaciones_insert_service" on notificaciones for insert
+  with check (auth.role() = 'service_role');

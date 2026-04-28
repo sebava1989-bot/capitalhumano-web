@@ -194,7 +194,7 @@ export interface Database {
       }
       get_my_rol: {
         Args: Record<PropertyKey, never>
-        Returns: string | null
+        Returns: 'superadmin' | 'admin' | 'barbero' | 'cliente' | null
       }
     }
   }

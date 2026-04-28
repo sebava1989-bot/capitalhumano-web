@@ -83,9 +83,9 @@ create table reservas (
   fecha_hora timestamptz not null,
   estado text not null default 'confirmada'
     check (estado in ('pendiente','confirmada','completada','cancelada','no_show')),
-  precio integer not null,
-  descuento integer not null default 0,
-  precio_final integer not null,
+  precio integer not null check (precio > 0),
+  descuento integer not null default 0 check (descuento >= 0 and descuento <= precio),
+  precio_final integer not null check (precio_final >= 0 and precio_final = precio - descuento),
   notas text,
   cliente_email text,
   cliente_nombre text,
@@ -113,3 +113,16 @@ create index idx_reservas_barbero_fecha on reservas(barbero_id, fecha_hora);
 create index idx_disponibilidad_barbero_fecha on disponibilidad(barbero_id, fecha);
 create index idx_users_barberia on users(barberia_id);
 create index idx_users_referral_code on users(referral_code);
+
+-- Auto-update updated_at on disponibilidad
+create or replace function update_updated_at()
+returns trigger language plpgsql as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+create trigger trg_disponibilidad_updated_at
+before update on disponibilidad
+for each row execute function update_updated_at();
