@@ -19,11 +19,36 @@ interface ReservaInput {
 
 export async function crearReserva(input: ReservaInput) {
   const supabase = await createClient()
+  const adminSupabase = createAdminClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
   const { data: userData } = await supabase.from('users').select('nombre').eq('id', user.id).maybeSingle()
   const nombre = input.clienteNombre || userData?.nombre || user.email?.split('@')[0] || 'Cliente'
+
+  // Lógica de descuento por referido (primera reserva)
+  let descuento = 0
+  let referrerId: string | null = null
+  if (input.refCode) {
+    const { count } = await supabase
+      .from('reservas').select('id', { count: 'exact', head: true })
+      .eq('cliente_id', user.id)
+    if ((count ?? 0) === 0) {
+      const { data: referrer } = await supabase
+        .from('users').select('id, nombre')
+        .eq('referral_code', input.refCode)
+        .neq('id', user.id)
+        .maybeSingle()
+      if (referrer) {
+        descuento = Math.round(input.precio * 0.10)
+        referrerId = referrer.id
+        await adminSupabase.from('users')
+          .update({ referral_by: referrer.id })
+          .eq('id', user.id)
+      }
+    }
+  }
+  const precioFinal = input.precio - descuento
 
   const { data: reserva, error } = await supabase.from('reservas').insert({
     barberia_id: input.barberiaId,
@@ -32,8 +57,8 @@ export async function crearReserva(input: ReservaInput) {
     servicio_id: input.servicioId,
     fecha_hora: input.fechaHora,
     precio: input.precio,
-    descuento: 0,
-    precio_final: input.precio,
+    descuento,
+    precio_final: precioFinal,
     estado: 'confirmada' as const,
     origen: 'web' as const,
     ref_code: input.refCode ?? null,
@@ -43,21 +68,16 @@ export async function crearReserva(input: ReservaInput) {
 
   if (error) return { error: error.message }
 
-  // Marcar slot como ocupado en disponibilidad (admin client para bypass RLS)
-  const adminSupabase = createAdminClient()
+  // Marcar slot como ocupado en disponibilidad
   const fechaDate = new Date(input.fechaHora)
   const fechaStr2 = fechaDate.toISOString().split('T')[0]
-  const horaSlot = input.horaSlot
   const { data: disp } = await adminSupabase
-    .from('disponibilidad')
-    .select('id, slots')
-    .eq('barbero_id', input.barberoId)
-    .eq('barberia_id', input.barberiaId)
-    .eq('fecha', fechaStr2)
-    .maybeSingle()
+    .from('disponibilidad').select('id, slots')
+    .eq('barbero_id', input.barberoId).eq('barberia_id', input.barberiaId)
+    .eq('fecha', fechaStr2).maybeSingle()
 
   const slotsActuales = Array.isArray(disp?.slots) ? disp.slots as { hora: string; reserva_id: string }[] : []
-  const slotsActualizados = [...slotsActuales, { hora: horaSlot, reserva_id: reserva.id }]
+  const slotsActualizados = [...slotsActuales, { hora: input.horaSlot, reserva_id: reserva.id }]
 
   if (disp?.id) {
     await adminSupabase.from('disponibilidad').update({ slots: slotsActualizados }).eq('id', disp.id)
@@ -70,11 +90,15 @@ export async function crearReserva(input: ReservaInput) {
     })
   }
 
-  // Enviar email de confirmación
+  // Emails
   const resend = new Resend(process.env.RESEND_API_KEY)
   const fecha = new Date(input.fechaHora)
   const fechaStr = fecha.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
   const horaStr = fecha.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })
+  const descuentoHtml = descuento > 0
+    ? `<p style="color:#4ade80">🎉 Descuento por referido aplicado: -$${descuento.toLocaleString('es-CL')}</p>`
+    : ''
+
   const { error: emailErr } = await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: user.email!,
@@ -88,14 +112,39 @@ export async function crearReserva(input: ReservaInput) {
         <li>Barbero: ${input.barberoNombre}</li>
         <li>Fecha: ${fechaStr}</li>
         <li>Hora: ${horaStr}</li>
-        <li>Total: $${input.precio.toLocaleString('es-CL')}</li>
+        <li>Precio: $${input.precio.toLocaleString('es-CL')}</li>
+        ${descuento > 0 ? `<li style="color:#4ade80">Descuento referido: -$${descuento.toLocaleString('es-CL')}</li>` : ''}
+        <li><strong>Total: $${precioFinal.toLocaleString('es-CL')}</strong></li>
       </ul>
+      ${descuentoHtml}
       <p style="color:#888;font-size:12px">Si necesitas cancelar, responde este correo.</p>
     `,
   })
-  if (emailErr) {
-    return { ok: true, reservaId: reserva.id, emailError: emailErr.message }
+
+  // Notificar al referidor
+  if (referrerId) {
+    const { data: referrerData } = await adminSupabase
+      .from('users').select('nombre').eq('id', referrerId).maybeSingle()
+    // Obtener email del referidor via auth admin (best effort)
+    const { data: referrerAuth } = await adminSupabase.auth.admin.getUserById(referrerId)
+    if (referrerAuth?.user?.email) {
+      await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL!,
+        to: referrerAuth.user.email,
+        subject: `🎉 Alguien usó tu código de referido`,
+        html: `
+          <h2 style="color:#e8c84a">🎉 ¡Tu código funcionó!</h2>
+          <p>Hola ${referrerData?.nombre ?? 'amigo'},</p>
+          <p><strong>${nombre}</strong> hizo su primera cita en ${input.barberiaNombre} usando tu código de referido.</p>
+          <p style="color:#888;font-size:12px">Sigue compartiendo tu código para más beneficios.</p>
+        `,
+      })
+    }
   }
 
-  return { ok: true, reservaId: reserva.id }
+  if (emailErr) {
+    return { ok: true, reservaId: reserva.id, descuento, emailError: emailErr.message }
+  }
+
+  return { ok: true, reservaId: reserva.id, descuento }
 }

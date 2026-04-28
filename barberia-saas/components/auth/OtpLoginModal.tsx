@@ -8,11 +8,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 interface OtpLoginModalProps {
   open: boolean
   onClose: () => void
+  onSuccess?: (nombre: string) => void
   redirectTo: string
   slug: string
 }
 
-export function OtpLoginModal({ open, onClose, redirectTo, slug }: OtpLoginModalProps) {
+export function OtpLoginModal({ open, onClose, onSuccess, redirectTo, slug }: OtpLoginModalProps) {
   const [email, setEmail] = useState('')
   const [nombre, setNombre] = useState('')
   const [step, setStep] = useState<'email' | 'sent'>('email')

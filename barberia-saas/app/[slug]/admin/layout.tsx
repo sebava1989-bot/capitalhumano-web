@@ -12,6 +12,8 @@ export default async function AdminLayout({
   const navItems = [
     { href: `/${slug}/admin`, label: 'Dashboard', icon: '📊' },
     { href: `/${slug}/admin/clientes`, label: 'Clientes', icon: '👥' },
+    { href: `/${slug}/admin/campanas`, label: 'Campañas', icon: '📣' },
+    { href: `/${slug}/admin/suscripciones`, label: 'Suscripciones', icon: '💳' },
     { href: `/${slug}/admin/barberos`, label: 'Barberos', icon: '✂️' },
     { href: `/${slug}/admin/servicios`, label: 'Servicios', icon: '💈' },
   ]
