@@ -116,6 +116,7 @@ export default async function ClientesPage({ params }: { params: Promise<{ slug:
         clientes={clientes}
         alianzasDisponibles={alianzas ?? []}
         slug={slug}
+        barberiaId={barberia.id}
       />
     </div>
   )
