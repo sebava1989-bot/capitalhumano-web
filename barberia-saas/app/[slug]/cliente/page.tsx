@@ -17,8 +17,15 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
     .from('barberias').select('id, nombre').eq('slug', slug).single()
   if (!barberia) notFound()
 
-  const { data: userData } = await supabase
-    .from('users').select('nombre, referral_code').eq('id', user.id).single()
+  const [{ data: userData }, { data: premios }] = await Promise.all([
+    supabase.from('users').select('nombre, referral_code').eq('id', user.id).single(),
+    supabase.from('referido_premios')
+      .select('id, descuento_pct, canjeado, created_at')
+      .eq('referidor_id', user.id)
+      .eq('barberia_id', barberia.id)
+      .eq('canjeado', false)
+      .order('created_at', { ascending: false }),
+  ])
 
   const { data: proximaCita } = await supabase
     .from('reservas')
@@ -78,7 +85,19 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
             <p className="text-white text-xl font-bold tracking-widest">{userData.referral_code}</p>
             <CopyReferralButton referralCode={userData.referral_code} slug={slug} />
           </div>
-          <p className="text-zinc-500 text-xs mt-2">Comparte y gana descuentos al traer amigos</p>
+          <p className="text-zinc-500 text-xs mt-2">Comparte tu código — cuando un amigo haga su primera cita, ¡tú ganas un descuento!</p>
+        </div>
+      )}
+
+      {premios && premios.length > 0 && (
+        <div className="bg-zinc-900 border border-green-500/30 rounded-xl p-4 mb-4">
+          <p className="text-zinc-400 text-xs uppercase tracking-wide mb-2">🎁 Premios por referidos</p>
+          {premios.map(p => (
+            <div key={p.id} className="flex items-center justify-between">
+              <p className="text-green-400 font-bold text-lg">{p.descuento_pct}% de descuento</p>
+              <span className="text-zinc-500 text-xs">Se aplica en tu próxima reserva</span>
+            </div>
+          ))}
         </div>
       )}
 

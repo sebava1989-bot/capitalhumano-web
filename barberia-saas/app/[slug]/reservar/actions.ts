@@ -28,6 +28,11 @@ export async function crearReserva(input: ReservaInput) {
   const { data: userData } = await supabase.from('users').select('nombre').eq('id', user.id).maybeSingle()
   const nombre = input.clienteNombre || userData?.nombre || user.email?.split('@')[0] || 'Cliente'
 
+  // Configuración de descuento por referido de la barbería
+  const { data: barberiaConfig } = await adminSupabase
+    .from('barberias').select('referido_descuento_pct').eq('id', input.barberiaId).maybeSingle()
+  const referidoPct = barberiaConfig?.referido_descuento_pct ?? 10
+
   // Lógica de descuento por referido (primera reserva)
   let descuento = 0
   let referrerId: string | null = null
@@ -42,7 +47,7 @@ export async function crearReserva(input: ReservaInput) {
         .neq('id', user.id)
         .maybeSingle()
       if (referrer) {
-        descuento = Math.round(input.precio * 0.10)
+        descuento = Math.round(input.precio * referidoPct / 100)
         referrerId = referrer.id
         await adminSupabase.from('users')
           .update({ referral_by: referrer.id })
@@ -94,6 +99,16 @@ export async function crearReserva(input: ReservaInput) {
   }).select('id').single()
 
   if (error) return { error: error.message }
+
+  // Premio al referidor: guardar descuento pendiente de canje
+  if (referrerId) {
+    await adminSupabase.from('referido_premios').insert({
+      barberia_id: input.barberiaId,
+      referidor_id: referrerId,
+      referido_id: user.id,
+      descuento_pct: referidoPct,
+    })
+  }
 
   // Registrar uso del descuento de alianza
   if (alianzaId) {

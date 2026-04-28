@@ -9,6 +9,7 @@ export interface ClienteSegmentado {
   nombre: string
   email: string
   telefono: string
+  referralCode: string
   totalVisitas: number
   visitasCompletadas: number
   ultimaVisita: string | null
@@ -94,18 +95,35 @@ function AlianzaCell({ cliente, alianzas, slug }: { cliente: ClienteSegmentado; 
 
 export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Props) {
   const [filtro, setFiltro] = useState<Filtro>('todos')
+  const [busqueda, setBusqueda] = useState('')
+
+  const filtrados = busqueda.trim()
+    ? clientes.filter(c => {
+        const q = busqueda.toLowerCase()
+        return c.nombre.toLowerCase().includes(q)
+          || c.email.toLowerCase().includes(q)
+          || c.telefono.includes(q)
+          || c.referralCode.toLowerCase().includes(q)
+      })
+    : clientes
 
   const conteos = {
-    todos: clientes.length,
-    nuevo: clientes.filter(c => c.segmento === 'nuevo').length,
-    frecuente: clientes.filter(c => c.segmento === 'frecuente').length,
-    inactivo: clientes.filter(c => c.segmento === 'inactivo').length,
+    todos: filtrados.length,
+    nuevo: filtrados.filter(c => c.segmento === 'nuevo').length,
+    frecuente: filtrados.filter(c => c.segmento === 'frecuente').length,
+    inactivo: filtrados.filter(c => c.segmento === 'inactivo').length,
   }
 
-  const visibles = filtro === 'todos' ? clientes : clientes.filter(c => c.segmento === filtro)
+  const visibles = filtro === 'todos' ? filtrados : filtrados.filter(c => c.segmento === filtro)
 
   return (
     <div>
+      <input
+        value={busqueda}
+        onChange={e => setBusqueda(e.target.value)}
+        placeholder="Buscar por nombre, email, teléfono o código..."
+        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-4 py-2.5 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-yellow-400 transition-colors mb-4"
+      />
       <div className="flex gap-2 mb-6 flex-wrap">
         {(['todos', 'frecuente', 'nuevo', 'inactivo'] as const).map(f => (
           <button key={f} onClick={() => setFiltro(f)}
@@ -124,6 +142,7 @@ export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Pro
             <tr>
               <th className="text-left p-3 text-zinc-400 font-medium">Cliente</th>
               <th className="text-left p-3 text-zinc-400 font-medium hidden lg:table-cell">Teléfono</th>
+              <th className="text-left p-3 text-zinc-400 font-medium hidden xl:table-cell">Cód. referido</th>
               <th className="text-left p-3 text-zinc-400 font-medium hidden md:table-cell">Visitas</th>
               <th className="text-left p-3 text-zinc-400 font-medium hidden md:table-cell">Gasto</th>
               <th className="text-left p-3 text-zinc-400 font-medium hidden sm:table-cell">Última visita</th>
@@ -149,6 +168,12 @@ export function ClientesSegmentados({ clientes, alianzasDisponibles, slug }: Pro
                 </td>
                 <td className="p-3 text-zinc-400 text-xs hidden lg:table-cell">
                   {c.telefono || <span className="text-zinc-700">—</span>}
+                </td>
+                <td className="p-3 hidden xl:table-cell">
+                  {c.referralCode
+                    ? <span className="font-mono text-xs bg-zinc-800 text-yellow-400 px-2 py-0.5 rounded">{c.referralCode}</span>
+                    : <span className="text-zinc-700 text-xs">—</span>
+                  }
                 </td>
                 <td className="p-3 text-zinc-300 hidden md:table-cell">
                   {c.visitasCompletadas}

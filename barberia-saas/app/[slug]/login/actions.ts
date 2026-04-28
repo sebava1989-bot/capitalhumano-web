@@ -1,5 +1,17 @@
 'use server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+async function generarRefCode(admin: ReturnType<typeof createAdminClient>): Promise<string> {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  for (let i = 0; i < 10; i++) {
+    const code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
+    const { count } = await (admin as unknown as SupabaseClient)
+      .from('users').select('id', { count: 'exact', head: true }).eq('referral_code', code)
+    if ((count ?? 0) === 0) return code
+  }
+  return 'R' + Date.now().toString(36).toUpperCase().slice(-5)
+}
 
 export async function registrarCliente(formData: FormData) {
   const nombre = (formData.get('nombre') as string ?? '').trim()
@@ -25,11 +37,14 @@ export async function registrarCliente(formData: FormData) {
     return { error: error.message }
   }
 
+  const referral_code = await generarRefCode(admin)
+
   await admin.from('users').upsert({
     id: data.user.id,
     nombre,
     telefono,
     rol: 'cliente',
+    referral_code,
   })
 
   return { ok: true }

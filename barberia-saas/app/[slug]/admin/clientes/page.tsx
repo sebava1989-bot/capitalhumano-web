@@ -30,12 +30,14 @@ export default async function ClientesPage({ params }: { params: Promise<{ slug:
   // Load telefono for registered clients
   const clienteIds = [...new Set((reservas ?? []).map(r => r.cliente_id as string).filter(Boolean))]
   const { data: perfiles } = clienteIds.length
-    ? await supabase.from('users').select('id, telefono').in('id', clienteIds)
+    ? await supabase.from('users').select('id, telefono, referral_code').in('id', clienteIds)
     : { data: [] }
 
   const telefonoMap: Record<string, string> = {}
+  const refCodeMap: Record<string, string> = {}
   for (const p of perfiles ?? []) {
     if (p.telefono) telefonoMap[p.id] = p.telefono
+    if (p.referral_code) refCodeMap[p.id] = p.referral_code
   }
 
   // Alianza assignments: clienteId → alianzaId[]
@@ -97,6 +99,7 @@ export default async function ClientesPage({ params }: { params: Promise<{ slug:
       nombre: c.nombre,
       email: c.email,
       telefono: c.telefono,
+      referralCode: refCodeMap[c.id] ?? '',
       totalVisitas: c.totalVisitas,
       visitasCompletadas: c.visitasCompletadas,
       gastoTotal: c.gastoTotal,

@@ -148,6 +148,7 @@ export type Database = {
           logo_url: string | null
           nombre: string
           plan_saas: string
+          referido_descuento_pct: number | null
           slug: string
         }
         Insert: {
@@ -159,6 +160,7 @@ export type Database = {
           logo_url?: string | null
           nombre: string
           plan_saas?: string
+          referido_descuento_pct?: number | null
           slug: string
         }
         Update: {
@@ -170,6 +172,7 @@ export type Database = {
           logo_url?: string | null
           nombre?: string
           plan_saas?: string
+          referido_descuento_pct?: number | null
           slug?: string
         }
         Relationships: []
@@ -361,6 +364,54 @@ export type Database = {
             columns: ["usuario_id"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referido_premios: {
+        Row: {
+          barberia_id: string
+          canjeado: boolean
+          created_at: string
+          descuento_pct: number
+          id: string
+          referido_id: string
+          referidor_id: string
+          reserva_canje_id: string | null
+        }
+        Insert: {
+          barberia_id: string
+          canjeado?: boolean
+          created_at?: string
+          descuento_pct: number
+          id?: string
+          referido_id: string
+          referidor_id: string
+          reserva_canje_id?: string | null
+        }
+        Update: {
+          barberia_id?: string
+          canjeado?: boolean
+          created_at?: string
+          descuento_pct?: number
+          id?: string
+          referido_id?: string
+          referidor_id?: string
+          reserva_canje_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referido_premios_barberia_id_fkey"
+            columns: ["barberia_id"]
+            isOneToOne: false
+            referencedRelation: "barberias"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referido_premios_reserva_canje_id_fkey"
+            columns: ["reserva_canje_id"]
+            isOneToOne: false
+            referencedRelation: "reservas"
             referencedColumns: ["id"]
           },
         ]
