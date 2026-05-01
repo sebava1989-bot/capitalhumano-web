@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
 import 'barberos_screen.dart';
 import 'servicios_screen.dart';
+import 'campana_referidos_screen.dart';
 import 'login_screen.dart';
 
 class ConfigScreen extends StatefulWidget {
@@ -69,6 +70,16 @@ class _ConfigScreenState extends State<ConfigScreen> {
                 MaterialPageRoute(
                     builder: (_) =>
                         ServiciosScreen(barberiaId: widget.barberiaId))),
+          ),
+          const SizedBox(height: 8),
+          _NavTile(
+            Icons.people_outline,
+            'Campaña de Referidos',
+            () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) =>
+                        CampanaReferidosScreen(barberiaId: widget.barberiaId))),
           ),
           const SizedBox(height: 32),
           SizedBox(
