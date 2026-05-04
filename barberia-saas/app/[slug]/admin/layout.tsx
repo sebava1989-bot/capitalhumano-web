@@ -10,7 +10,7 @@ export default async function AdminLayout({
   const { slug } = await params
 
   const navItems = [
-    { href: `/${slug}/admin`, label: 'Dashboard', icon: '📊' },
+    { href: `/${slug}/admin`, label: 'Panel Central', icon: '📊' },
     { href: `/${slug}/admin/clientes`, label: 'Clientes', icon: '👥' },
     { href: `/${slug}/admin/campanas`, label: 'Campañas', icon: '📣' },
     { href: `/${slug}/admin/suscripciones`, label: 'Suscripciones', icon: '💳' },
