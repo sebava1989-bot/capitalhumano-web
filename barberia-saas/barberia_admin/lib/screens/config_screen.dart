@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import '../services/auth_service.dart';
+import '../services/barberias_service.dart';
 import 'barberos_screen.dart';
 import 'servicios_screen.dart';
 import 'campana_referidos_screen.dart';
+import 'logo_upload_screen.dart';
 import 'login_screen.dart';
 
 class ConfigScreen extends StatefulWidget {
@@ -14,8 +15,7 @@ class ConfigScreen extends StatefulWidget {
 }
 
 class _ConfigScreenState extends State<ConfigScreen> {
-  String? _nombre;
-  String? _slug;
+  Map<String, dynamic>? _barberia;
 
   @override
   void initState() {
@@ -24,16 +24,9 @@ class _ConfigScreenState extends State<ConfigScreen> {
   }
 
   Future<void> _load() async {
-    final data = await Supabase.instance.client
-        .from('barberias')
-        .select('nombre, slug')
-        .eq('id', widget.barberiaId)
-        .maybeSingle();
+    final data = await BarberiasService().getBarberia(widget.barberiaId);
     if (!mounted || data == null) return;
-    setState(() {
-      _nombre = data['nombre'] as String?;
-      _slug = data['slug'] as String?;
-    });
+    setState(() => _barberia = data);
   }
 
   @override
@@ -43,67 +36,52 @@ class _ConfigScreenState extends State<ConfigScreen> {
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          if (_nombre != null) _InfoTile('Barbería', _nombre!),
-          if (_slug != null) _InfoTile('URL slug', _slug!),
+          if (_barberia != null) ...[
+            _InfoTile('Barbería', _barberia!['nombre'] as String? ?? ''),
+            _InfoTile('Código', _barberia!['codigo'] as String? ?? ''),
+            _InfoTile('URL slug', _barberia!['slug'] as String? ?? ''),
+          ],
           const SizedBox(height: 24),
           const Text('GESTIÓN',
-              style: TextStyle(
-                  color: Color(0xFFA1A1AA),
-                  fontSize: 12,
-                  letterSpacing: 1)),
+              style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 12, letterSpacing: 1)),
           const SizedBox(height: 8),
-          _NavTile(
-            Icons.content_cut,
-            'Barberos',
-            () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) =>
-                        BarberosScreen(barberiaId: widget.barberiaId))),
-          ),
+          _NavTile(Icons.image_outlined, 'Logo de la barbería', () async {
+            await Navigator.push(context, MaterialPageRoute(
+              builder: (_) => LogoUploadScreen(
+                barberiaId: widget.barberiaId,
+                logoUrlActual: _barberia?['logo_url'] as String?,
+              ),
+            ));
+            _load();
+          }),
           const SizedBox(height: 8),
-          _NavTile(
-            Icons.list_alt,
-            'Servicios',
-            () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) =>
-                        ServiciosScreen(barberiaId: widget.barberiaId))),
-          ),
+          _NavTile(Icons.content_cut, 'Barberos', () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => BarberosScreen(barberiaId: widget.barberiaId)))),
           const SizedBox(height: 8),
-          _NavTile(
-            Icons.people_outline,
-            'Campaña de Referidos',
-            () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (_) =>
-                        CampanaReferidosScreen(barberiaId: widget.barberiaId))),
-          ),
+          _NavTile(Icons.list_alt, 'Servicios', () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => ServiciosScreen(barberiaId: widget.barberiaId)))),
+          const SizedBox(height: 8),
+          _NavTile(Icons.people_outline, 'Campaña de Referidos', () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => CampanaReferidosScreen(barberiaId: widget.barberiaId)))),
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton(
               onPressed: () async {
                 await AuthService().signOut();
-                if (mounted) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                        builder: (_) => const LoginScreen()),
-                    (_) => false,
-                  );
-                }
+                if (!mounted) return;
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  (_) => false,
+                );
               },
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.redAccent),
                 foregroundColor: Colors.redAccent,
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Cerrar sesión',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              child: const Text('Cerrar sesión', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ),
         ],
@@ -117,17 +95,12 @@ class _InfoTile extends StatelessWidget {
   const _InfoTile(this.label, this.value);
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Row(children: [
-          SizedBox(
-              width: 80,
-              child: Text(label,
-                  style: const TextStyle(color: Color(0xFFA1A1AA)))),
-          Expanded(
-              child: Text(value,
-                  style: const TextStyle(color: Colors.white))),
-        ]),
-      );
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Row(children: [
+      SizedBox(width: 80, child: Text(label, style: const TextStyle(color: Color(0xFFA1A1AA)))),
+      Expanded(child: Text(value, style: const TextStyle(color: Colors.white))),
+    ]),
+  );
 }
 
 class _NavTile extends StatelessWidget {
@@ -137,13 +110,11 @@ class _NavTile extends StatelessWidget {
   const _NavTile(this.icon, this.label, this.onTap);
   @override
   Widget build(BuildContext context) => ListTile(
-        tileColor: const Color(0xFF27272A),
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)),
-        leading: Icon(icon, color: const Color(0xFFFACC15)),
-        title: Text(label, style: const TextStyle(color: Colors.white)),
-        trailing: const Icon(Icons.chevron_right,
-            color: Color(0xFFA1A1AA)),
-        onTap: onTap,
-      );
+    tileColor: const Color(0xFF27272A),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    leading: Icon(icon, color: const Color(0xFFFACC15)),
+    title: Text(label, style: const TextStyle(color: Colors.white)),
+    trailing: const Icon(Icons.chevron_right, color: Color(0xFFA1A1AA)),
+    onTap: onTap,
+  );
 }
