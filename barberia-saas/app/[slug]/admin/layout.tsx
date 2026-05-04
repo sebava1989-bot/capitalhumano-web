@@ -17,6 +17,7 @@ export default async function AdminLayout({
     { href: `/${slug}/admin/alianzas`, label: 'Alianzas', icon: '🤝' },
     { href: `/${slug}/admin/barberos`, label: 'Barberos', icon: '✂️' },
     { href: `/${slug}/admin/servicios`, label: 'Servicios', icon: '💈' },
+    { href: `/${slug}/admin/sugerencias`, label: 'Sugerencias', icon: '💬' },
   ]
 
   return (
