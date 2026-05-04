@@ -36,11 +36,106 @@ class _ReservaDetailScreenState extends State<ReservaDetailScreen> {
     );
   }
 
+  Future<void> _mostrarDialogoCompletar() async {
+    final codigoCtrl = TextEditingController();
+    if (!mounted) return;
+
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF27272A),
+        title: const Text('Completar cita',
+            style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '¿El cliente fue referido por alguien?',
+              style: TextStyle(color: Color(0xFFA1A1AA), fontSize: 14),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: codigoCtrl,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: 'Código de referido (opcional)',
+                hintStyle: const TextStyle(color: Color(0xFF71717A)),
+                filled: true,
+                fillColor: const Color(0xFF3F3F46),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar',
+                style: TextStyle(color: Color(0xFFA1A1AA))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFACC15),
+              foregroundColor: Colors.black,
+            ),
+            child: const Text('Confirmar',
+                style: TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmar != true || !mounted) return;
+
+    setState(() => _loading = true);
+    final codigo = codigoCtrl.text.trim().isEmpty ? null : codigoCtrl.text.trim();
+    final result = await _service.completarReserva(widget.reserva.id, codigo);
+    if (!mounted) return;
+    setState(() {
+      if (result.ok) _estado = 'completada';
+      _loading = false;
+    });
+
+    if (!result.ok) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(result.errorCodigo ?? 'Error al completar'),
+            backgroundColor: Colors.redAccent),
+      );
+      return;
+    }
+
+    if (result.errorCodigo != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(result.errorCodigo!),
+            backgroundColor: Colors.orange),
+      );
+    } else if (result.descuentoAplicado) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Cita completada — descuento ${result.descuentoPct}% aplicado al cliente'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Cita completada'),
+            backgroundColor: Color(0xFF27272A)),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final r = widget.reserva;
-    final fmt =
-        DateFormat("EEEE d/MM/yyyy 'a las' HH:mm", 'es');
+    final fmt = DateFormat("EEEE d/MM/yyyy 'a las' HH:mm", 'es');
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle reserva')),
       body: ListView(
@@ -65,7 +160,11 @@ class _ReservaDetailScreenState extends State<ReservaDetailScreen> {
                 child:
                     CircularProgressIndicator(color: Color(0xFFFACC15)))
           else
-            _Botones(estado: _estado, onCambiar: _cambiarEstado),
+            _Botones(
+              estado: _estado,
+              onCambiar: _cambiarEstado,
+              onCompletar: _mostrarDialogoCompletar,
+            ),
         ],
       ),
     );
@@ -94,22 +193,25 @@ class _InfoTile extends StatelessWidget {
 class _Botones extends StatelessWidget {
   final String estado;
   final void Function(String) onCambiar;
-  const _Botones({required this.estado, required this.onCambiar});
+  final VoidCallback onCompletar;
+  const _Botones({
+    required this.estado,
+    required this.onCambiar,
+    required this.onCompletar,
+  });
 
   @override
   Widget build(BuildContext context) {
     if (estado == 'pendiente') {
       return Column(children: [
-        _Btn('Confirmar', Colors.greenAccent,
-            () => onCambiar('confirmada')),
+        _Btn('Confirmar', Colors.greenAccent, () => onCambiar('confirmada')),
         const SizedBox(height: 12),
         _Btn('Cancelar', Colors.redAccent, () => onCambiar('cancelada')),
       ]);
     }
     if (estado == 'confirmada') {
       return Column(children: [
-        _Btn('Completar', const Color(0xFFFACC15),
-            () => onCambiar('completada')),
+        _Btn('Completar cita', const Color(0xFFFACC15), onCompletar),
         const SizedBox(height: 12),
         _Btn('Cancelar', Colors.redAccent, () => onCambiar('cancelada')),
       ]);
