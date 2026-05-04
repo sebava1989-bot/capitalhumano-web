@@ -121,17 +121,24 @@ Pasos:
 4. Consultar `sugerencias` donde `ip_hash = hash AND barberia_id = barberiaId AND created_at > now() - interval '24 hours'`
 5. Si existe: retornar `{ ok: false, error: 'Ya enviaste una sugerencia hoy. Puedes volver mañana.' }`
 6. Insertar en `sugerencias`: `{ barberia_id, tipo, mensaje, ip_hash }`
-7. Llamar Edge Function `notify-admin-fcm` con:
+7. Obtener `fcm_token_admin` de `barberias` donde `id = barberiaId`
+8. Si hay token: llamar `https://fcm.googleapis.com/fcm/send` con `Authorization: key=${FCM_SERVER_KEY}` (env var ya disponible en Next.js) y payload:
    ```json
    {
-     "barberia_id": "...",
-     "title": "Nueva sugerencia" | "Nuevo reclamo" | "Nuevo elogio",
-     "body": "mensaje[:80]..."
+     "to": "<fcm_token_admin>",
+     "notification": {
+       "title": "Nueva sugerencia" | "Nuevo reclamo" | "Nuevo elogio",
+       "body": "mensaje[:80]...",
+       "sound": "default"
+     },
+     "android": { "priority": "high", "notification": { "channel_id": "barberia_reservas" } }
    }
    ```
-8. Retornar `{ ok: true }`
+9. Retornar `{ ok: true }`
 
-El fallo del paso 7 (push) no bloquea ni revierte la inserción — se ignora silenciosamente.
+El fallo del paso 8 (push) no bloquea ni revierte la inserción — se ignora silenciosamente.
+
+**Nota:** El Edge Function `notify-admin` existente está acoplado a reservas (lee `barbero_id`, `servicio_id`, `fecha_hora`) y no es reutilizable para sugerencias. Por eso el Server Action llama FCM directamente.
 
 ### Migración `supabase/migrations/20260504000001_sugerencias.sql`
 
@@ -174,7 +181,7 @@ Actualiza `sugerencias` SET `leida = true` WHERE `id = id` — con verificación
 
 ### Modificados
 - `app/[slug]/page.tsx` — importar y renderizar `SugerenciasButton`
-- `app/[slug]/admin/page.tsx` o nav del admin — agregar enlace + badge de no leídas
+- `app/[slug]/admin/layout.tsx` — agregar enlace "Sugerencias" con badge de no leídas al `navItems`
 
 ---
 
