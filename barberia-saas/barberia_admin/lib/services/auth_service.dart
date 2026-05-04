@@ -3,10 +3,13 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class AuthService {
   final _db = Supabase.instance.client;
 
-  Future<String?> signIn(String email, String password) async {
+  String _emailFromCodigo(String codigo) =>
+      '${codigo.toLowerCase().trim()}@barberia.local';
+
+  Future<String?> signIn(String codigo, String password) async {
+    final email = _emailFromCodigo(codigo);
     try {
-      final res = await _db.auth
-          .signInWithPassword(email: email, password: password);
+      final res = await _db.auth.signInWithPassword(email: email, password: password);
       if (res.user == null) return 'No se pudo iniciar sesión';
 
       final profile = await _db
@@ -23,7 +26,7 @@ class AuthService {
       return null;
     } on AuthException catch (e) {
       if (e.message.toLowerCase().contains('invalid')) {
-        return 'Email o contraseña incorrectos';
+        return 'Código o contraseña incorrectos';
       }
       return e.message;
     } catch (_) {
@@ -39,16 +42,7 @@ class AuthService {
         .select('barberia_id')
         .eq('id', user.id)
         .maybeSingle();
-    if (profile?['barberia_id'] != null) {
-      return profile!['barberia_id'] as String;
-    }
-    // Fallback: primera barbería disponible
-    final b = await _db
-        .from('barberias')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-    return b?['id'] as String?;
+    return profile?['barberia_id'] as String?;
   }
 
   Future<void> signOut() => _db.auth.signOut();

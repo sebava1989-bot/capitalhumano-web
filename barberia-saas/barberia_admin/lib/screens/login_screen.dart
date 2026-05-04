@@ -10,18 +10,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _email = TextEditingController();
+  final _codigo = TextEditingController();
   final _password = TextEditingController();
   final _auth = AuthService();
   bool _loading = false;
   String? _error;
 
   Future<void> _login() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    final error = await _auth.signIn(_email.text.trim(), _password.text);
+    setState(() { _loading = true; _error = null; });
+    final error = await _auth.signIn(_codigo.text.trim(), _password.text);
     if (!mounted) return;
     setState(() => _loading = false);
     if (error != null) {
@@ -46,18 +43,13 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               const Text('✂️', style: TextStyle(fontSize: 48)),
               const SizedBox(height: 8),
-              const Text(
-                'Admin Barbería',
-                style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
-              ),
+              const Text('Admin Barbería',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white)),
               const SizedBox(height: 32),
               TextField(
-                controller: _email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: _inputDeco('Email'),
+                controller: _codigo,
+                textCapitalization: TextCapitalization.characters,
+                decoration: _inputDeco('Código de barbería'),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -68,8 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               if (_error != null) ...[
                 const SizedBox(height: 12),
-                Text(_error!,
-                    style: const TextStyle(color: Colors.redAccent)),
+                Text(_error!, style: const TextStyle(color: Colors.redAccent)),
               ],
               const SizedBox(height: 20),
               SizedBox(
@@ -80,18 +71,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     backgroundColor: const Color(0xFFFACC15),
                     foregroundColor: Colors.black,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _loading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.black))
-                      : const Text('Ingresar',
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
+                      ? const SizedBox(height: 20, width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.black))
+                      : const Text('Ingresar', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
               ),
             ],
@@ -102,15 +87,13 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   InputDecoration _inputDeco(String hint) => InputDecoration(
-        hintText: hint,
-        filled: true,
-        fillColor: const Color(0xFF27272A),
-        border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFFFACC15)),
-        ),
-      );
+    hintText: hint,
+    filled: true,
+    fillColor: const Color(0xFF27272A),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: const BorderSide(color: Color(0xFFFACC15)),
+    ),
+  );
 }
