@@ -115,19 +115,21 @@ class _StatCard extends StatelessWidget {
     final card = Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF27272A),
+        color: const Color(0xFF2D2D31),
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: color.withValues(alpha: 0.15), blurRadius: 20, spreadRadius: 1),
+        ],
+        border: Border.fromBorderSide(
+          BorderSide(color: color.withValues(alpha: 0.3), width: 1),
+        ),
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Icon(icon, color: color, size: 28),
         const SizedBox(height: 12),
-        Text(value,
-            style: TextStyle(
-                color: color, fontSize: 28, fontWeight: FontWeight.bold)),
+        Text(value, style: TextStyle(color: color, fontSize: 28, fontWeight: FontWeight.bold)),
         const SizedBox(height: 4),
-        Text(label,
-            style: const TextStyle(
-                color: Color(0xFFA1A1AA), fontSize: 13)),
+        Text(label, style: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 13)),
       ]),
     );
     return Expanded(child: card);
