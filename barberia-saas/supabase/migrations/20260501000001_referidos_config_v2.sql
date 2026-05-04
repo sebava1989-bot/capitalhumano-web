@@ -10,7 +10,7 @@ ALTER TABLE barberias
     CHECK (referido_max_pct_por_servicio BETWEEN 1 AND 100);
 
 -- Permitir que el admin inserte premios de referido (antes solo podía leer)
-CREATE POLICY IF NOT EXISTS "admin_inserta_premios" ON referido_premios
+CREATE POLICY "admin_inserta_premios" ON referido_premios
   FOR INSERT WITH CHECK (
     EXISTS (
       SELECT 1 FROM users
