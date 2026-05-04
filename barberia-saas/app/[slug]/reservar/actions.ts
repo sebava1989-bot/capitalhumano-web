@@ -72,11 +72,12 @@ export async function crearReserva(input: ReservaInput) {
 
   // Premios de referido pendientes — lógica acumulable
   const premiosCanjeadosIds: string[] = []
-  const { data: barberiaConf } = await adminSupabase
+  const { data: barberiaConfRaw } = await adminSupabase
     .from('barberias')
     .select('referido_acumulable, referido_max_pct_por_servicio')
     .eq('id', input.barberiaId)
     .maybeSingle()
+  const barberiaConf = barberiaConfRaw as { referido_acumulable: boolean; referido_max_pct_por_servicio: number } | null
   const acumulable = barberiaConf?.referido_acumulable ?? true
   const maxPct = barberiaConf?.referido_max_pct_por_servicio ?? 50
 
