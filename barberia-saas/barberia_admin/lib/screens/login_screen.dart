@@ -16,6 +16,13 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _loading = false;
   String? _error;
 
+  @override
+  void dispose() {
+    _codigo.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
   Future<void> _login() async {
     setState(() { _loading = true; _error = null; });
     final error = await _auth.signIn(_codigo.text.trim(), _password.text);

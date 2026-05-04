@@ -33,6 +33,13 @@ class _BarberoFormScreenState extends State<BarberoFormScreen> {
     }
   }
 
+  @override
+  void dispose() {
+    _nombre.dispose();
+    _descripcion.dispose();
+    super.dispose();
+  }
+
   Future<void> _pickFoto() async {
     final picker = ImagePicker();
     final file = await picker.pickImage(source: ImageSource.gallery, maxWidth: 800, imageQuality: 80);

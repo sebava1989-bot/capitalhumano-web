@@ -1,5 +1,4 @@
 'use client'
-export const dynamic = 'force-dynamic'
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -39,13 +38,27 @@ export default function AdminLoginPage() {
       return
     }
 
+    if (!profile.barberia_id) {
+      await supabase.auth.signOut()
+      setError('Esta cuenta no tiene una barbería asignada')
+      setLoading(false)
+      return
+    }
+
     const { data: barberia } = await supabase
       .from('barberias')
       .select('slug')
-      .eq('id', profile.barberia_id ?? '')
+      .eq('id', profile.barberia_id)
       .maybeSingle()
 
-    router.push(`/${barberia?.slug ?? ''}/admin`)
+    if (!barberia?.slug) {
+      await supabase.auth.signOut()
+      setError('No se encontró la barbería asociada')
+      setLoading(false)
+      return
+    }
+
+    router.push(`/${barberia.slug}/admin`)
   }
 
   return (

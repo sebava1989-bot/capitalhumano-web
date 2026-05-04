@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 type TipoFiltro = 'todas' | 'elogio' | 'sugerencia' | 'reclamo'
@@ -14,9 +14,15 @@ const TIPO_CONFIG = {
 
 async function marcarLeida(id: string, barberiaId: string) {
   'use server'
-  const adminSupabase = createAdminClient()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  const { data: profile } = await supabase
+    .from('users').select('rol, barberia_id').eq('id', user.id).maybeSingle()
+  if (!profile || !['admin', 'superadmin'].includes(profile.rol) || profile.barberia_id !== barberiaId) return
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (adminSupabase as any)
+  await (createAdminClient() as any)
     .from('sugerencias')
     .update({ leida: true })
     .eq('id', id)
@@ -45,16 +51,26 @@ export default async function SugerenciasPage({
   const { tipo: tipoParam } = await searchParams
 
   const supabase = await createClient()
+
+  // Auth guard
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/admin-login')
+
   const { data: barberia } = await supabase
     .from('barberias').select('id').eq('slug', slug).maybeSingle()
   if (!barberia) notFound()
 
+  const { data: profile } = await supabase
+    .from('users').select('rol, barberia_id').eq('id', user.id).maybeSingle()
+  if (!profile || !['admin', 'superadmin'].includes(profile.rol) || profile.barberia_id !== barberia.id) {
+    notFound()
+  }
+
   const tipoFiltro: TipoFiltro =
     ['elogio', 'sugerencia', 'reclamo'].includes(tipoParam ?? '') ? (tipoParam as TipoFiltro) : 'todas'
 
-  const adminSupabase = createAdminClient()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = adminSupabase as any
+  const db = createAdminClient() as any
   let query = db
     .from('sugerencias')
     .select('id, tipo, mensaje, leida, created_at')
