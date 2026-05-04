@@ -7,7 +7,7 @@ import { BookingConfirm } from './BookingConfirm'
 import type { Json } from '@/types/database'
 
 interface Servicio { id: string; nombre: string; descripcion: string | null; duracion_min: number; precio: number }
-interface Barbero { id: string; nombre: string; foto_url: string | null }
+interface Barbero { id: string; nombre: string; foto_url: string | null; descripcion?: string | null }
 interface Barberia { id: string; nombre: string; colores: Json }
 
 interface Props {

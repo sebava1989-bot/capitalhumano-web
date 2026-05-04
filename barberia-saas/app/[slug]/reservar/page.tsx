@@ -10,6 +10,13 @@ interface Barberia {
   colores: Json
 }
 
+interface BarberoData {
+  id: string
+  nombre: string
+  foto_url: string | null
+  descripcion: string | null
+}
+
 interface Props {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ ref?: string }>
@@ -40,7 +47,7 @@ export default async function ReservarPage({ params, searchParams }: Props) {
 
   const { data: barberos } = await supabase
     .from('barberos')
-    .select('id, nombre, foto_url')
+    .select('id, nombre, foto_url, descripcion')
     .eq('barberia_id', barberia.id)
     .eq('activo', true)
 
@@ -57,7 +64,7 @@ export default async function ReservarPage({ params, searchParams }: Props) {
         <BookingWizard
           barberia={barberia}
           servicios={servicios ?? []}
-          barberos={barberos ?? []}
+          barberos={(barberos ?? []) as unknown as BarberoData[]}
           refCode={ref}
         />
       </div>
