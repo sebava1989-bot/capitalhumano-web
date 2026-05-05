@@ -51,30 +51,38 @@ export default async function ServiciosPage({ params }: { params: Promise<{ slug
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Servicios</h1>
-      <form action={upsertServicio} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-6 grid grid-cols-2 gap-3">
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Servicios</h1>
+      <form action={upsertServicio}
+        className="bg-white border border-gray-200 rounded-2xl shadow-sm p-5 mb-6 grid grid-cols-2 gap-3">
         <input type="hidden" name="slug" value={slug} />
         <input name="nombre" placeholder="Nombre del servicio" required
-          className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm col-span-2" />
+          className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 text-sm col-span-2
+            focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all" />
         <input name="descripcion" placeholder="Descripción (opcional)"
-          className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm col-span-2" />
+          className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 text-sm col-span-2
+            focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all" />
         <input name="duracion_min" type="number" placeholder="Duración (min)" required min="1"
-          className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm" />
+          className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 text-sm
+            focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all" />
         <input name="precio" type="number" placeholder="Precio ($)" required min="1"
-          className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white text-sm" />
+          className="bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-gray-900 text-sm
+            focus:outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/20 transition-all" />
         <button type="submit"
-          className="col-span-2 py-2 bg-yellow-400 text-black font-bold rounded-lg hover:bg-yellow-300 transition-colors text-sm">
+          className="col-span-2 py-2 bg-yellow-400 text-black font-bold rounded-xl
+            hover:bg-yellow-300 transition-colors text-sm shadow-sm">
           Agregar servicio
         </button>
       </form>
       <div className="space-y-2">
         {servicios?.map(s => (
-          <div key={s.id} className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-xl p-3">
+          <div key={s.id}
+            className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 shadow-sm
+              hover:shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-shadow">
             <div>
-              <p className="text-white font-medium">{s.nombre}</p>
-              <p className="text-zinc-400 text-sm">{s.duracion_min} min</p>
+              <p className="text-gray-900 font-medium">{s.nombre}</p>
+              <p className="text-gray-500 text-sm">{s.duracion_min} min</p>
             </div>
-            <p className="text-yellow-400 font-bold">${s.precio.toLocaleString('es-CL')}</p>
+            <p className="text-yellow-500 font-bold">${s.precio.toLocaleString('es-CL')}</p>
           </div>
         ))}
       </div>

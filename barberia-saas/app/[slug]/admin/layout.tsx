@@ -10,7 +10,7 @@ export default async function AdminLayout({
   const { slug } = await params
 
   const navItems = [
-    { href: `/${slug}/admin`, label: 'Dashboard', icon: '📊' },
+    { href: `/${slug}/admin`, label: 'Panel Central', icon: '📊' },
     { href: `/${slug}/admin/clientes`, label: 'Clientes', icon: '👥' },
     { href: `/${slug}/admin/campanas`, label: 'Campañas', icon: '📣' },
     { href: `/${slug}/admin/suscripciones`, label: 'Suscripciones', icon: '💳' },
@@ -22,22 +22,35 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-zinc-950 flex">
-      <aside className="hidden md:flex w-56 flex-col bg-zinc-900 border-r border-zinc-800 p-4">
-        <div className="text-yellow-400 font-bold text-lg mb-8 px-2">⚙ Admin</div>
-        <nav className="flex flex-col gap-1">
+      <aside className="hidden md:flex w-64 flex-col bg-zinc-900 border-r border-zinc-800/60 p-5
+        shadow-[4px_0_32px_rgba(0,0,0,0.5)]">
+        <div className="flex items-center gap-2 mb-8 px-1">
+          <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center shadow-[0_0_12px_rgba(250,204,21,0.4)]">
+            <span className="text-base">✂️</span>
+          </div>
+          <span className="font-bold text-white text-base">Admin</span>
+        </div>
+        <nav className="flex flex-col gap-1 flex-1">
           {navItems.map(item => (
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-400
-                hover:text-white hover:bg-zinc-800 transition-colors text-sm"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-zinc-400
+                hover:text-white hover:bg-white/5
+                hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_2px_8px_rgba(0,0,0,0.3)]
+                transition-all text-sm font-medium group"
             >
-              {item.icon} {item.label}
+              <span className="text-base group-hover:scale-110 transition-transform">{item.icon}</span>
+              {item.label}
             </Link>
           ))}
         </nav>
+        <p className="text-zinc-700 text-xs text-center pt-4 border-t border-zinc-800/60">
+          Desarrollado por<br />
+          <span className="text-zinc-600 font-medium">Tu Amigo Digital SpA</span>
+        </p>
       </aside>
-      <main className="flex-1 p-6 text-white overflow-auto">{children}</main>
+      <main className="flex-1 p-6 overflow-auto">{children}</main>
     </div>
   )
 }

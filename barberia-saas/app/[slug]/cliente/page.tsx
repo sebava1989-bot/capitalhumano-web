@@ -1,10 +1,25 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
+import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { Suspense } from 'react'
-import { CopyReferralButton } from '@/components/cliente/CopyReferralButton'
+import { WspReferralButton } from '@/components/cliente/WspReferralButton'
 import { CalificarReservaForm } from '@/components/cliente/CalificarReservaForm'
+import { CancelarCitaButton } from '@/components/cliente/CancelarCitaButton'
+import { FeedbackServicioCard } from '@/components/cliente/FeedbackServicioCard'
 import { RecomendacionIA } from './recomendacion'
+
+async function cancelarReserva(reservaId: string) {
+  'use server'
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('reservas')
+    .update({ estado: 'cancelada' })
+    .eq('id', reservaId)
+    .eq('cliente_id', user.id)
+  revalidatePath('/', 'layout')
+}
 
 export default async function ClientePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -13,17 +28,20 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect(`/${slug}/reservar?login=true`)
 
-  const { data: barberia } = await supabase
-    .from('barberias').select('id, nombre').eq('slug', slug).single()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: barberia } = await (supabase as any)
+    .from('barberias').select('id, nombre, referido_descuento_nuevo_cliente_pct').eq('slug', slug).single()
   if (!barberia) notFound()
 
   const [{ data: userData }, { data: premios }, { data: descuentosMasivos }] = await Promise.all([
     supabase.from('users').select('nombre, referral_code').eq('id', user.id).single(),
-    supabase.from('referido_premios')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('referido_premios')
       .select('id, descuento_pct, created_at')
       .eq('referidor_id', user.id)
       .eq('barberia_id', barberia.id)
       .eq('canjeado', false)
+      .eq('confirmado', true)
       .order('created_at', { ascending: false }),
     supabase.from('descuentos_masivos')
       .select('id, descuento_pct, motivo, created_at')
@@ -32,6 +50,18 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
       .eq('canjeado', false)
       .order('created_at', { ascending: false }),
   ])
+
+  // Reserva completada reciente sin calificar → mostrar card de feedback prominente
+  const { data: sinCalificar } = await supabase
+    .from('reservas')
+    .select('id, servicios(nombre), barberos(nombre)')
+    .eq('cliente_id', user.id)
+    .eq('barberia_id', barberia.id)
+    .eq('estado', 'completada')
+    .is('calificacion', null)
+    .order('fecha_hora', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   const { data: proximaCita } = await supabase
     .from('reservas')
@@ -69,6 +99,17 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
         <RecomendacionIA clienteId={user.id} barberiaNombre={barberia.nombre} />
       </Suspense>
 
+      {sinCalificar && (
+        <FeedbackServicioCard
+          reservaId={sinCalificar.id}
+          barberiaNombre={barberia.nombre}
+          barberiaId={barberia.id}
+          servicio={(sinCalificar.servicios as unknown as { nombre: string })?.nombre ?? ''}
+          barbero={(sinCalificar.barberos as unknown as { nombre: string })?.nombre ?? ''}
+          slug={slug}
+        />
+      )}
+
       {proximaCita && (
         <div className="bg-zinc-900 border border-yellow-400/30 rounded-xl p-4 mb-4">
           <p className="text-zinc-400 text-xs uppercase tracking-wide mb-2">Próxima cita</p>
@@ -81,17 +122,21 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
             {new Date(proximaCita.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
             {' — '}{(proximaCita.servicios as unknown as { nombre: string })?.nombre} con {(proximaCita.barberos as unknown as { nombre: string })?.nombre}
           </p>
+          <CancelarCitaButton reservaId={proximaCita.id} slug={slug} cancelarAction={cancelarReserva} />
         </div>
       )}
 
       {userData?.referral_code && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-4">
           <p className="text-zinc-400 text-xs uppercase tracking-wide mb-2">Tu código de referido</p>
-          <div className="flex items-center justify-between">
-            <p className="text-white text-xl font-bold tracking-widest">{userData.referral_code}</p>
-            <CopyReferralButton referralCode={userData.referral_code} slug={slug} />
-          </div>
-          <p className="text-zinc-500 text-xs mt-2">Comparte tu código — cuando un amigo haga su primera cita, ¡tú ganas un descuento!</p>
+          <p className="text-white text-xl font-bold tracking-widest mb-3">{userData.referral_code}</p>
+          <WspReferralButton
+            referralCode={userData.referral_code}
+            slug={slug}
+            barberiaNombre={barberia.nombre}
+            descuentoPct={(barberia as Record<string, number>).referido_descuento_nuevo_cliente_pct ?? 10}
+          />
+          <p className="text-zinc-500 text-xs mt-2">Tu amigo recibe un descuento en su primera cita, ¡y tú también ganas un premio cuando se atienda!</p>
         </div>
       )}
 
@@ -113,7 +158,7 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
       {premios && premios.length > 0 && (
         <div className="bg-zinc-900 border border-green-500/30 rounded-xl p-4 mb-4">
           <p className="text-zinc-400 text-xs uppercase tracking-wide mb-2">🎁 Premios por referidos</p>
-          {premios.map(p => (
+          {(premios as { id: string; descuento_pct: number }[]).map(p => (
             <div key={p.id} className="flex items-center justify-between">
               <p className="text-green-400 font-bold text-lg">{p.descuento_pct}% de descuento</p>
               <span className="text-zinc-500 text-xs">Se aplica en tu próxima reserva</span>
