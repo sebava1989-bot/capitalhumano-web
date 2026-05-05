@@ -75,27 +75,25 @@ async function terminarCita(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  const { data: reserva } = await supabase
+  const adminClient = createAdminClient()
+
+  // Usar adminClient para leer la reserva completa (incluyendo ref_code) sin restricciones de RLS
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: reserva } = await (adminClient as any)
     .from('reservas')
-    .select('id, cliente_id, barberia_id, estado')
+    .select('id, cliente_id, barberia_id, estado, ref_code')
     .eq('id', reservaId)
     .maybeSingle()
 
   if (!reserva || reserva.estado === 'completada') return
 
-  // Obtener ref_code por separado (no está en el tipo generado)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: reservaRef } = await (supabase as any)
-    .from('reservas').select('ref_code').eq('id', reservaId).maybeSingle()
-
   // Solo marcar como completada — recién aquí se suma al ingreso
-  await supabase.from('reservas').update({ estado: 'completada' }).eq('id', reservaId)
+  await adminClient.from('reservas').update({ estado: 'completada' }).eq('id', reservaId)
 
   // Verificar si el cliente fue referido usando ref_code de la reserva
   if (reserva.cliente_id) {
-    const adminClient = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const referredByCode = (reservaRef as any)?.ref_code as string | null
+    const referredByCode = (reserva as any).ref_code as string | null
     if (referredByCode) {
       const { count } = await adminClient
         .from('reservas')
