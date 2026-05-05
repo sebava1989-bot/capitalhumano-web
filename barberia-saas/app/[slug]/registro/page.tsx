@@ -26,7 +26,11 @@ export default function RegistroPage() {
     supabase.from('barberias').select('nombre').eq('slug', slug).maybeSingle()
       .then(({ data }) => { if (data) setBarberiaNombre(data.nombre) })
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) router.replace(`/${slug}/cliente`)
+      if (user) {
+        // Si viene con código de referido, llevarlo a reservar con el código preservado
+        const destino = refCode ? `/${slug}/reservar?ref=${refCode}` : `/${slug}/cliente`
+        router.replace(destino)
+      }
     })
   }, [slug])
 
