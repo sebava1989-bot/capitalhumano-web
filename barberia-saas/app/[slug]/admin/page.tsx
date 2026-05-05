@@ -6,7 +6,17 @@ import { TopServicios } from '@/components/admin/TopServicios'
 import { TopClientes } from '@/components/admin/TopClientes'
 import { WspInviteButton } from '@/components/admin/WspInviteButton'
 import { startOfDay, endOfDay, startOfMonth, startOfWeek, endOfWeek, format, isSameDay } from 'date-fns'
+import { toZonedTime, fromZonedTime } from 'date-fns-tz'
 import { es } from 'date-fns/locale'
+
+const TZ = 'America/Santiago'
+
+// Devuelve la fecha actual en zona horaria chilena
+function todayChile() { return toZonedTime(new Date(), TZ) }
+
+// Convierte inicio/fin de día en Santiago a UTC para queries Supabase
+function startOfDayUTC(d: Date) { return fromZonedTime(startOfDay(toZonedTime(d, TZ)), TZ).toISOString() }
+function endOfDayUTC(d: Date)   { return fromZonedTime(endOfDay(toZonedTime(d, TZ)), TZ).toISOString() }
 import { Suspense } from 'react'
 import { PrediccionDemanda } from './prediccion'
 
@@ -128,18 +138,22 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .from('barberias').select('id, nombre').eq('slug', slug).maybeSingle()
   if (!barberia) notFound()
 
-  const today = new Date()
+  const today = todayChile()
+  const todayStartISO = startOfDayUTC(today)
+  const todayEndISO = endOfDayUTC(today)
+  const mesStartISO = fromZonedTime(startOfMonth(today), TZ).toISOString()
+
   const [{ data: citasHoy }, { data: citasMes }, { data: canceladas }] = await Promise.all([
     supabase.from('reservas').select('id, precio_final')
       .eq('barberia_id', barberia.id).eq('estado', 'confirmada')
-      .gte('fecha_hora', startOfDay(today).toISOString())
-      .lte('fecha_hora', endOfDay(today).toISOString()),
+      .gte('fecha_hora', todayStartISO)
+      .lte('fecha_hora', todayEndISO),
     supabase.from('reservas').select('precio_final, servicio_id, cliente_id, cliente_nombre, servicios(nombre)')
       .eq('barberia_id', barberia.id).eq('estado', 'completada')
-      .gte('fecha_hora', startOfMonth(today).toISOString()),
+      .gte('fecha_hora', mesStartISO),
     supabase.from('reservas').select('id')
       .eq('barberia_id', barberia.id).eq('estado', 'cancelada')
-      .gte('fecha_hora', startOfDay(today).toISOString()),
+      .gte('fecha_hora', todayStartISO),
   ])
 
   const ingresosMes = citasMes?.reduce((s, r) => s + (r.precio_final ?? 0), 0) ?? 0
@@ -174,12 +188,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .select('id, fecha_hora, estado, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
     .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente'])
-    .gte('fecha_hora', startOfDay(today).toISOString())
-    .lte('fecha_hora', endOfDay(today).toISOString())
+    .gte('fecha_hora', todayStartISO)
+    .lte('fecha_hora', todayEndISO)
     .order('fecha_hora')
 
-  const semanaStart = startOfWeek(today, { weekStartsOn: 1 })
-  const semanaEnd = endOfWeek(today, { weekStartsOn: 1 })
+  const semanaStart = fromZonedTime(startOfWeek(today, { weekStartsOn: 1 }), TZ)
+  const semanaEnd = fromZonedTime(endOfWeek(today, { weekStartsOn: 1 }), TZ)
 
   const { data: agendaSemana } = await supabase
     .from('reservas')
@@ -193,10 +207,10 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
   type AgendaItem = { id: string; fecha_hora: string; estado: string; cliente_nombre: string | null; precio: number; descuento: number; precio_final: number; servicios: unknown; barberos: unknown }
   const citasHoyList = (citasHoyDetalle ?? []) as AgendaItem[]
 
-  // Agrupar agenda por día
+  // Agrupar agenda por día en hora chilena
   const porDia = new Map<string, AgendaItem[]>()
   for (const r of (agendaSemana ?? []) as AgendaItem[]) {
-    const key = format(new Date(r.fecha_hora), 'yyyy-MM-dd')
+    const key = format(toZonedTime(new Date(r.fecha_hora), TZ), 'yyyy-MM-dd')
     if (!porDia.has(key)) porDia.set(key, [])
     porDia.get(key)!.push(r)
   }
