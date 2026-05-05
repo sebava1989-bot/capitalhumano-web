@@ -22,7 +22,6 @@ function todayChile() { return toZonedTime(new Date(), TZ) }
 function startOfDayUTC(d: Date) { return fromZonedTime(startOfDay(toZonedTime(d, TZ)), TZ).toISOString() }
 function endOfDayUTC(d: Date)   { return fromZonedTime(endOfDay(toZonedTime(d, TZ)), TZ).toISOString() }
 import { Suspense } from 'react'
-import { PrediccionDemanda } from './prediccion'
 
 async function iniciarCita(formData: FormData) {
   'use server'
@@ -379,12 +378,6 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
             ))}
           </div>
         )}
-      </div>
-
-      <div className="mt-4">
-        <Suspense fallback={null}>
-          <PrediccionDemanda barberiaId={barberia.id} />
-        </Suspense>
       </div>
 
       <div className="mt-8">

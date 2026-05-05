@@ -7,6 +7,8 @@ import { toZonedTime, fromZonedTime } from 'date-fns-tz'
 import { es } from 'date-fns/locale'
 import { MetaSemanal } from '@/components/admin/MetaSemanal'
 import { MetaBarberoCell } from '@/components/admin/MetaBarberoCell'
+import { Suspense } from 'react'
+import { PrediccionDemanda } from '../prediccion'
 
 const TZ = 'America/Santiago'
 
@@ -284,6 +286,12 @@ export default async function ResumenEjecutivoPage({ params }: { params: Promise
             <p className="text-zinc-500 text-sm col-span-3">No hay barberos activos</p>
           )}
         </div>
+      </section>
+
+      <section>
+        <Suspense fallback={null}>
+          <PrediccionDemanda barberiaId={barberia.id} />
+        </Suspense>
       </section>
     </div>
   )

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 
 export default async function AdminLayout({
   children,
@@ -8,6 +9,12 @@ export default async function AdminLayout({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
+  const supabase = await createClient()
+  const { data: barberia } = await supabase
+    .from('barberias')
+    .select('nombre, logo_url')
+    .eq('slug', slug)
+    .maybeSingle()
 
   const navItems = [
     { href: `/${slug}/admin`, label: 'Panel Central', icon: '📊' },
@@ -26,9 +33,13 @@ export default async function AdminLayout({
       <aside className="hidden md:flex w-64 flex-col bg-zinc-900 border-r border-zinc-800/60 p-5
         shadow-[4px_0_32px_rgba(0,0,0,0.5)]">
         <div className="flex items-center gap-2 mb-8 px-1">
-          <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center shadow-[0_0_12px_rgba(250,204,21,0.4)]">
-            <span className="text-base">✂️</span>
-          </div>
+          {barberia?.logo_url ? (
+            <img src={barberia.logo_url} alt={barberia.nombre ?? 'Logo'} className="w-8 h-8 rounded-lg object-cover" />
+          ) : (
+            <div className="w-8 h-8 rounded-lg bg-yellow-400 flex items-center justify-center shadow-[0_0_12px_rgba(250,204,21,0.4)]">
+              <span className="text-base">💈</span>
+            </div>
+          )}
           <span className="font-bold text-white text-base">Admin</span>
         </div>
         <nav className="flex flex-col gap-1 flex-1">
