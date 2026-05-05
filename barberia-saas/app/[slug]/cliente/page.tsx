@@ -89,13 +89,15 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
     .limit(1)
     .maybeSingle()
 
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
   const { data: proximaCita } = await supabase
     .from('reservas')
     .select('id, fecha_hora, estado, servicios(nombre), barberos(nombre)')
     .eq('cliente_id', user.id)
     .eq('barberia_id', barberia.id)
     .in('estado', ['confirmada', 'en_curso', 'pendiente'])
-    .gte('fecha_hora', new Date().toISOString())
+    .gte('fecha_hora', startOfToday.toISOString())
     .order('fecha_hora')
     .limit(1)
     .maybeSingle()
