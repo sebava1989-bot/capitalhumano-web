@@ -53,11 +53,11 @@ export function CalificarReservaForm({ reservaId, slug }: Props) {
       </div>
       {selected > 0 && (
         <>
-          <input
-            type="text"
+          <textarea
             name="nota"
             placeholder="Comentario (opcional)"
-            className="w-full text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white placeholder-zinc-500 mb-1 mt-1"
+            rows={2}
+            className="w-full text-xs bg-zinc-800 border border-zinc-700 rounded px-2 py-1 text-white placeholder-zinc-500 mb-1 mt-1 resize-none"
           />
           <button
             type="submit"

@@ -93,10 +93,11 @@ async function terminarCita(formData: FormData) {
 
   // Verificar si el cliente fue referido usando ref_code de la reserva
   if (reserva.cliente_id) {
+    const adminClient = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const referredByCode = (reservaRef as any)?.ref_code as string | null
     if (referredByCode) {
-      const { count } = await supabase
+      const { count } = await adminClient
         .from('reservas')
         .select('id', { count: 'exact', head: true })
         .eq('cliente_id', reserva.cliente_id)
@@ -104,15 +105,15 @@ async function terminarCita(formData: FormData) {
         .eq('estado', 'completada')
 
       if ((count ?? 0) === 1) {
-        const { data: barberia } = await supabase
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: barberia } = await (adminClient as any)
           .from('barberias')
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .select('referido_descuento_pct, referido_descuento_nuevo_cliente_pct' as any)
+          .select('referido_descuento_pct, referido_descuento_nuevo_cliente_pct')
           .eq('id', reserva.barberia_id)
           .maybeSingle()
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: referidor } = await (supabase as any)
+        const { data: referidor } = await (adminClient as any)
           .from('users')
           .select('id')
           .eq('referral_code', referredByCode)
@@ -122,7 +123,7 @@ async function terminarCita(formData: FormData) {
           const b = barberia as unknown as Record<string, number>
           const descReferidor = b.referido_descuento_pct ?? 10
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          await (supabase as any).from('referido_premios').insert({
+          await (adminClient as any).from('referido_premios').insert({
             referidor_id: referidor.id,
             referido_id: reserva.cliente_id,
             barberia_id: reserva.barberia_id,
@@ -133,7 +134,7 @@ async function terminarCita(formData: FormData) {
 
           const descNuevo = b.referido_descuento_nuevo_cliente_pct ?? 0
           if (descNuevo > 0) {
-            await supabase.from('descuentos_masivos').insert({
+            await adminClient.from('descuentos_masivos').insert({
               cliente_id: reserva.cliente_id,
               barberia_id: reserva.barberia_id,
               descuento_pct: descNuevo,
