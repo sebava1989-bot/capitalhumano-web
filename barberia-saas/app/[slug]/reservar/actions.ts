@@ -55,8 +55,15 @@ export async function crearReserva(input: ReservaInput) {
     }
   }
 
-  // Descuento nuevo cliente referido — se aplica en la primera reserva si viene con refCode
-  if (input.refCode && !alianzaExcluye) {
+  // Descuento nuevo cliente referido — usa refCode de URL o el guardado en el perfil al registrarse
+  let effectiveRefCode = input.refCode ?? null
+  if (!effectiveRefCode) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: userRef } = await (adminSupabase as any)
+      .from('users').select('referred_by_code').eq('id', user.id).maybeSingle()
+    effectiveRefCode = userRef?.referred_by_code ?? null
+  }
+  if (effectiveRefCode && !alianzaExcluye) {
     const { count: prevCount } = await adminSupabase
       .from('reservas')
       .select('id', { count: 'exact', head: true })
@@ -148,7 +155,7 @@ export async function crearReserva(input: ReservaInput) {
     precio_final: precioFinal,
     estado: 'confirmada' as const,
     origen: 'web' as const,
-    ref_code: input.refCode ?? null,
+    ref_code: effectiveRefCode ?? null,
     cliente_email: user.email,
     cliente_nombre: nombre,
   }).select('id').single()
