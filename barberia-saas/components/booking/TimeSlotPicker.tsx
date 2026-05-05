@@ -14,10 +14,10 @@ interface Props {
 
 export function TimeSlotPicker({ barberiaId, barberoId, duracionMin, onSelect, onBack }: Props) {
   const today = startOfDay(new Date())
-  const [fecha, setFecha] = useState<Date>(addDays(today, 1))
+  const [fecha, setFecha] = useState<Date>(today)
   const { availableSlots, loading } = useRealtimeSlots(barberiaId, barberoId, fecha, duracionMin)
 
-  const days = Array.from({ length: 7 }, (_, i) => addDays(today, i + 1))
+  const days = Array.from({ length: 7 }, (_, i) => addDays(today, i))
 
   return (
     <div>

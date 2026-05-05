@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect, notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
@@ -14,11 +15,36 @@ async function cancelarReserva(reservaId: string) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
-  await supabase.from('reservas')
-    .update({ estado: 'cancelada' })
+  // Verificar que la reserva pertenece al usuario
+  const { data: reserva } = await supabase.from('reservas')
+    .select('id, cliente_id, barberia_id, barbero_id, servicio_id, fecha_hora, cliente_nombre')
     .eq('id', reservaId)
     .eq('cliente_id', user.id)
+    .maybeSingle()
+  if (!reserva) return
+  // Usar admin client para bypassear RLS en el update
+  const admin = createAdminClient()
+  await admin.from('reservas')
+    .update({ estado: 'cancelada' })
+    .eq('id', reservaId)
+  // Notificar al admin vía Edge Function
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  fetch(`${supabaseUrl}/functions/v1/notify-admin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${serviceKey}`,
+    },
+    body: JSON.stringify({ record: reserva, tipo: 'cancelacion' }),
+  }).catch(() => null)
+  // Obtener slug de la barbería para revalidar el panel admin
+  const { data: barberia } = await admin.from('barberias')
+    .select('slug')
+    .eq('id', reserva.barberia_id)
+    .maybeSingle()
   revalidatePath('/', 'layout')
+  if (barberia?.slug) revalidatePath(`/${barberia.slug}/admin`)
 }
 
 export default async function ClientePage({ params }: { params: Promise<{ slug: string }> }) {
@@ -65,10 +91,10 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
 
   const { data: proximaCita } = await supabase
     .from('reservas')
-    .select('id, fecha_hora, servicios(nombre), barberos(nombre)')
+    .select('id, fecha_hora, estado, servicios(nombre), barberos(nombre)')
     .eq('cliente_id', user.id)
     .eq('barberia_id', barberia.id)
-    .eq('estado', 'confirmada')
+    .in('estado', ['confirmada', 'en_curso', 'pendiente'])
     .gte('fecha_hora', new Date().toISOString())
     .order('fecha_hora')
     .limit(1)

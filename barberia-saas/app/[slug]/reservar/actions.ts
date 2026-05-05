@@ -55,6 +55,29 @@ export async function crearReserva(input: ReservaInput) {
     }
   }
 
+  // Descuento nuevo cliente referido — se aplica en la primera reserva si viene con refCode
+  if (input.refCode && !alianzaExcluye) {
+    const { count: prevCount } = await adminSupabase
+      .from('reservas')
+      .select('id', { count: 'exact', head: true })
+      .eq('cliente_id', user.id)
+      .eq('barberia_id', input.barberiaId)
+      .neq('estado', 'cancelada')
+    if ((prevCount ?? 0) === 0) {
+      const { data: barberiaConf } = await adminSupabase
+        .from('barberias')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .select('referido_descuento_nuevo_cliente_pct' as any)
+        .eq('id', input.barberiaId)
+        .maybeSingle()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const descNuevoPct = (barberiaConf as any)?.referido_descuento_nuevo_cliente_pct ?? 0
+      if (descNuevoPct > 0) {
+        descuento += Math.round(input.precio * descNuevoPct / 100)
+      }
+    }
+  }
+
   // Descuento masivo — se omite si la alianza excluye otros descuentos
   let descuentoMasivoId: string | null = null
   if (!alianzaExcluye) {

@@ -22,11 +22,6 @@ export function PWAInstallPrompt() {
 
     if (!ios && !android) return
 
-    // Registrar SW para habilitar beforeinstallprompt en futuras visitas
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').catch(() => null)
-    }
-
     setIsIOS(ios)
     setVisible(true) // mostrar instrucciones manuales de inmediato
 

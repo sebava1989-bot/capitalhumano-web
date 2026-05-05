@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { PushPermission } from '@/components/push/PushPermission'
 import { PWAInstallPrompt } from '@/components/cliente/PWAInstallPrompt'
+import { SWRegister } from '@/components/cliente/SWRegister'
 
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
@@ -14,12 +15,15 @@ export async function generateMetadata(
   return {
     title: nombre,
     description: `Reserva tu hora en ${nombre}`,
-    manifest: `/${slug}/cliente/manifest.webmanifest`,
+    manifest: `/${slug}/manifest.webmanifest`,
     appleWebApp: {
       capable: true,
       title: nombre,
       statusBarStyle: 'black-translucent',
     },
+    icons: [
+      { rel: 'apple-touch-icon', url: '/icon-192.png?v=3', sizes: '192x192' },
+    ],
     other: {
       'mobile-web-app-capable': 'yes',
     },
@@ -33,6 +37,7 @@ export default function ClienteLayout({ children }: { children: React.ReactNode 
       <footer className="text-center py-4 text-zinc-700 text-xs">
         Desarrollado por <span className="text-zinc-500 font-medium">Tu Amigo Digital SpA</span>
       </footer>
+      <SWRegister />
       <PushPermission />
       <PWAInstallPrompt />
     </div>

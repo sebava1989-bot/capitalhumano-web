@@ -7,6 +7,8 @@ import { TopServicios } from '@/components/admin/TopServicios'
 import { TopClientes } from '@/components/admin/TopClientes'
 import { WspInviteButton } from '@/components/admin/WspInviteButton'
 import { ReasignarBarberoButton } from '@/components/admin/ReasignarBarberoButton'
+import { RealtimeAdminRefresh } from '@/components/admin/RealtimeAdminRefresh'
+import { AdminActionButton } from '@/components/admin/AdminActionButton'
 import { startOfDay, endOfDay, startOfMonth, startOfWeek, endOfWeek, format, isSameDay } from 'date-fns'
 import { toZonedTime, fromZonedTime } from 'date-fns-tz'
 import { es } from 'date-fns/locale'
@@ -81,19 +83,18 @@ async function terminarCita(formData: FormData) {
 
   if (!reserva || reserva.estado === 'completada') return
 
+  // Obtener ref_code por separado (no está en el tipo generado)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: reservaRef } = await (supabase as any)
+    .from('reservas').select('ref_code').eq('id', reservaId).maybeSingle()
+
   // Solo marcar como completada — recién aquí se suma al ingreso
   await supabase.from('reservas').update({ estado: 'completada' }).eq('id', reservaId)
 
-  // Verificar si el cliente fue referido y si esta es su primera cita completada
+  // Verificar si el cliente fue referido usando ref_code de la reserva
   if (reserva.cliente_id) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: clienteData } = await (supabase as any)
-      .from('users')
-      .select('referred_by_code')
-      .eq('id', reserva.cliente_id)
-      .maybeSingle()
-
-    const referredByCode = clienteData?.referred_by_code
+    const referredByCode = (reservaRef as any)?.ref_code as string | null
     if (referredByCode) {
       const { count } = await supabase
         .from('reservas')
@@ -209,7 +210,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .from('reservas')
     .select('id, fecha_hora, estado, barbero_id, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
-    .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente'])
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente', 'cancelada'])
     .gte('fecha_hora', todayStartISO)
     .lte('fecha_hora', todayEndISO)
     .order('fecha_hora')
@@ -221,7 +222,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .from('reservas')
     .select('id, fecha_hora, estado, barbero_id, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
-    .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente'])
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente', 'cancelada'])
     .gte('fecha_hora', semanaStart.toISOString())
     .lte('fecha_hora', semanaEnd.toISOString())
     .order('fecha_hora')
@@ -239,6 +240,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
 
   return (
     <div>
+      <RealtimeAdminRefresh barberiaId={barberia.id} />
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
         <h1 className="text-2xl font-bold text-white">{barberia.nombre}</h1>
         <WspInviteButton slug={slug} barberiaNombre={barberia.nombre} />
@@ -262,14 +264,17 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                 className={`flex items-center gap-3 rounded-xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.3)] border
                   ${r.estado === 'en_curso'
                     ? 'bg-gradient-to-r from-blue-950/60 to-zinc-900/80 border-blue-500/40'
+                    : r.estado === 'cancelada'
+                    ? 'bg-gradient-to-r from-red-950/30 to-zinc-900/60 border-red-900/40 opacity-60'
                     : 'bg-gradient-to-r from-zinc-800/80 to-zinc-900/80 border-zinc-700/60'}`}>
                 <div className={`w-2 h-2 rounded-full flex-shrink-0
                   ${r.estado === 'completada' ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.6)]'
                     : r.estado === 'en_curso' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]'
+                    : r.estado === 'cancelada' ? 'bg-red-500'
                     : r.estado === 'pendiente' ? 'bg-zinc-500'
                     : 'bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.6)]'}`} />
                 <span className="text-white font-mono text-sm w-12 flex-shrink-0">
-                  {new Date(r.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
+                  {format(toZonedTime(new Date(r.fecha_hora), TZ), 'HH:mm')}
                 </span>
                 <div className="flex-1 min-w-0">
                   <span className="text-white font-medium truncate block">{r.cliente_nombre ?? 'Sin nombre'}</span>
@@ -293,12 +298,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                     <form action={iniciarCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <button type="submit"
-                        className="text-xs px-3 py-1.5 rounded-lg font-bold
-                          bg-blue-500/20 text-blue-400 border border-blue-500/40
-                          hover:bg-blue-500/30 transition-colors whitespace-nowrap">
+                      <AdminActionButton pendingText="..." className="text-xs px-3 py-1.5 rounded-lg font-bold bg-blue-500/20 text-blue-400 border border-blue-500/40 hover:bg-blue-500/30 whitespace-nowrap">
                         ▶ Comenzar
-                      </button>
+                      </AdminActionButton>
                     </form>
                     <ReasignarBarberoButton
                       reservaId={r.id}
@@ -309,12 +311,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                     <form action={noAsisteCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <button type="submit"
-                        className="text-xs px-3 py-1.5 rounded-lg font-bold
-                          bg-red-500/10 text-red-400 border border-red-500/30
-                          hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                      <AdminActionButton pendingText="..." className="text-xs px-3 py-1.5 rounded-lg font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 whitespace-nowrap">
                         ✕ No asiste
-                      </button>
+                      </AdminActionButton>
                     </form>
                   </div>
                 )}
@@ -323,12 +322,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                     <form action={terminarCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <button type="submit"
-                        className="text-xs px-3 py-1.5 rounded-lg font-bold
-                          bg-green-500/20 text-green-400 border border-green-500/40
-                          hover:bg-green-500/30 transition-colors whitespace-nowrap">
+                      <AdminActionButton pendingText="..." className="text-xs px-3 py-1.5 rounded-lg font-bold bg-green-500/20 text-green-400 border border-green-500/40 hover:bg-green-500/30 whitespace-nowrap">
                         ✓ Terminar
-                      </button>
+                      </AdminActionButton>
                     </form>
                     <ReasignarBarberoButton
                       reservaId={r.id}
@@ -339,12 +335,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                     <form action={noAsisteCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
-                      <button type="submit"
-                        className="text-xs px-3 py-1.5 rounded-lg font-bold
-                          bg-red-500/10 text-red-400 border border-red-500/30
-                          hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                      <AdminActionButton pendingText="..." className="text-xs px-3 py-1.5 rounded-lg font-bold bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 whitespace-nowrap">
                         ✕ No asiste
-                      </button>
+                      </AdminActionButton>
                     </form>
                   </div>
                 )}
@@ -358,6 +351,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                   <span className="text-xs px-3 py-1.5 rounded-lg font-medium
                     bg-zinc-700/50 text-zinc-500 border border-zinc-700/50 flex-shrink-0">
                     Pendiente
+                  </span>
+                )}
+                {r.estado === 'cancelada' && (
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium
+                    bg-red-500/10 text-red-400 border border-red-500/20 flex-shrink-0">
+                    Cancelada
                   </span>
                 )}
               </div>
@@ -380,7 +379,10 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
         )}
 
         <div className="space-y-5">
-          {[...porDia.entries()].map(([dia, citas]) => {
+          {[...porDia.entries()].filter(([dia]) => {
+            const fecha = new Date(dia + 'T12:00:00')
+            return !isSameDay(fecha, today)
+          }).map(([dia, citas]) => {
             const fecha = new Date(dia + 'T12:00:00')
             const esHoy = isSameDay(fecha, today)
             return (
@@ -403,10 +405,11 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                       <div className={`w-2 h-2 rounded-full flex-shrink-0
                         ${r.estado === 'completada' ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.6)]'
                           : r.estado === 'en_curso' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]'
+                          : r.estado === 'cancelada' ? 'bg-red-500'
                           : r.estado === 'pendiente' ? 'bg-zinc-500'
                           : 'bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.6)]'}`} />
                       <span className="text-white font-mono text-sm w-12 flex-shrink-0">
-                        {new Date(r.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
+                        {format(toZonedTime(new Date(r.fecha_hora), TZ), 'HH:mm')}
                       </span>
                       <span className="text-white flex-1 font-medium truncate">{r.cliente_nombre ?? 'Sin nombre'}</span>
                       <span className="text-zinc-400 text-sm hidden sm:block truncate max-w-[120px]">
@@ -430,12 +433,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                           <form action={iniciarCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
-                            <button type="submit"
-                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
-                                bg-blue-500/10 text-blue-400 border border-blue-500/30
-                                hover:bg-blue-500/20 transition-colors whitespace-nowrap">
+                            <AdminActionButton pendingText="..." className="text-xs px-2.5 py-1.5 rounded-lg font-medium bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 whitespace-nowrap">
                               ▶ Comenzar
-                            </button>
+                            </AdminActionButton>
                           </form>
                           <ReasignarBarberoButton
                             reservaId={r.id}
@@ -446,12 +446,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                           <form action={noAsisteCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
-                            <button type="submit"
-                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
-                                bg-red-500/10 text-red-400 border border-red-500/30
-                                hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                            <AdminActionButton pendingText="..." className="text-xs px-2.5 py-1.5 rounded-lg font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 whitespace-nowrap">
                               ✕ No asiste
-                            </button>
+                            </AdminActionButton>
                           </form>
                         </div>
                       )}
@@ -460,12 +457,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                           <form action={terminarCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
-                            <button type="submit"
-                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
-                                bg-green-500/10 text-green-400 border border-green-500/30
-                                hover:bg-green-500/20 transition-colors whitespace-nowrap">
+                            <AdminActionButton pendingText="..." className="text-xs px-2.5 py-1.5 rounded-lg font-medium bg-green-500/10 text-green-400 border border-green-500/30 hover:bg-green-500/20 whitespace-nowrap">
                               ✓ Terminar
-                            </button>
+                            </AdminActionButton>
                           </form>
                           <ReasignarBarberoButton
                             reservaId={r.id}
@@ -476,12 +470,9 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                           <form action={noAsisteCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
-                            <button type="submit"
-                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
-                                bg-red-500/10 text-red-400 border border-red-500/30
-                                hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                            <AdminActionButton pendingText="..." className="text-xs px-2.5 py-1.5 rounded-lg font-medium bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20 whitespace-nowrap">
                               ✕ No asiste
-                            </button>
+                            </AdminActionButton>
                           </form>
                         </div>
                       )}
@@ -495,6 +486,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                         <span className="text-xs px-3 py-1.5 rounded-lg font-medium
                           bg-zinc-700/50 text-zinc-500 border border-zinc-700/50 flex-shrink-0">
                           Pendiente
+                        </span>
+                      )}
+                      {r.estado === 'cancelada' && (
+                        <span className="text-xs px-3 py-1.5 rounded-lg font-medium
+                          bg-red-500/10 text-red-400 border border-red-500/20 flex-shrink-0">
+                          Cancelada
                         </span>
                       )}
                     </div>

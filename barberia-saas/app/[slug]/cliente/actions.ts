@@ -55,13 +55,54 @@ export async function calificarReserva(formData: FormData) {
   if (reserva?.barberia_id) {
     const admin = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (admin as any)
+    const { data: premiosConfirmados } = await (admin as any)
       .from('referido_premios')
-      .update({ confirmado: true })
+      .select('id, referidor_id, descuento_pct')
       .eq('referido_id', user.id)
       .eq('barberia_id', reserva.barberia_id)
       .eq('confirmado', false)
       .eq('canjeado', false)
+
+    if (premiosConfirmados && premiosConfirmados.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (admin as any)
+        .from('referido_premios')
+        .update({ confirmado: true })
+        .eq('referido_id', user.id)
+        .eq('barberia_id', reserva.barberia_id)
+        .eq('confirmado', false)
+        .eq('canjeado', false)
+
+      // Notificar al referidor por push
+      const referidorId = premiosConfirmados[0].referidor_id
+      const descuentoPct = premiosConfirmados[0].descuento_pct
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: referidor } = await (admin as any)
+        .from('users')
+        .select('fcm_token, nombre')
+        .eq('id', referidorId)
+        .maybeSingle()
+
+      const fcmToken = referidor?.fcm_token
+      const fcmKey = process.env.FCM_SERVER_KEY
+      if (fcmToken && fcmKey) {
+        fetch('https://fcm.googleapis.com/fcm/send', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `key=${fcmKey}`,
+          },
+          body: JSON.stringify({
+            to: fcmToken,
+            notification: {
+              title: '🎁 ¡Ganaste un descuento!',
+              body: `Tu referido completó su primera cita. Tienes un ${descuentoPct}% de descuento disponible.`,
+              sound: 'default',
+            },
+          }),
+        }).catch(() => null)
+      }
+    }
   }
 
   revalidatePath(`/${slug}/cliente`)

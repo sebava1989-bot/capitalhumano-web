@@ -34,6 +34,8 @@ serve(async (req) => {
       supabase.from('servicios').select('nombre').eq('id', record.servicio_id).maybeSingle(),
     ])
 
+    const tipo = payload.tipo ?? 'nueva' // 'nueva' | 'cancelacion'
+
     const fecha = new Date(record.fecha_hora)
     const hora = fecha.toLocaleTimeString('es-CL', {
       hour: '2-digit',
@@ -42,6 +44,9 @@ serve(async (req) => {
     })
 
     const body = `${hora} · ${servicio?.nombre ?? 'Servicio'} con ${barbero?.nombre ?? 'Barbero'}`
+    const title = tipo === 'cancelacion'
+      ? `❌ ${record.cliente_nombre ?? 'Cliente'} canceló su cita`
+      : '📅 Nueva reserva'
 
     // Send FCM notification via HTTP v1 legacy API
     const fcmRes = await fetch('https://fcm.googleapis.com/fcm/send', {
@@ -53,7 +58,7 @@ serve(async (req) => {
       body: JSON.stringify({
         to: token,
         notification: {
-          title: 'Nueva reserva',
+          title,
           body,
           sound: 'default',
         },
