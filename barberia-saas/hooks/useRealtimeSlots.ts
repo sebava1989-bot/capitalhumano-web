@@ -4,6 +4,17 @@ import { createClient } from '@/lib/supabase/client'
 import { generateSlots, getAvailableSlots } from '@/lib/slots'
 import type { Slot } from '@/lib/slots'
 
+function filterPastSlots(slots: string[], fechaStr: string): string[] {
+  const todayStr = new Date().toISOString().split('T')[0]
+  if (fechaStr !== todayStr) return slots
+  const now = new Date()
+  const currentMinutes = now.getHours() * 60 + now.getMinutes()
+  return slots.filter(slot => {
+    const [h, m] = slot.split(':').map(Number)
+    return h * 60 + m > currentMinutes
+  })
+}
+
 export function useRealtimeSlots(
   barberiaId: string,
   barberoId: string,
@@ -30,7 +41,7 @@ export function useRealtimeSlots(
 
       const bookedSlots: Slot[] = Array.isArray(data?.slots) ? (data.slots as unknown as Slot[]) : []
       const allSlots = generateSlots('09:00', '18:00', duracionMin)
-      setAvailableSlots(getAvailableSlots(allSlots, bookedSlots))
+      setAvailableSlots(filterPastSlots(getAvailableSlots(allSlots, bookedSlots), fechaStr))
       setLoading(false)
     }
 
@@ -50,7 +61,7 @@ export function useRealtimeSlots(
           if (payload.new.barberia_id !== barberiaId) return
           const bookedSlots: Slot[] = Array.isArray(payload.new.slots) ? payload.new.slots : []
           const allSlots = generateSlots('09:00', '18:00', duracionMin)
-          setAvailableSlots(getAvailableSlots(allSlots, bookedSlots))
+          setAvailableSlots(filterPastSlots(getAvailableSlots(allSlots, bookedSlots), fechaStr))
         }
       )
       .subscribe()
