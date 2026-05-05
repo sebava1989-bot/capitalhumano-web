@@ -41,6 +41,9 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
   const [codigoError, setCodigoError] = useState('')
   const [checkingCodigo, setCheckingCodigo] = useState(false)
 
+  // Referral discount
+  const [referralDescuento, setReferralDescuento] = useState(0)
+
   const supabase = useMemo(() => createClient(), [])
 
   const fechaHora = useMemo(() => {
@@ -54,19 +57,38 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        // Redirigir a registro preservando el ref code para que vuelva con descuento
         const slug = pathname.split('/')[1]
         const registroUrl = `/${slug}/registro${refCode ? `?ref=${refCode}` : ''}`
         router.replace(registroUrl)
         return
       }
 
-      const [discount, { data: perfil }] = await Promise.all([
+      const [discount, { data: perfil }, { data: userProfile }] = await Promise.all([
         calcularDescuentoAlianza(barberia.id, servicio.id, fechaHora, undefined, user.id),
         supabase.from('users').select('nombre, telefono').eq('id', user.id).maybeSingle(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any).from('users').select('referred_by_code').eq('id', user.id).maybeSingle(),
       ])
 
       if (discount) setAlianza(discount)
+
+      // Calcular descuento referido si es primera reserva
+      const referredByCode = (userProfile as any)?.referred_by_code ?? refCode ?? null
+      if (referredByCode) {
+        const { count: prevCount } = await supabase.from('reservas')
+          .select('id', { count: 'exact', head: true })
+          .eq('cliente_id', user.id)
+          .eq('barberia_id', barberia.id)
+          .neq('estado', 'cancelada')
+        if ((prevCount ?? 0) === 0) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: barberiaConf } = await (supabase as any).from('barberias')
+            .select('referido_descuento_nuevo_cliente_pct')
+            .eq('id', barberia.id).maybeSingle()
+          const pct = (barberiaConf as any)?.referido_descuento_nuevo_cliente_pct ?? 0
+          if (pct > 0) setReferralDescuento(Math.round(servicio.precio * pct / 100))
+        }
+      }
 
       if (!perfil?.nombre || !perfil?.telefono) {
         setPNombre(perfil?.nombre ?? '')
@@ -90,7 +112,7 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
   }
 
   const descuentoAlianza = alianza?.monto ?? 0
-  const precioFinal = servicio.precio - descuentoAlianza
+  const precioFinal = servicio.precio - descuentoAlianza - referralDescuento
 
   async function handleProfile(e: React.FormEvent) {
     e.preventDefault()
@@ -190,6 +212,12 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
           <span className="text-zinc-400 text-sm">Precio</span>
           <span className="text-white">${servicio.precio.toLocaleString('es-CL')}</span>
         </div>
+        {referralDescuento > 0 && (
+          <div className="flex justify-between text-green-400">
+            <span className="text-sm">🎁 Dcto. referido (primera cita)</span>
+            <span className="font-medium">-${referralDescuento.toLocaleString('es-CL')}</span>
+          </div>
+        )}
         {alianza && (
           <div className="flex justify-between text-green-400">
             <span className="text-sm">Dcto. alianza ({alianza.nombre})</span>
