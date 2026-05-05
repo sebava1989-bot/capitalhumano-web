@@ -38,10 +38,31 @@ export async function calificarReserva(formData: FormData) {
 
   if (!reservaId || calificacion < 1 || calificacion > 5) return
 
+  // Obtener barberia_id de la reserva para confirmar el premio del referidor
+  const { data: reserva } = await supabase
+    .from('reservas')
+    .select('barberia_id')
+    .eq('id', reservaId)
+    .eq('cliente_id', user.id)
+    .maybeSingle()
+
   await supabase.from('reservas')
     .update({ calificacion, nota_cliente: nota || null })
     .eq('id', reservaId)
     .eq('cliente_id', user.id)
+
+  // Confirmar el premio de referido pendiente para quien refirió a este cliente
+  if (reserva?.barberia_id) {
+    const admin = createAdminClient()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (admin as any)
+      .from('referido_premios')
+      .update({ confirmado: true })
+      .eq('referido_id', user.id)
+      .eq('barberia_id', reserva.barberia_id)
+      .eq('confirmado', false)
+      .eq('canjeado', false)
+  }
 
   revalidatePath(`/${slug}/cliente`)
 }

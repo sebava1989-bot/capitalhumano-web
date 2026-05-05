@@ -29,14 +29,14 @@ export async function crearReserva(input: ReservaInput) {
   const nombre = input.clienteNombre || userData?.nombre || user.email?.split('@')[0] || 'Cliente'
 
   let descuento = 0
-  // Descuento por alianza (se suma al de referido si ambos aplican)
-  let alianzaDescuento = 0
   let alianzaId: string | null = null
+  let alianzaExcluye = false
+  let alianzaDescuento = 0
+
   const alianzaResult = await calcularDescuentoAlianza(
-    input.barberiaId, input.servicioId, input.fechaHora, input.alianzaCodigo
+    input.barberiaId, input.servicioId, input.fechaHora, input.alianzaCodigo, user.id
   )
   if (alianzaResult) {
-    // Verificar que el cliente no haya agotado los usos permitidos
     const maxUsos = alianzaResult.maxUsosPorCliente
     let usosPrevios = 0
     if (maxUsos !== null) {
@@ -48,61 +48,67 @@ export async function crearReserva(input: ReservaInput) {
       usosPrevios = count ?? 0
     }
     if (maxUsos === null || usosPrevios < maxUsos) {
-      alianzaDescuento = alianzaResult.monto
       alianzaId = alianzaResult.alianzaId
+      alianzaExcluye = alianzaResult.excluyeOtrosDescuentos
+      alianzaDescuento = alianzaResult.monto
       descuento += alianzaDescuento
     }
   }
 
-  // Descuento masivo pendiente (cargado por el admin a segmentos)
+  // Descuento masivo — se omite si la alianza excluye otros descuentos
   let descuentoMasivoId: string | null = null
-  const { data: dctoMasivo } = await adminSupabase
-    .from('descuentos_masivos')
-    .select('id, descuento_pct')
-    .eq('barberia_id', input.barberiaId)
-    .eq('cliente_id', user.id)
-    .eq('canjeado', false)
-    .order('created_at')
-    .limit(1)
-    .maybeSingle()
-  if (dctoMasivo) {
-    descuento += Math.round(input.precio * dctoMasivo.descuento_pct / 100)
-    descuentoMasivoId = dctoMasivo.id
+  if (!alianzaExcluye) {
+    const { data: dctoMasivo } = await adminSupabase
+      .from('descuentos_masivos')
+      .select('id, descuento_pct')
+      .eq('barberia_id', input.barberiaId)
+      .eq('cliente_id', user.id)
+      .eq('canjeado', false)
+      .order('created_at')
+      .limit(1)
+      .maybeSingle()
+    if (dctoMasivo) {
+      descuento += Math.round(input.precio * dctoMasivo.descuento_pct / 100)
+      descuentoMasivoId = dctoMasivo.id
+    }
   }
 
-  // Premios de referido pendientes — lógica acumulable
+  // Premios de referido — se omiten si la alianza excluye otros descuentos
   const premiosCanjeadosIds: string[] = []
-  const { data: barberiaConfRaw } = await adminSupabase
-    .from('barberias')
-    .select('referido_acumulable, referido_max_pct_por_servicio')
-    .eq('id', input.barberiaId)
-    .maybeSingle()
-  const barberiaConf = barberiaConfRaw as { referido_acumulable: boolean; referido_max_pct_por_servicio: number } | null
-  const acumulable = barberiaConf?.referido_acumulable ?? true
-  const maxPct = barberiaConf?.referido_max_pct_por_servicio ?? 50
+  if (!alianzaExcluye) {
+    const { data: barberiaConfRaw } = await adminSupabase
+      .from('barberias')
+      .select('referido_acumulable, referido_max_pct_por_servicio')
+      .eq('id', input.barberiaId)
+      .maybeSingle()
+    const barberiaConf = barberiaConfRaw as { referido_acumulable: boolean; referido_max_pct_por_servicio: number } | null
+    const acumulable = barberiaConf?.referido_acumulable ?? true
+    const maxPct = barberiaConf?.referido_max_pct_por_servicio ?? 50
 
-  const { data: premiosPendientes } = await adminSupabase
-    .from('referido_premios')
-    .select('id, descuento_pct')
-    .eq('barberia_id', input.barberiaId)
-    .eq('referidor_id', user.id)
-    .eq('canjeado', false)
-    .order('created_at')
+    const { data: premiosPendientes } = await (adminSupabase as any)
+      .from('referido_premios')
+      .select('id, descuento_pct')
+      .eq('barberia_id', input.barberiaId)
+      .eq('referidor_id', user.id)
+      .eq('canjeado', false)
+      .eq('confirmado', true)
+      .order('created_at')
 
-  if (premiosPendientes && premiosPendientes.length > 0) {
-    if (acumulable) {
-      let pctRestante = maxPct
-      for (const premio of premiosPendientes) {
-        if (pctRestante <= 0) break
-        const pctUsado = Math.min(premio.descuento_pct, pctRestante)
-        descuento += Math.round(input.precio * pctUsado / 100)
+    if (premiosPendientes && premiosPendientes.length > 0) {
+      if (acumulable) {
+        let pctRestante = maxPct
+        for (const premio of premiosPendientes) {
+          if (pctRestante <= 0) break
+          const pctUsado = Math.min(premio.descuento_pct, pctRestante)
+          descuento += Math.round(input.precio * pctUsado / 100)
+          premiosCanjeadosIds.push(premio.id)
+          pctRestante -= pctUsado
+        }
+      } else {
+        const premio = premiosPendientes[0]
+        descuento += Math.round(input.precio * premio.descuento_pct / 100)
         premiosCanjeadosIds.push(premio.id)
-        pctRestante -= pctUsado
       }
-    } else {
-      const premio = premiosPendientes[0]
-      descuento += Math.round(input.precio * premio.descuento_pct / 100)
-      premiosCanjeadosIds.push(premio.id)
     }
   }
 
