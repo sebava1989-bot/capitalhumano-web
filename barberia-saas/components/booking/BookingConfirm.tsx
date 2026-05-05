@@ -1,5 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -22,6 +23,8 @@ interface Props {
 type Step = 'loading' | 'profile' | 'summary' | 'confirmed'
 
 export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCode, onBack }: Props) {
+  const router = useRouter()
+  const pathname = usePathname()
   const [step, setStep] = useState<Step>('loading')
   const [bookingLoading, setBookingLoading] = useState(false)
 
@@ -50,7 +53,13 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
   useEffect(() => {
     async function init() {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return // proxy guarantees auth, shouldn't happen
+      if (!user) {
+        // Redirigir a registro preservando el ref code para que vuelva con descuento
+        const slug = pathname.split('/')[1]
+        const registroUrl = `/${slug}/registro${refCode ? `?ref=${refCode}` : ''}`
+        router.replace(registroUrl)
+        return
+      }
 
       const [discount, { data: perfil }] = await Promise.all([
         calcularDescuentoAlianza(barberia.id, servicio.id, fechaHora, undefined, user.id),

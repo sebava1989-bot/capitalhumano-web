@@ -48,7 +48,8 @@ export default function RegistroPage() {
     const { error: loginErr } = await supabase.auth.signInWithPassword({ email, password })
     setLoading(false)
     if (loginErr) { setError('Cuenta creada. Inicia sesión.'); router.push(`/${slug}/login`); return }
-    router.push(`/${slug}/reservar`)
+    const destino = refCode ? `/${slug}/reservar?ref=${refCode}` : `/${slug}/reservar`
+    router.push(destino)
   }
 
   return (
