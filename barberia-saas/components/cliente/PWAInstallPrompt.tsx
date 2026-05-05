@@ -1,11 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
 
-type Mode = 'native' | 'android-manual' | 'ios' | 'hidden'
-
 export function PWAInstallPrompt() {
-  const [mode, setMode] = useState<Mode>('hidden')
+  const [visible, setVisible] = useState(false)
+  const [useNative, setUseNative] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<{ prompt: () => Promise<void> } | null>(null)
+  const [isIOS, setIsIOS] = useState(false)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -17,42 +17,32 @@ export function PWAInstallPrompt() {
     if (isStandalone) return
 
     const ua = navigator.userAgent.toLowerCase()
-    const isIOS = /iphone|ipad|ipod/.test(ua)
-    const isAndroid = /android/.test(ua)
+    const ios = /iphone|ipad|ipod/.test(ua)
+    const android = /android/.test(ua)
 
-    // Registrar service worker para habilitar beforeinstallprompt
+    if (!ios && !android) return
+
+    // Registrar SW para habilitar beforeinstallprompt en futuras visitas
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').catch(() => null)
     }
 
-    if (isIOS) {
-      setMode('ios')
-      return
+    setIsIOS(ios)
+    setVisible(true) // mostrar instrucciones manuales de inmediato
+
+    // Si Chrome ofrece el prompt nativo, usarlo en lugar de instrucciones
+    const handler = (e: Event) => {
+      e.preventDefault()
+      setDeferredPrompt(e as unknown as { prompt: () => Promise<void> })
+      setUseNative(true)
     }
-
-    if (isAndroid) {
-      const handler = (e: Event) => {
-        e.preventDefault()
-        setDeferredPrompt(e as unknown as { prompt: () => Promise<void> })
-        setMode('native')
-      }
-      window.addEventListener('beforeinstallprompt', handler)
-
-      // Si el evento no llega en 3s, mostrar instrucciones manuales
-      const timer = setTimeout(() => {
-        setMode(prev => prev === 'hidden' ? 'android-manual' : prev)
-      }, 3000)
-
-      return () => {
-        window.removeEventListener('beforeinstallprompt', handler)
-        clearTimeout(timer)
-      }
-    }
+    window.addEventListener('beforeinstallprompt', handler)
+    return () => window.removeEventListener('beforeinstallprompt', handler)
   }, [])
 
   function dismiss() {
     localStorage.setItem('pwa-dismissed', '1')
-    setMode('hidden')
+    setVisible(false)
   }
 
   async function installNative() {
@@ -61,9 +51,10 @@ export function PWAInstallPrompt() {
     dismiss()
   }
 
-  if (mode === 'hidden') return null
+  if (!visible) return null
 
-  if (mode === 'native') {
+  // Prompt nativo disponible (Android Chrome tras varias visitas)
+  if (useNative) {
     return (
       <div className="fixed bottom-20 left-4 right-4 bg-zinc-900 border border-yellow-400/30 rounded-2xl p-4 shadow-2xl z-40 flex items-center gap-3">
         <span className="text-2xl flex-shrink-0">📲</span>
@@ -80,7 +71,8 @@ export function PWAInstallPrompt() {
     )
   }
 
-  if (mode === 'android-manual') {
+  // Instrucciones manuales iOS
+  if (isIOS) {
     return (
       <div className="fixed bottom-20 left-4 right-4 bg-zinc-900 border border-zinc-700 rounded-2xl p-4 shadow-2xl z-40">
         <div className="flex items-start gap-3">
@@ -88,16 +80,17 @@ export function PWAInstallPrompt() {
           <div className="flex-1">
             <p className="text-white text-sm font-semibold mb-1">Agregar a pantalla de inicio</p>
             <p className="text-zinc-400 text-xs leading-relaxed">
-              En Chrome, toca el menú <strong className="text-white">⋮</strong> (tres puntos arriba a la derecha) y selecciona <strong className="text-white">"Agregar a pantalla de inicio"</strong>.
+              Toca <strong className="text-white">Compartir ⎙</strong> abajo y luego{' '}
+              <strong className="text-white">"Agregar a inicio"</strong> para acceder como app.
             </p>
           </div>
-          <button onClick={dismiss} className="text-zinc-500 hover:text-white text-lg flex-shrink-0">✕</button>
+          <button onClick={dismiss} className="text-zinc-500 hover:text-white text-xl flex-shrink-0 leading-none">✕</button>
         </div>
       </div>
     )
   }
 
-  // iOS
+  // Instrucciones manuales Android Chrome
   return (
     <div className="fixed bottom-20 left-4 right-4 bg-zinc-900 border border-zinc-700 rounded-2xl p-4 shadow-2xl z-40">
       <div className="flex items-start gap-3">
@@ -105,10 +98,11 @@ export function PWAInstallPrompt() {
         <div className="flex-1">
           <p className="text-white text-sm font-semibold mb-1">Agregar a pantalla de inicio</p>
           <p className="text-zinc-400 text-xs leading-relaxed">
-            Toca <strong className="text-white">Compartir</strong> <span className="text-base">⎙</span> y luego <strong className="text-white">"Agregar a inicio"</strong> para acceder sin abrir el navegador.
+            Toca el menú <strong className="text-white">⋮</strong> (tres puntos) arriba a la derecha
+            en Chrome y selecciona <strong className="text-white">"Agregar a pantalla de inicio"</strong>.
           </p>
         </div>
-        <button onClick={dismiss} className="text-zinc-500 hover:text-white text-lg flex-shrink-0">✕</button>
+        <button onClick={dismiss} className="text-zinc-500 hover:text-white text-xl flex-shrink-0 leading-none">✕</button>
       </div>
     </div>
   )
