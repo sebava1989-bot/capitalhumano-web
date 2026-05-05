@@ -3,6 +3,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { generateSlots, getAvailableSlots } from '@/lib/slots'
 import type { Slot } from '@/lib/slots'
+import type { Horario } from '@/app/[slug]/reservar/page'
 
 function filterPastSlots(slots: string[], fechaStr: string): string[] {
   const todayStr = new Date().toISOString().split('T')[0]
@@ -19,7 +20,8 @@ export function useRealtimeSlots(
   barberiaId: string,
   barberoId: string,
   fecha: Date | null,
-  duracionMin: number
+  duracionMin: number,
+  horario: Horario
 ) {
   const [availableSlots, setAvailableSlots] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -40,7 +42,7 @@ export function useRealtimeSlots(
         .maybeSingle()
 
       const bookedSlots: Slot[] = Array.isArray(data?.slots) ? (data.slots as unknown as Slot[]) : []
-      const allSlots = generateSlots('09:00', '18:00', duracionMin)
+      const allSlots = generateSlots(horario.apertura, horario.cierre, duracionMin)
       setAvailableSlots(filterPastSlots(getAvailableSlots(allSlots, bookedSlots), fechaStr))
       setLoading(false)
     }
@@ -60,14 +62,14 @@ export function useRealtimeSlots(
         payload => {
           if (payload.new.barberia_id !== barberiaId) return
           const bookedSlots: Slot[] = Array.isArray(payload.new.slots) ? payload.new.slots : []
-          const allSlots = generateSlots('09:00', '18:00', duracionMin)
+          const allSlots = generateSlots(horario.apertura, horario.cierre, duracionMin)
           setAvailableSlots(filterPastSlots(getAvailableSlots(allSlots, bookedSlots), fechaStr))
         }
       )
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [barberoId, fecha, duracionMin, supabase])
+  }, [barberoId, fecha, duracionMin, supabase, horario.apertura, horario.cierre])
 
   return { availableSlots, loading }
 }

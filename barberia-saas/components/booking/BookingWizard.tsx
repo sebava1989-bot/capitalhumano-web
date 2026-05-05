@@ -5,6 +5,7 @@ import { BarberSelector } from './BarberSelector'
 import { TimeSlotPicker } from './TimeSlotPicker'
 import { BookingConfirm } from './BookingConfirm'
 import type { Json } from '@/types/database'
+import type { Horario } from '@/app/[slug]/reservar/page'
 
 interface Servicio { id: string; nombre: string; descripcion: string | null; duracion_min: number; precio: number }
 interface Barbero { id: string; nombre: string; foto_url: string | null; descripcion?: string | null }
@@ -15,9 +16,10 @@ interface Props {
   servicios: Servicio[]
   barberos: Barbero[]
   refCode?: string
+  horario: Horario
 }
 
-export function BookingWizard({ barberia, servicios, barberos, refCode }: Props) {
+export function BookingWizard({ barberia, servicios, barberos, refCode, horario }: Props) {
   const [step, setStep] = useState(1)
   const [servicio, setServicio] = useState<Servicio | null>(null)
   const [barbero, setBarbero] = useState<Barbero | null>(null)
@@ -70,6 +72,7 @@ export function BookingWizard({ barberia, servicios, barberos, refCode }: Props)
           barberiaId={barberia.id}
           barberoId={barbero.id}
           duracionMin={servicio.duracion_min}
+          horario={horario}
           onSelect={(f, h) => { setFecha(f); setHora(h); setStep(4) }}
           onBack={() => setStep(2)}
         />

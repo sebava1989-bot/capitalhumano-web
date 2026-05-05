@@ -3,21 +3,25 @@ import { useState } from 'react'
 import { useRealtimeSlots } from '@/hooks/useRealtimeSlots'
 import { addDays, format, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
+import type { Horario } from '@/app/[slug]/reservar/page'
 
 interface Props {
   barberiaId: string
   barberoId: string
   duracionMin: number
+  horario: Horario
   onSelect: (fecha: Date, hora: string) => void
   onBack: () => void
 }
 
-export function TimeSlotPicker({ barberiaId, barberoId, duracionMin, onSelect, onBack }: Props) {
+export function TimeSlotPicker({ barberiaId, barberoId, duracionMin, horario, onSelect, onBack }: Props) {
   const today = startOfDay(new Date())
-  const [fecha, setFecha] = useState<Date>(today)
-  const { availableSlots, loading } = useRealtimeSlots(barberiaId, barberoId, fecha, duracionMin)
 
-  const days = Array.from({ length: 7 }, (_, i) => addDays(today, i))
+  const allDays = Array.from({ length: 14 }, (_, i) => addDays(today, i))
+  const days = allDays.filter(d => horario.diasSemana.includes(d.getDay()))
+
+  const [fecha, setFecha] = useState<Date>(days[0] ?? today)
+  const { availableSlots, loading } = useRealtimeSlots(barberiaId, barberoId, fecha, duracionMin, horario)
 
   return (
     <div>

@@ -17,6 +17,12 @@ interface BarberoData {
   descripcion: string | null
 }
 
+export interface Horario {
+  apertura: string
+  cierre: string
+  diasSemana: number[]
+}
+
 interface Props {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ ref?: string }>
@@ -29,7 +35,7 @@ export default async function ReservarPage({ params, searchParams }: Props) {
 
   const { data } = await supabase
     .from('barberias')
-    .select('id, nombre, logo_url, colores')
+    .select('id, nombre, logo_url, colores, configuracion')
     .eq('slug', slug)
     .eq('activo', true)
     .single()
@@ -37,6 +43,12 @@ export default async function ReservarPage({ params, searchParams }: Props) {
   if (!data) notFound()
 
   const barberia = data as Barberia
+  const conf = (data.configuracion as Record<string, unknown>) ?? {}
+  const horario: Horario = {
+    apertura: (conf.apertura as string) ?? '09:00',
+    cierre: (conf.cierre as string) ?? '18:00',
+    diasSemana: (conf.diasSemana as number[]) ?? [1, 2, 3, 4, 5, 6],
+  }
 
   const { data: servicios } = await supabase
     .from('servicios')
@@ -66,6 +78,7 @@ export default async function ReservarPage({ params, searchParams }: Props) {
           servicios={servicios ?? []}
           barberos={(barberos ?? []) as unknown as BarberoData[]}
           refCode={ref}
+          horario={horario}
         />
       </div>
     </main>
