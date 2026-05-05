@@ -1,10 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { StatsCards } from '@/components/admin/StatsCards'
 import { TopServicios } from '@/components/admin/TopServicios'
 import { TopClientes } from '@/components/admin/TopClientes'
 import { WspInviteButton } from '@/components/admin/WspInviteButton'
+import { ReasignarBarberoButton } from '@/components/admin/ReasignarBarberoButton'
 import { startOfDay, endOfDay, startOfMonth, startOfWeek, endOfWeek, format, isSameDay } from 'date-fns'
 import { toZonedTime, fromZonedTime } from 'date-fns-tz'
 import { es } from 'date-fns/locale'
@@ -43,6 +45,22 @@ async function noAsisteCita(formData: FormData) {
   await supabase.from('reservas').update({ estado: 'cancelada' }).eq('id', reservaId)
     .in('estado', ['confirmada', 'en_curso'])
   revalidatePath(`/${slug}/admin`)
+}
+
+async function reasignarBarbero(reservaId: string, nuevoBarberoId: string) {
+  'use server'
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  const admin = createAdminClient()
+  const { data: reserva } = await supabase.from('reservas').select('barberia_id').eq('id', reservaId).maybeSingle()
+  if (!reserva) return
+  // Verificar que el nuevo barbero pertenece a esta barbería
+  const { data: barbero } = await admin.from('barberos').select('id')
+    .eq('id', nuevoBarberoId).eq('barberia_id', reserva.barberia_id).maybeSingle()
+  if (!barbero) return
+  await admin.from('reservas').update({ barbero_id: nuevoBarberoId }).eq('id', reservaId)
+  revalidatePath('/', 'layout')
 }
 
 async function terminarCita(formData: FormData) {
@@ -138,6 +156,10 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .from('barberias').select('id, nombre').eq('slug', slug).maybeSingle()
   if (!barberia) notFound()
 
+  const { data: barberosData } = await supabase
+    .from('barberos').select('id, nombre').eq('barberia_id', barberia.id).eq('activo', true).order('nombre')
+  const barberosList = (barberosData ?? []) as { id: string; nombre: string }[]
+
   const today = todayChile()
   const todayStartISO = startOfDayUTC(today)
   const todayEndISO = endOfDayUTC(today)
@@ -185,7 +207,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
 
   const { data: citasHoyDetalle } = await supabase
     .from('reservas')
-    .select('id, fecha_hora, estado, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
+    .select('id, fecha_hora, estado, barbero_id, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
     .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente'])
     .gte('fecha_hora', todayStartISO)
@@ -197,14 +219,14 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
 
   const { data: agendaSemana } = await supabase
     .from('reservas')
-    .select('id, fecha_hora, estado, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
+    .select('id, fecha_hora, estado, barbero_id, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
     .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente'])
     .gte('fecha_hora', semanaStart.toISOString())
     .lte('fecha_hora', semanaEnd.toISOString())
     .order('fecha_hora')
 
-  type AgendaItem = { id: string; fecha_hora: string; estado: string; cliente_nombre: string | null; precio: number; descuento: number; precio_final: number; servicios: unknown; barberos: unknown }
+  type AgendaItem = { id: string; fecha_hora: string; estado: string; barbero_id: string | null; cliente_nombre: string | null; precio: number; descuento: number; precio_final: number; servicios: unknown; barberos: unknown }
   const citasHoyList = (citasHoyDetalle ?? []) as AgendaItem[]
 
   // Agrupar agenda por día en hora chilena
@@ -267,7 +289,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                   )}
                 </div>
                 {r.estado === 'confirmada' && (
-                  <div className="flex gap-1.5 flex-shrink-0">
+                  <div className="flex gap-1.5 flex-shrink-0 flex-wrap justify-end">
                     <form action={iniciarCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
@@ -278,6 +300,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                         ▶ Comenzar
                       </button>
                     </form>
+                    <ReasignarBarberoButton
+                      reservaId={r.id}
+                      barberoActualId={r.barbero_id}
+                      barberos={barberosList}
+                      reasignarAction={reasignarBarbero}
+                    />
                     <form action={noAsisteCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
@@ -291,7 +319,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                   </div>
                 )}
                 {r.estado === 'en_curso' && (
-                  <div className="flex gap-1.5 flex-shrink-0">
+                  <div className="flex gap-1.5 flex-shrink-0 flex-wrap justify-end">
                     <form action={terminarCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
@@ -302,6 +330,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                         ✓ Terminar
                       </button>
                     </form>
+                    <ReasignarBarberoButton
+                      reservaId={r.id}
+                      barberoActualId={r.barbero_id}
+                      barberos={barberosList}
+                      reasignarAction={reasignarBarbero}
+                    />
                     <form action={noAsisteCita}>
                       <input type="hidden" name="reservaId" value={r.id} />
                       <input type="hidden" name="slug" value={slug} />
@@ -392,7 +426,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                         )}
                       </div>
                       {r.estado === 'confirmada' && (
-                        <div className="flex gap-1 flex-shrink-0">
+                        <div className="flex gap-1 flex-shrink-0 flex-wrap justify-end">
                           <form action={iniciarCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
@@ -403,6 +437,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                               ▶ Comenzar
                             </button>
                           </form>
+                          <ReasignarBarberoButton
+                            reservaId={r.id}
+                            barberoActualId={r.barbero_id}
+                            barberos={barberosList}
+                            reasignarAction={reasignarBarbero}
+                          />
                           <form action={noAsisteCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
@@ -416,7 +456,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                         </div>
                       )}
                       {r.estado === 'en_curso' && (
-                        <div className="flex gap-1 flex-shrink-0">
+                        <div className="flex gap-1 flex-shrink-0 flex-wrap justify-end">
                           <form action={terminarCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
@@ -427,6 +467,12 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                               ✓ Terminar
                             </button>
                           </form>
+                          <ReasignarBarberoButton
+                            reservaId={r.id}
+                            barberoActualId={r.barbero_id}
+                            barberos={barberosList}
+                            reasignarAction={reasignarBarbero}
+                          />
                           <form action={noAsisteCita}>
                             <input type="hidden" name="reservaId" value={r.id} />
                             <input type="hidden" name="slug" value={slug} />
