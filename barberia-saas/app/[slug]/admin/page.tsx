@@ -10,7 +10,32 @@ import { es } from 'date-fns/locale'
 import { Suspense } from 'react'
 import { PrediccionDemanda } from './prediccion'
 
-async function completarCita(formData: FormData) {
+async function iniciarCita(formData: FormData) {
+  'use server'
+  const supabase = await createClient()
+  const reservaId = formData.get('reservaId') as string
+  const slug = formData.get('slug') as string
+  if (!reservaId || !slug) return
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('reservas').update({ estado: 'en_curso' }).eq('id', reservaId).eq('estado', 'confirmada')
+  revalidatePath(`/${slug}/admin`)
+}
+
+async function noAsisteCita(formData: FormData) {
+  'use server'
+  const supabase = await createClient()
+  const reservaId = formData.get('reservaId') as string
+  const slug = formData.get('slug') as string
+  if (!reservaId || !slug) return
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await supabase.from('reservas').update({ estado: 'cancelada' }).eq('id', reservaId)
+    .in('estado', ['confirmada', 'en_curso'])
+  revalidatePath(`/${slug}/admin`)
+}
+
+async function terminarCita(formData: FormData) {
   'use server'
   const supabase = await createClient()
   const reservaId = formData.get('reservaId') as string
@@ -20,7 +45,6 @@ async function completarCita(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  // Obtener datos de la reserva con el cliente
   const { data: reserva } = await supabase
     .from('reservas')
     .select('id, cliente_id, barberia_id, estado')
@@ -29,7 +53,7 @@ async function completarCita(formData: FormData) {
 
   if (!reserva || reserva.estado === 'completada') return
 
-  // Marcar como completada
+  // Solo marcar como completada — recién aquí se suma al ingreso
   await supabase.from('reservas').update({ estado: 'completada' }).eq('id', reservaId)
 
   // Verificar si el cliente fue referido y si esta es su primera cita completada
@@ -43,7 +67,6 @@ async function completarCita(formData: FormData) {
 
     const referredByCode = clienteData?.referred_by_code
     if (referredByCode) {
-      // Verificar que sea la PRIMERA cita completada de este cliente en esta barbería
       const { count } = await supabase
         .from('reservas')
         .select('id', { count: 'exact', head: true })
@@ -52,7 +75,6 @@ async function completarCita(formData: FormData) {
         .eq('estado', 'completada')
 
       if ((count ?? 0) === 1) {
-        // Es la primera → dar premio al referidor y descuento al nuevo cliente
         const { data: barberia } = await supabase
           .from('barberias')
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,7 +91,6 @@ async function completarCita(formData: FormData) {
 
         if (referidor && barberia) {
           const b = barberia as unknown as Record<string, number>
-          // Premio al referidor
           const descReferidor = b.referido_descuento_pct ?? 10
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           await (supabase as any).from('referido_premios').insert({
@@ -81,7 +102,6 @@ async function completarCita(formData: FormData) {
             confirmado: false,
           })
 
-          // Descuento al nuevo cliente para su próxima cita
           const descNuevo = b.referido_descuento_nuevo_cliente_pct ?? 0
           if (descNuevo > 0) {
             await supabase.from('descuentos_masivos').insert({
@@ -153,7 +173,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .from('reservas')
     .select('id, fecha_hora, estado, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
-    .in('estado', ['confirmada', 'completada', 'pendiente'])
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente'])
     .gte('fecha_hora', startOfDay(today).toISOString())
     .lte('fecha_hora', endOfDay(today).toISOString())
     .order('fecha_hora')
@@ -165,7 +185,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .from('reservas')
     .select('id, fecha_hora, estado, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
-    .in('estado', ['confirmada', 'completada', 'pendiente'])
+    .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente'])
     .gte('fecha_hora', semanaStart.toISOString())
     .lte('fecha_hora', semanaEnd.toISOString())
     .order('fecha_hora')
@@ -203,22 +223,25 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
           <div className="space-y-2">
             {citasHoyList.map(r => (
               <div key={r.id}
-                className="flex items-center gap-3 bg-gradient-to-r from-zinc-800/80 to-zinc-900/80
-                  border border-zinc-700/60 rounded-xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
+                className={`flex items-center gap-3 rounded-xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.3)] border
+                  ${r.estado === 'en_curso'
+                    ? 'bg-gradient-to-r from-blue-950/60 to-zinc-900/80 border-blue-500/40'
+                    : 'bg-gradient-to-r from-zinc-800/80 to-zinc-900/80 border-zinc-700/60'}`}>
                 <div className={`w-2 h-2 rounded-full flex-shrink-0
                   ${r.estado === 'completada' ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.6)]'
+                    : r.estado === 'en_curso' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]'
                     : r.estado === 'pendiente' ? 'bg-zinc-500'
                     : 'bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.6)]'}`} />
                 <span className="text-white font-mono text-sm w-12 flex-shrink-0">
                   {new Date(r.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
                 </span>
-                <span className="text-white flex-1 font-medium truncate">{r.cliente_nombre ?? 'Sin nombre'}</span>
-                <span className="text-zinc-400 text-sm hidden sm:block truncate max-w-[120px]">
-                  {(r.servicios as unknown as { nombre: string })?.nombre}
-                </span>
-                <span className="text-zinc-500 text-sm hidden md:block truncate max-w-[100px]">
-                  {(r.barberos as unknown as { nombre: string })?.nombre}
-                </span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-white font-medium truncate block">{r.cliente_nombre ?? 'Sin nombre'}</span>
+                  <span className="text-zinc-400 text-xs truncate block">
+                    {(r.servicios as unknown as { nombre: string })?.nombre}
+                    {' · '}{(r.barberos as unknown as { nombre: string })?.nombre}
+                  </span>
+                </div>
                 <div className="flex flex-col items-end flex-shrink-0">
                   {r.descuento > 0 ? (
                     <>
@@ -229,23 +252,61 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                     <span className="text-white text-sm font-bold">${r.precio_final.toLocaleString('es-CL')}</span>
                   )}
                 </div>
-                {r.estado === 'confirmada' ? (
-                  <form action={completarCita}>
-                    <input type="hidden" name="reservaId" value={r.id} />
-                    <input type="hidden" name="slug" value={slug} />
-                    <button type="submit"
-                      className="text-xs px-3 py-1.5 rounded-lg font-bold
-                        bg-green-500/20 text-green-400 border border-green-500/40
-                        hover:bg-green-500/30 transition-colors whitespace-nowrap flex-shrink-0">
-                      ✓ Completar
-                    </button>
-                  </form>
-                ) : r.estado === 'completada' ? (
+                {r.estado === 'confirmada' && (
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    <form action={iniciarCita}>
+                      <input type="hidden" name="reservaId" value={r.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <button type="submit"
+                        className="text-xs px-3 py-1.5 rounded-lg font-bold
+                          bg-blue-500/20 text-blue-400 border border-blue-500/40
+                          hover:bg-blue-500/30 transition-colors whitespace-nowrap">
+                        ▶ Comenzar
+                      </button>
+                    </form>
+                    <form action={noAsisteCita}>
+                      <input type="hidden" name="reservaId" value={r.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <button type="submit"
+                        className="text-xs px-3 py-1.5 rounded-lg font-bold
+                          bg-red-500/10 text-red-400 border border-red-500/30
+                          hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                        ✕ No asiste
+                      </button>
+                    </form>
+                  </div>
+                )}
+                {r.estado === 'en_curso' && (
+                  <div className="flex gap-1.5 flex-shrink-0">
+                    <form action={terminarCita}>
+                      <input type="hidden" name="reservaId" value={r.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <button type="submit"
+                        className="text-xs px-3 py-1.5 rounded-lg font-bold
+                          bg-green-500/20 text-green-400 border border-green-500/40
+                          hover:bg-green-500/30 transition-colors whitespace-nowrap">
+                        ✓ Terminar
+                      </button>
+                    </form>
+                    <form action={noAsisteCita}>
+                      <input type="hidden" name="reservaId" value={r.id} />
+                      <input type="hidden" name="slug" value={slug} />
+                      <button type="submit"
+                        className="text-xs px-3 py-1.5 rounded-lg font-bold
+                          bg-red-500/10 text-red-400 border border-red-500/30
+                          hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                        ✕ No asiste
+                      </button>
+                    </form>
+                  </div>
+                )}
+                {r.estado === 'completada' && (
                   <span className="text-xs px-3 py-1.5 rounded-lg font-medium
                     bg-green-500/10 text-green-500 border border-green-500/20 flex-shrink-0">
                     ✓ Listo
                   </span>
-                ) : (
+                )}
+                {r.estado === 'pendiente' && (
                   <span className="text-xs px-3 py-1.5 rounded-lg font-medium
                     bg-zinc-700/50 text-zinc-500 border border-zinc-700/50 flex-shrink-0">
                     Pendiente
@@ -293,6 +354,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                         hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)]">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0
                         ${r.estado === 'completada' ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.6)]'
+                          : r.estado === 'en_curso' ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.8)]'
                           : r.estado === 'pendiente' ? 'bg-zinc-500'
                           : 'bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.6)]'}`} />
                       <span className="text-white font-mono text-sm w-12 flex-shrink-0">
@@ -315,23 +377,61 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
                           <span className="text-white text-sm font-bold">${r.precio_final.toLocaleString('es-CL')}</span>
                         )}
                       </div>
-                      {r.estado === 'confirmada' ? (
-                        <form action={completarCita}>
-                          <input type="hidden" name="reservaId" value={r.id} />
-                          <input type="hidden" name="slug" value={slug} />
-                          <button type="submit"
-                            className="text-xs px-3 py-1.5 rounded-lg font-medium
-                              bg-green-500/10 text-green-400 border border-green-500/30
-                              hover:bg-green-500/20 transition-colors whitespace-nowrap flex-shrink-0">
-                            ✓ Completar
-                          </button>
-                        </form>
-                      ) : r.estado === 'completada' ? (
+                      {r.estado === 'confirmada' && (
+                        <div className="flex gap-1 flex-shrink-0">
+                          <form action={iniciarCita}>
+                            <input type="hidden" name="reservaId" value={r.id} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <button type="submit"
+                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
+                                bg-blue-500/10 text-blue-400 border border-blue-500/30
+                                hover:bg-blue-500/20 transition-colors whitespace-nowrap">
+                              ▶ Comenzar
+                            </button>
+                          </form>
+                          <form action={noAsisteCita}>
+                            <input type="hidden" name="reservaId" value={r.id} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <button type="submit"
+                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
+                                bg-red-500/10 text-red-400 border border-red-500/30
+                                hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                              ✕ No asiste
+                            </button>
+                          </form>
+                        </div>
+                      )}
+                      {r.estado === 'en_curso' && (
+                        <div className="flex gap-1 flex-shrink-0">
+                          <form action={terminarCita}>
+                            <input type="hidden" name="reservaId" value={r.id} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <button type="submit"
+                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
+                                bg-green-500/10 text-green-400 border border-green-500/30
+                                hover:bg-green-500/20 transition-colors whitespace-nowrap">
+                              ✓ Terminar
+                            </button>
+                          </form>
+                          <form action={noAsisteCita}>
+                            <input type="hidden" name="reservaId" value={r.id} />
+                            <input type="hidden" name="slug" value={slug} />
+                            <button type="submit"
+                              className="text-xs px-2.5 py-1.5 rounded-lg font-medium
+                                bg-red-500/10 text-red-400 border border-red-500/30
+                                hover:bg-red-500/20 transition-colors whitespace-nowrap">
+                              ✕ No asiste
+                            </button>
+                          </form>
+                        </div>
+                      )}
+                      {r.estado === 'completada' && (
                         <span className="text-xs px-3 py-1.5 rounded-lg font-medium
-                          bg-zinc-700/50 text-zinc-500 border border-zinc-700/50 flex-shrink-0">
-                          Completada
+                          bg-green-500/10 text-green-500 border border-green-500/20 flex-shrink-0">
+                          ✓ Listo
                         </span>
-                      ) : (
+                      )}
+                      {r.estado === 'pendiente' && (
                         <span className="text-xs px-3 py-1.5 rounded-lg font-medium
                           bg-zinc-700/50 text-zinc-500 border border-zinc-700/50 flex-shrink-0">
                           Pendiente
