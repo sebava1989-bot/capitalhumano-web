@@ -10,7 +10,7 @@ interface Alianza {
   beneficio: string | null; activo: boolean
   descuento_pct: number | null; dias_semana: number[] | null
   servicio_ids: string[] | null; requiere_codigo: boolean; codigo_acceso: string | null
-  max_usos_por_cliente: number | null
+  max_usos_por_cliente: number | null; excluye_otros_descuentos: boolean
 }
 
 interface Servicio { id: string; nombre: string }
@@ -30,6 +30,7 @@ export default function AlianzasPage() {
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [requiereCodigo, setRequiereCodigo] = useState(false)
+  const [excluyeDescuentos, setExcluyeDescuentos] = useState(false)
   const supabase = createClient()
 
   async function load() {
@@ -40,7 +41,7 @@ export default function AlianzasPage() {
       supabase.from('alianzas').select('*').eq('barberia_id', barberia.id).order('created_at', { ascending: false }),
       supabase.from('servicios').select('id, nombre').eq('barberia_id', barberia.id).eq('activo', true),
     ])
-    setAlianzas(alianzasData ?? [])
+    setAlianzas((alianzasData ?? []) as unknown as Alianza[])
     setServicios(serviciosData ?? [])
 
     // Cargar conteo de usos por alianza
@@ -65,12 +66,14 @@ export default function AlianzasPage() {
     const fd = new FormData(e.currentTarget)
     fd.set('slug', slug)
     fd.set('requiere_codigo', requiereCodigo ? 'true' : 'false')
+    fd.set('excluye_otros_descuentos', excluyeDescuentos ? 'true' : 'false')
     const result = await crearAlianza(fd)
     setLoading(false)
     if (result && 'error' in result) { toast.error(result.error); return }
     toast.success('Alianza creada')
     setShowForm(false)
     setRequiereCodigo(false)
+    setExcluyeDescuentos(false)
     await load()
   }
 
@@ -182,6 +185,17 @@ export default function AlianzasPage() {
                   placeholder="Ej: CORP2026" />
               </div>
             )}
+
+            <div className="flex items-center gap-3 pt-1 border-t border-zinc-700/50">
+              <button type="button" onClick={() => setExcluyeDescuentos(!excluyeDescuentos)}
+                className={`w-10 h-6 rounded-full transition-colors flex-shrink-0 ${excluyeDescuentos ? 'bg-red-500' : 'bg-zinc-700'}`}>
+                <div className={`w-5 h-5 bg-white rounded-full mx-0.5 transition-transform ${excluyeDescuentos ? 'translate-x-4' : ''}`} />
+              </button>
+              <div>
+                <span className="text-zinc-300 text-sm">No acumula con otros descuentos</span>
+                <p className="text-zinc-600 text-xs">Referidos y descuentos masivos no se aplicarán si el cliente tiene esta alianza</p>
+              </div>
+            </div>
           </div>
 
           <div className="flex gap-2">
@@ -214,6 +228,11 @@ export default function AlianzasPage() {
                   {a.requiere_codigo && (
                     <span className="bg-zinc-700 text-zinc-300 text-xs px-2 py-0.5 rounded-full">
                       🔑 {a.codigo_acceso}
+                    </span>
+                  )}
+                  {a.excluye_otros_descuentos && (
+                    <span className="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded-full border border-red-500/30">
+                      Sin acumulación
                     </span>
                   )}
                 </div>

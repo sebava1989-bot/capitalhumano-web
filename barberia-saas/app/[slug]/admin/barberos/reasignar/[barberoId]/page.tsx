@@ -96,7 +96,8 @@ async function confirmarEliminar(formData: FormData) {
   if ((count ?? 0) > 0) return
 
   await admin.from('disponibilidad').delete().eq('barbero_id', barberoId)
-  await admin.from('reservas').update({ barbero_id: null }).eq('barbero_id', barberoId)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any).from('reservas').update({ barbero_id: null }).eq('barbero_id', barberoId)
   await admin.from('barberos').delete().eq('id', barberoId)
   redirect(`/${slug}/admin/barberos`)
 }

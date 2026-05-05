@@ -8,6 +8,7 @@ export interface DescuentoAlianza {
   monto: number
   requiereCodigo: boolean
   maxUsosPorCliente: number | null
+  excluyeOtrosDescuentos: boolean
 }
 
 export async function calcularDescuentoAlianza(
@@ -19,9 +20,10 @@ export async function calcularDescuentoAlianza(
 ): Promise<DescuentoAlianza | null> {
   const supabase = await createClient()
 
-  const { data: alianzas } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: alianzas } = await (supabase as any)
     .from('alianzas')
-    .select('id, nombre, descuento_pct, dias_semana, servicio_ids, requiere_codigo, codigo_acceso, max_usos_por_cliente')
+    .select('id, nombre, descuento_pct, dias_semana, servicio_ids, requiere_codigo, codigo_acceso, max_usos_por_cliente, excluye_otros_descuentos')
     .eq('barberia_id', barberiaId)
     .eq('activo', true)
     .not('descuento_pct', 'is', null)
@@ -30,7 +32,8 @@ export async function calcularDescuentoAlianza(
 
   const diaSemana = new Date(fechaHora).getDay()
 
-  type AlianzaRow = NonNullable<typeof alianzas>[0]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  type AlianzaRow = Record<string, any>
 
   function cumpleRestriccionesDiasServicio(a: AlianzaRow) {
     const dias = a.dias_semana as number[] | null
@@ -40,6 +43,7 @@ export async function calcularDescuentoAlianza(
     return true
   }
 
+  const alianzaRows = alianzas as AlianzaRow[]
   let aplicable: AlianzaRow | null = null
 
   // 1. Prioridad: alianzas asignadas manualmente por el admin (bypass de código)
@@ -51,13 +55,13 @@ export async function calcularDescuentoAlianza(
 
     if (asignaciones?.length) {
       const idsAsignados = new Set(asignaciones.map(a => a.alianza_id as string))
-      aplicable = alianzas.find(a => idsAsignados.has(a.id) && cumpleRestriccionesDiasServicio(a)) ?? null
+      aplicable = alianzaRows.find((a: AlianzaRow) => idsAsignados.has(a.id) && cumpleRestriccionesDiasServicio(a)) ?? null
     }
   }
 
   // 2. Fallback: alianza por código o automática (sin código requerido)
   if (!aplicable) {
-    aplicable = alianzas.find(a => {
+    aplicable = alianzaRows.find((a: AlianzaRow) => {
       if (!cumpleRestriccionesDiasServicio(a)) return false
       if (a.requiere_codigo) {
         if (!codigo || codigo.trim().toLowerCase() !== (a.codigo_acceso ?? '').trim().toLowerCase()) return false
@@ -73,12 +77,14 @@ export async function calcularDescuentoAlianza(
   const precio = servicio?.precio ?? 0
   const monto = Math.round(precio * (aplicable.descuento_pct as number) / 100)
 
+  const row = aplicable as { max_usos_por_cliente?: number | null; excluye_otros_descuentos?: boolean }
   return {
     alianzaId: aplicable.id,
     nombre: aplicable.nombre,
     descuentoPct: aplicable.descuento_pct as number,
     monto,
     requiereCodigo: aplicable.requiere_codigo,
-    maxUsosPorCliente: (aplicable as { max_usos_por_cliente?: number | null }).max_usos_por_cliente ?? null,
+    maxUsosPorCliente: row.max_usos_por_cliente ?? null,
+    excluyeOtrosDescuentos: row.excluye_otros_descuentos ?? false,
   }
 }

@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { asignarAlianza, quitarAlianza, cargarDescuentoMasivo } from '@/app/[slug]/admin/clientes/actions'
 import { toast } from 'sonner'
 
@@ -44,7 +44,18 @@ type Filtro = 'todos' | Segmento
 function AlianzaCell({ cliente, alianzas, slug }: { cliente: ClienteSegmentado; alianzas: AlianzaDisponible[]; slug: string }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [pos, setPos] = useState({ top: 0, left: 0 })
+  const btnRef = useRef<HTMLButtonElement>(null)
   const asignadas = cliente.alianzasAsignadas
+
+  useEffect(() => {
+    if (!open) return
+    const rect = btnRef.current?.getBoundingClientRect()
+    if (rect) setPos({ top: rect.bottom + window.scrollY + 4, left: rect.right - 180 })
+    const close = () => setOpen(false)
+    document.addEventListener('click', close, { capture: true })
+    return () => document.removeEventListener('click', close, { capture: true })
+  }, [open])
 
   async function toggle(alianzaId: string) {
     setLoading(true)
@@ -60,8 +71,8 @@ function AlianzaCell({ cliente, alianzas, slug }: { cliente: ClienteSegmentado; 
   const asignadaNombre = alianzas.find(a => asignadas.includes(a.id))?.nombre
 
   return (
-    <div className="relative">
-      <button onClick={() => setOpen(!open)} disabled={loading}
+    <div>
+      <button ref={btnRef} onClick={e => { e.stopPropagation(); setOpen(!open) }} disabled={loading}
         className={`text-xs px-2 py-1 rounded-lg transition-colors ${
           asignadaNombre
             ? 'bg-yellow-400/20 text-yellow-400 hover:bg-yellow-400/30'
@@ -69,24 +80,27 @@ function AlianzaCell({ cliente, alianzas, slug }: { cliente: ClienteSegmentado; 
         }`}>
         {loading ? '…' : asignadaNombre ? `🤝 ${asignadaNombre}` : '+ Alianza'}
       </button>
-      {open && (
-        <div className="absolute right-0 top-8 z-20 bg-zinc-900 border border-zinc-700 rounded-xl shadow-xl min-w-[180px]">
+      {open && typeof window !== 'undefined' && (
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{ position: 'fixed', top: pos.top, left: Math.max(8, pos.left), zIndex: 9999 }}
+          className="bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl min-w-[200px]">
           {alianzas.length === 0 && (
-            <p className="text-zinc-500 text-xs p-3">No hay alianzas con descuento</p>
+            <p className="text-zinc-500 text-xs p-3">No hay alianzas disponibles</p>
           )}
           {alianzas.map(a => (
             <button key={a.id} onClick={() => toggle(a.id)}
-              className={`w-full text-left px-3 py-2 text-sm hover:bg-zinc-800 flex items-center justify-between gap-2 ${
+              className={`w-full text-left px-3 py-2.5 text-sm hover:bg-zinc-800 flex items-center justify-between gap-2 first:rounded-t-xl last:rounded-b-xl ${
                 asignadas.includes(a.id) ? 'text-yellow-400' : 'text-white'
               }`}>
               <span>{a.nombre}</span>
-              <span className="text-zinc-500 text-xs">
-                {asignadas.includes(a.id) ? '✓ Quitar' : `${a.descuento_pct}%`}
+              <span className="text-zinc-500 text-xs shrink-0">
+                {asignadas.includes(a.id) ? '✓ Quitar' : a.descuento_pct ? `${a.descuento_pct}%` : ''}
               </span>
             </button>
           ))}
           <button onClick={() => setOpen(false)}
-            className="w-full text-center text-zinc-600 text-xs py-2 hover:text-zinc-400 border-t border-zinc-800">
+            className="w-full text-center text-zinc-600 text-xs py-2 hover:text-zinc-400 border-t border-zinc-800 rounded-b-xl">
             Cerrar
           </button>
         </div>

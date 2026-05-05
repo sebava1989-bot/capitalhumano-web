@@ -8,7 +8,8 @@ type Tipo = 'elogio' | 'sugerencia' | 'reclamo'
 export async function enviarSugerencia(
   barberiaId: string,
   tipo: Tipo,
-  mensaje: string
+  mensaje: string,
+  nombre?: string
 ): Promise<{ ok: boolean; error?: string }> {
   if (!['elogio', 'sugerencia', 'reclamo'].includes(tipo)) {
     return { ok: false, error: 'Tipo inválido' }
@@ -43,6 +44,7 @@ export async function enviarSugerencia(
     tipo,
     mensaje,
     ip_hash: ipHash,
+    nombre: nombre?.trim() || null,
   })
 
   if (insertError) {

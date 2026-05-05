@@ -48,7 +48,7 @@ export default async function BarberoPage({ params }: { params: Promise<{ slug: 
   const today = new Date()
   const { data: citas } = await supabase
     .from('reservas')
-    .select('id, fecha_hora, estado, cliente_nombre, precio_final, servicios(nombre)')
+    .select('id, fecha_hora, estado, cliente_nombre, precio, descuento, precio_final, servicios(nombre)')
     .eq('barbero_id', barbero.id)
     .eq('barberia_id', barberia.id)
     .gte('fecha_hora', startOfDay(today).toISOString())
@@ -86,7 +86,16 @@ export default async function BarberoPage({ params }: { params: Promise<{ slug: 
                 </p>
                 <p className="text-zinc-400 text-sm">{(c.servicios as unknown as { nombre: string })?.nombre}</p>
               </div>
-              <p className="text-white font-bold">${(c.precio_final ?? 0).toLocaleString('es-CL')}</p>
+              <div className="text-right">
+                {(c.descuento ?? 0) > 0 ? (
+                  <>
+                    <p className="text-zinc-500 text-xs line-through">${(c.precio ?? 0).toLocaleString('es-CL')}</p>
+                    <p className="text-yellow-400 font-bold">${(c.precio_final ?? 0).toLocaleString('es-CL')}</p>
+                  </>
+                ) : (
+                  <p className="text-white font-bold">${(c.precio_final ?? 0).toLocaleString('es-CL')}</p>
+                )}
+              </div>
             </div>
 
             {c.estado === 'confirmada' && (

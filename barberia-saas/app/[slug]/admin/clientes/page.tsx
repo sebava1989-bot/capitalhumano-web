@@ -22,8 +22,7 @@ export default async function ClientesPage({ params }: { params: Promise<{ slug:
       .from('alianzas')
       .select('id, nombre, descuento_pct')
       .eq('barberia_id', barberia.id)
-      .eq('activo', true)
-      .not('descuento_pct', 'is', null),
+      .eq('activo', true),
     supabase.from('alianza_clientes').select('alianza_id, cliente_id'),
   ])
 
