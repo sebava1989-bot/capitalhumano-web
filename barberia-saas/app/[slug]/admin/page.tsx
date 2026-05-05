@@ -149,6 +149,15 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     { label: 'Completadas mes', value: String(citasMes?.length ?? 0), color: 'text-yellow-500' },
   ]
 
+  const { data: citasHoyDetalle } = await supabase
+    .from('reservas')
+    .select('id, fecha_hora, estado, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
+    .eq('barberia_id', barberia.id)
+    .in('estado', ['confirmada', 'completada', 'pendiente'])
+    .gte('fecha_hora', startOfDay(today).toISOString())
+    .lte('fecha_hora', endOfDay(today).toISOString())
+    .order('fecha_hora')
+
   const semanaStart = startOfWeek(today, { weekStartsOn: 1 })
   const semanaEnd = endOfWeek(today, { weekStartsOn: 1 })
 
@@ -161,8 +170,10 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .lte('fecha_hora', semanaEnd.toISOString())
     .order('fecha_hora')
 
-  // Agrupar agenda por día
   type AgendaItem = { id: string; fecha_hora: string; estado: string; cliente_nombre: string | null; precio: number; descuento: number; precio_final: number; servicios: unknown; barberos: unknown }
+  const citasHoyList = (citasHoyDetalle ?? []) as AgendaItem[]
+
+  // Agrupar agenda por día
   const porDia = new Map<string, AgendaItem[]>()
   for (const r of (agendaSemana ?? []) as AgendaItem[]) {
     const key = format(new Date(r.fecha_hora), 'yyyy-MM-dd')
@@ -182,6 +193,68 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
       <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <TopServicios items={topServicios} />
         <TopClientes items={topClientes} />
+      </div>
+
+      <div className="mt-8">
+        <h2 className="text-lg font-semibold text-white mb-3">Citas de hoy</h2>
+        {citasHoyList.length === 0 ? (
+          <p className="text-zinc-500 text-sm">No hay citas para hoy</p>
+        ) : (
+          <div className="space-y-2">
+            {citasHoyList.map(r => (
+              <div key={r.id}
+                className="flex items-center gap-3 bg-gradient-to-r from-zinc-800/80 to-zinc-900/80
+                  border border-zinc-700/60 rounded-xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.3)]">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0
+                  ${r.estado === 'completada' ? 'bg-green-400 shadow-[0_0_6px_rgba(74,222,128,0.6)]'
+                    : r.estado === 'pendiente' ? 'bg-zinc-500'
+                    : 'bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.6)]'}`} />
+                <span className="text-white font-mono text-sm w-12 flex-shrink-0">
+                  {new Date(r.fecha_hora).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
+                </span>
+                <span className="text-white flex-1 font-medium truncate">{r.cliente_nombre ?? 'Sin nombre'}</span>
+                <span className="text-zinc-400 text-sm hidden sm:block truncate max-w-[120px]">
+                  {(r.servicios as unknown as { nombre: string })?.nombre}
+                </span>
+                <span className="text-zinc-500 text-sm hidden md:block truncate max-w-[100px]">
+                  {(r.barberos as unknown as { nombre: string })?.nombre}
+                </span>
+                <div className="flex flex-col items-end flex-shrink-0">
+                  {r.descuento > 0 ? (
+                    <>
+                      <span className="text-zinc-500 text-xs line-through">${r.precio.toLocaleString('es-CL')}</span>
+                      <span className="text-yellow-400 text-sm font-bold">${r.precio_final.toLocaleString('es-CL')}</span>
+                    </>
+                  ) : (
+                    <span className="text-white text-sm font-bold">${r.precio_final.toLocaleString('es-CL')}</span>
+                  )}
+                </div>
+                {r.estado === 'confirmada' ? (
+                  <form action={completarCita}>
+                    <input type="hidden" name="reservaId" value={r.id} />
+                    <input type="hidden" name="slug" value={slug} />
+                    <button type="submit"
+                      className="text-xs px-3 py-1.5 rounded-lg font-bold
+                        bg-green-500/20 text-green-400 border border-green-500/40
+                        hover:bg-green-500/30 transition-colors whitespace-nowrap flex-shrink-0">
+                      ✓ Completar
+                    </button>
+                  </form>
+                ) : r.estado === 'completada' ? (
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium
+                    bg-green-500/10 text-green-500 border border-green-500/20 flex-shrink-0">
+                    ✓ Listo
+                  </span>
+                ) : (
+                  <span className="text-xs px-3 py-1.5 rounded-lg font-medium
+                    bg-zinc-700/50 text-zinc-500 border border-zinc-700/50 flex-shrink-0">
+                    Pendiente
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="mt-4">
