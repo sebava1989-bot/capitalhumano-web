@@ -41,8 +41,10 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
   const [codigoError, setCodigoError] = useState('')
   const [checkingCodigo, setCheckingCodigo] = useState(false)
 
-  // Referral discount
+  // Referral discount (new referred client)
   const [referralDescuento, setReferralDescuento] = useState(0)
+  // Prize discount (for referrers like Sebastian)
+  const [premioDescuento, setPremioDescuento] = useState(0)
 
   const supabase = useMemo(() => createClient(), [])
 
@@ -90,6 +92,41 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
         }
       }
 
+      // Calcular descuento de premios de referido (para quien refirió)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: premios } = await (supabase as any)
+        .from('referido_premios')
+        .select('descuento_pct')
+        .eq('referidor_id', user.id)
+        .eq('barberia_id', barberia.id)
+        .eq('confirmado', true)
+        .eq('canjeado', false)
+        .order('created_at')
+
+      if (premios && premios.length > 0) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: bc } = await (supabase as any)
+          .from('barberias')
+          .select('referido_acumulable, referido_max_pct_por_servicio')
+          .eq('id', barberia.id)
+          .maybeSingle()
+        const acumulable = (bc as any)?.referido_acumulable ?? true
+        const maxPct = (bc as any)?.referido_max_pct_por_servicio ?? 50
+        let totalPct = 0
+        if (acumulable) {
+          let pctRestante = maxPct
+          for (const p of premios as { descuento_pct: number }[]) {
+            if (pctRestante <= 0) break
+            const usado = Math.min(p.descuento_pct, pctRestante)
+            totalPct += usado
+            pctRestante -= usado
+          }
+        } else {
+          totalPct = (premios[0] as { descuento_pct: number }).descuento_pct
+        }
+        if (totalPct > 0) setPremioDescuento(Math.round(servicio.precio * totalPct / 100))
+      }
+
       if (!perfil?.nombre || !perfil?.telefono) {
         setPNombre(perfil?.nombre ?? '')
         setStep('profile')
@@ -112,7 +149,7 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
   }
 
   const descuentoAlianza = alianza?.monto ?? 0
-  const precioFinal = servicio.precio - descuentoAlianza - referralDescuento
+  const precioFinal = servicio.precio - descuentoAlianza - referralDescuento - premioDescuento
 
   async function handleProfile(e: React.FormEvent) {
     e.preventDefault()
@@ -216,6 +253,12 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
           <div className="flex justify-between text-green-400">
             <span className="text-sm">🎁 Dcto. referido (primera cita)</span>
             <span className="font-medium">-${referralDescuento.toLocaleString('es-CL')}</span>
+          </div>
+        )}
+        {premioDescuento > 0 && (
+          <div className="flex justify-between text-green-400">
+            <span className="text-sm">🎁 Premio por referido</span>
+            <span className="font-medium">-${premioDescuento.toLocaleString('es-CL')}</span>
           </div>
         )}
         {alianza && (

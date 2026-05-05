@@ -131,17 +131,6 @@ async function terminarCita(formData: FormData) {
             canjeado: false,
             confirmado: false,
           })
-
-          const descNuevo = b.referido_descuento_nuevo_cliente_pct ?? 0
-          if (descNuevo > 0) {
-            await adminClient.from('descuentos_masivos').insert({
-              cliente_id: reserva.cliente_id,
-              barberia_id: reserva.barberia_id,
-              descuento_pct: descNuevo,
-              motivo: 'Descuento por primera cita como cliente referido',
-              canjeado: false,
-            })
-          }
         }
       }
     }
