@@ -20,7 +20,7 @@ export function generateSlots(inicio: string, fin: string, duracionMin: number):
 }
 
 export function getAvailableSlots(allSlots: string[], booked: Slot[]): string[] {
-  const bookedHoras = new Set(booked.filter(s => !s.disponible).map(s => s.hora))
+  const bookedHoras = new Set(booked.filter(s => s.reserva_id !== null && s.reserva_id !== undefined).map(s => s.hora))
   return allSlots.filter(hora => !bookedHoras.has(hora))
 }
 

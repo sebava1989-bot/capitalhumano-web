@@ -44,8 +44,36 @@ async function noAsisteCita(formData: FormData) {
   if (!reservaId || !slug) return
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
+
+  const adminClient = createAdminClient()
+
+  // Obtener datos de la reserva antes de cancelar
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: reserva } = await (adminClient as any)
+    .from('reservas')
+    .select('barbero_id, barberia_id, fecha_hora')
+    .eq('id', reservaId)
+    .maybeSingle()
+
   await supabase.from('reservas').update({ estado: 'cancelada' }).eq('id', reservaId)
     .in('estado', ['confirmada', 'en_curso'])
+
+  // Liberar el slot en disponibilidad
+  if (reserva) {
+    const fechaStr = new Date(reserva.fecha_hora).toISOString().split('T')[0]
+    const { data: disp } = await adminClient
+      .from('disponibilidad').select('id, slots')
+      .eq('barbero_id', reserva.barbero_id)
+      .eq('barberia_id', reserva.barberia_id)
+      .eq('fecha', fechaStr).maybeSingle()
+
+    if (disp?.id && Array.isArray(disp.slots)) {
+      const slotsActualizados = (disp.slots as { hora: string; reserva_id: string }[])
+        .filter(s => s.reserva_id !== reservaId)
+      await adminClient.from('disponibilidad').update({ slots: slotsActualizados }).eq('id', disp.id)
+    }
+  }
+
   revalidatePath(`/${slug}/admin`)
 }
 
