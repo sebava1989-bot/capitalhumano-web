@@ -16,11 +16,6 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Barbería App",
   description: "Reserva tu hora en la barbería",
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-  },
 };
 
 export const viewport: Viewport = {
