@@ -61,7 +61,8 @@ export default async function ResumenEjecutivoPage({ params }: { params: Promise
       .eq('estado', 'completada')
       .gte('fecha_hora', mesStart.toISOString())
       .lte('fecha_hora', mesEnd.toISOString()),
-    supabase.from('barberos')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any).from('barberos')
       .select('id, nombre, meta_semanal')
       .eq('barberia_id', barberia.id)
       .eq('activo', true)
