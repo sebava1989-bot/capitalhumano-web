@@ -46,14 +46,14 @@ export async function calificarReserva(formData: FormData) {
     .eq('cliente_id', user.id)
     .maybeSingle()
 
-  await supabase.from('reservas')
+  const admin = createAdminClient()
+  await admin.from('reservas')
     .update({ calificacion, nota_cliente: nota || null })
     .eq('id', reservaId)
     .eq('cliente_id', user.id)
 
   // Confirmar el premio de referido pendiente para quien refirió a este cliente
   if (reserva?.barberia_id) {
-    const admin = createAdminClient()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: premiosConfirmados } = await (admin as any)
       .from('referido_premios')

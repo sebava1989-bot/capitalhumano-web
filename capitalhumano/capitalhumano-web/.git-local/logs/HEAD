@@ -1,0 +1,9 @@
+0000000000000000000000000000000000000000 129d26a2f22c9344deb32dc4e769e87731f528e0 sebava1989-bot <seba.v.a1989@gmail.com> 1776370781 -0400	commit (initial): feat: capitalhumano web panel inicial
+129d26a2f22c9344deb32dc4e769e87731f528e0 69d72399ebabbb07eec78b16498bfb554eb8540b sebava1989-bot <seba.v.a1989@gmail.com> 1776381491 -0400	commit: feat: finiquitados, APK download, worker PWA, código empresa por iniciales
+69d72399ebabbb07eec78b16498bfb554eb8540b abd35af5c71e586b6187d8ad81a8438554596d59 sebava1989-bot <seba.v.a1989@gmail.com> 1776381651 -0400	commit: feat: custom CH app icon (blue gradient + people silhouettes)
+abd35af5c71e586b6187d8ad81a8438554596d59 bbb32e61d4f5d047bcd3dece20a7a75a2b57e40b sebava1989-bot <seba.v.a1989@gmail.com> 1776381847 -0400	commit: feat: upload docs from finiquitados panel (finiquito type)
+bbb32e61d4f5d047bcd3dece20a7a75a2b57e40b 7f9e36bf643f797a985aee35987575451060b275 sebava1989-bot <seba.v.a1989@gmail.com> 1776382918 -0400	commit: feat: add admin APK download button to dashboard
+7f9e36bf643f797a985aee35987575451060b275 cef8fe3a4eff2d458e1d0c68e08a749515c44389 sebava1989-bot <seba.v.a1989@gmail.com> 1776383139 -0400	commit: feat: editable company code in settings
+cef8fe3a4eff2d458e1d0c68e08a749515c44389 9d4ba4b0cf5544151c08d9bcbea30fe5790cf158 sebava1989-bot <seba.v.a1989@gmail.com> 1776384512 -0400	commit: fix: mobile layout - safe area insets, flex scroll, viewport-fit=cover
+9d4ba4b0cf5544151c08d9bcbea30fe5790cf158 baf38ebe1593ebdab4c54a784f0ec415ca7562e4 sebava1989-bot <seba.v.a1989@gmail.com> 1776385070 -0400	commit: fix: dashboard responsive layout with mobile drawer menu
+baf38ebe1593ebdab4c54a784f0ec415ca7562e4 790a4cdd1a5b4c3b169e29e4e815dfe18e3083a3 sebava1989-bot <seba.v.a1989@gmail.com> 1776385309 -0400	commit: fix: responsive padding p-4 md:p-8 on all dashboard pages
