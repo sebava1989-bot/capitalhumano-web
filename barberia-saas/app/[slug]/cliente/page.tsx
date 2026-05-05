@@ -170,14 +170,19 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
       <div>
         <p className="text-zinc-400 text-xs uppercase tracking-wide mb-3">Historial</p>
         <div className="space-y-2">
-          {historial?.map(r => (
+          {historial?.map(r => {
+            const barberoNombre = (r.barberos as unknown as { nombre: string } | null)?.nombre
+            return (
             <div key={r.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-3">
               <div className="flex justify-between items-start">
                 <div>
                   <p className="text-white text-sm font-medium">{(r.servicios as unknown as { nombre: string })?.nombre}</p>
                   <p className="text-zinc-400 text-xs">
-                    {new Date(r.fecha_hora).toLocaleDateString('es-CL')} · {(r.barberos as unknown as { nombre: string })?.nombre}
+                    {new Date(r.fecha_hora).toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
+                  {barberoNombre && (
+                    <p className="text-zinc-500 text-xs mt-0.5">✂️ {barberoNombre}</p>
+                  )}
                 </div>
                 <div className="text-right">
                   <p className="text-white text-sm">${(r.precio_final ?? 0).toLocaleString('es-CL')}</p>
@@ -198,7 +203,7 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
                 )
               )}
             </div>
-          ))}
+          )})}
           {!historial?.length && <p className="text-zinc-500 text-sm">Aún no tienes reservas pasadas</p>}
         </div>
       </div>
