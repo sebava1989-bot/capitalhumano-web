@@ -6,18 +6,64 @@ interface PricingProps {
 
 export function Pricing({ phone }: PricingProps) {
   return (
-    <section className="bg-zinc-900 px-6 py-24 text-center text-white">
-      <h2 className="mb-4 text-3xl font-extrabold sm:text-4xl">
-        Todo esto por{' '}
-        <span className="text-amber-400">$15.000 al mes.</span>
-      </h2>
-      <p className="mb-10 text-lg text-zinc-400">
-        Sin contrato. Sin letra chica. Si no te sirve, lo cancelas.
-      </p>
-      <p className="mb-8 text-2xl font-bold">
-        ¿Le das una oportunidad a tu barbería?
-      </p>
-      <DemoButton phone={phone} />
+    <section
+      className="relative overflow-hidden px-6 py-32 text-center"
+      style={{ backgroundColor: '#0a0a0a' }}
+    >
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-[120px]"
+        style={{ width: '600px', height: '350px', background: '#F59E0B' }}
+      />
+
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage: 'radial-gradient(rgba(245,158,11,0.05) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
+        }}
+      />
+
+      <div className="relative z-10 mx-auto max-w-3xl">
+        <p
+          className="mb-4 text-xs font-bold uppercase tracking-widest text-zinc-600"
+          style={{ fontFamily: 'var(--font-jakarta)' }}
+        >
+          Precio
+        </p>
+
+        <div
+          className="leading-none text-amber-400"
+          style={{
+            fontFamily: 'var(--font-anton)',
+            fontSize: 'clamp(5rem, 20vw, 14rem)',
+          }}
+        >
+          $15.000
+        </div>
+
+        <p
+          className="mb-2 text-2xl text-zinc-300"
+          style={{ fontFamily: 'var(--font-jakarta)' }}
+        >
+          al mes por barbería
+        </p>
+
+        <p
+          className="mb-12 text-sm text-zinc-600"
+          style={{ fontFamily: 'var(--font-jakarta)' }}
+        >
+          Sin contrato · Sin letra chica · Cancela cuando quieras
+        </p>
+
+        <DemoButton phone={phone} />
+
+        <p
+          className="mt-6 text-sm text-zinc-600"
+          style={{ fontFamily: 'var(--font-jakarta)' }}
+        >
+          Demo gratuita — lo ves funcionando con el nombre de tu barbería
+        </p>
+      </div>
     </section>
   )
 }

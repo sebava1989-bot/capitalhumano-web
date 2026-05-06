@@ -1,42 +1,65 @@
 const features = [
   {
-    icon: '📅',
+    num: '01',
     title: 'Reserva en 3 pasos',
     desc: 'El cliente elige barbero, servicio y hora desde su celular. Sin llamadas, sin WhatsApp.',
   },
   {
-    icon: '📲',
+    num: '02',
     title: 'App admin en tu bolsillo',
     desc: 'Ve la agenda del día, gestiona clientes y servicios desde la app móvil.',
   },
   {
-    icon: '🔔',
+    num: '03',
     title: 'Recordatorios automáticos',
-    desc: 'Emails automáticos 24h antes de cada reserva. Cero no-shows.',
+    desc: 'Emails 24h antes de cada reserva. Cero no-shows, cero llamadas de confirmación.',
   },
   {
-    icon: '🎯',
+    num: '04',
     title: 'Campañas con IA',
-    desc: 'Manda descuentos personalizados a tus clientes con un clic. La IA escribe los mensajes.',
+    desc: 'Descuentos personalizados a tus clientes con un clic. La IA escribe los mensajes.',
   },
 ]
 
 export function Features() {
   return (
-    <section className="bg-zinc-50 px-6 py-20">
+    <section style={{ backgroundColor: '#0a0a0a' }} className="px-6 py-24">
       <div className="mx-auto max-w-5xl">
-        <h2 className="mb-12 text-center text-3xl font-bold text-zinc-900">
-          Así funciona barberDesk
+        <h2
+          className="mb-16 text-center leading-none text-white"
+          style={{
+            fontFamily: 'var(--font-anton)',
+            fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+          }}
+        >
+          ASÍ FUNCIONA
         </h2>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+
+        <div className="grid gap-px bg-zinc-800 sm:grid-cols-2">
           {features.map((f) => (
             <article
-              key={f.title}
-              className="rounded-2xl bg-white p-6 shadow-sm"
+              key={f.num}
+              className="group relative overflow-hidden bg-zinc-950 p-8 transition-colors duration-300 hover:bg-zinc-900"
             >
-              <span className="mb-3 block text-4xl">{f.icon}</span>
-              <h3 className="mb-2 font-bold text-zinc-900">{f.title}</h3>
-              <p className="text-sm text-zinc-500">{f.desc}</p>
+              <div
+                className="mb-4 leading-none text-zinc-800 transition-colors duration-300 group-hover:text-amber-400/20"
+                style={{ fontFamily: 'var(--font-anton)', fontSize: '4rem' }}
+              >
+                {f.num}
+              </div>
+              <h3
+                className="mb-2 text-base font-bold text-white"
+                style={{ fontFamily: 'var(--font-jakarta)' }}
+              >
+                {f.title}
+              </h3>
+              <p
+                className="text-sm leading-relaxed text-zinc-500"
+                style={{ fontFamily: 'var(--font-jakarta)' }}
+              >
+                {f.desc}
+              </p>
+              <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-amber-400 transition-all duration-500 group-hover:w-full" />
             </article>
           ))}
         </div>
