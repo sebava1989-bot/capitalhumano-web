@@ -69,100 +69,88 @@ class ReservasService {
     await _db.from('reservas').update({'estado': estado}).eq('id', reservaId);
   }
 
-  /// Marca la reserva como completada y aplica descuento de referido si corresponde.
-  Future<CompletarReservaResult> completarReserva(
-      String reservaId, String? codigoReferido) async {
-    // 1. Cargar reserva
+  Future<List<Map<String, String>>> getBarberos(String barberiaId) async {
+    final data = await _db
+        .from('barberos')
+        .select('id, nombre')
+        .eq('barberia_id', barberiaId)
+        .eq('activo', true)
+        .order('nombre');
+    return (data as List)
+        .map((e) => {'id': e['id'] as String, 'nombre': e['nombre'] as String})
+        .toList();
+  }
+
+  Future<void> reasignarBarbero(String reservaId, String nuevoBarberoId) async {
+    await _db.from('reservas').update({'barbero_id': nuevoBarberoId}).eq('id', reservaId);
+  }
+
+  /// Marca la reserva como completada. Si tenía ref_code al momento de reservar,
+  /// crea el premio pendiente para el referidor (se confirma cuando el cliente valora).
+  Future<CompletarReservaResult> completarReserva(String reservaId) async {
+    // 1. Cargar reserva con ref_code que se guardó al momento de reservar online
     final reservaData = await _db
         .from('reservas')
-        .select('id, precio, cliente_id, barberia_id, estado, descuento, precio_final')
+        .select('id, cliente_id, barberia_id, ref_code')
         .eq('id', reservaId)
         .maybeSingle();
     if (reservaData == null) {
       return const CompletarReservaResult(ok: false, errorCodigo: 'Reserva no encontrada');
     }
-    final precio = (reservaData['precio'] as num).toDouble();
-    final clienteId = reservaData['cliente_id'] as String;
+    final clienteId = reservaData['cliente_id'] as String?;
     final barberiaId = reservaData['barberia_id'] as String;
-    final descuentoActual = (reservaData['descuento'] as num?)?.toDouble() ?? 0;
-    final precioFinalActual = (reservaData['precio_final'] as num).toDouble();
+    final refCode = reservaData['ref_code'] as String?;
 
-    String? errorCodigo;
-    bool descuentoAplicado = false;
-    int? descuentoPct;
+    // 2. Marcar como completada
+    await _db.from('reservas').update({'estado': 'completada'}).eq('id', reservaId);
 
-    if (codigoReferido != null && codigoReferido.trim().isNotEmpty) {
-      // 2. Obtener config de campaña
-      final barberiaData = await _db
-          .from('barberias')
-          .select(
-            'referido_activo, referido_descuento_referido_pct, referidor_premio_pct',
-          )
-          .eq('id', barberiaId)
-          .maybeSingle();
+    // 3. Si vino por referido y es la primera cita completada → crear premio para el referidor
+    if (refCode != null && refCode.isNotEmpty && clienteId != null) {
+      final completadasData = await _db
+          .from('reservas')
+          .select('id')
+          .eq('cliente_id', clienteId)
+          .eq('barberia_id', barberiaId)
+          .eq('estado', 'completada');
+      final totalCompletadas = (completadasData as List).length;
 
-      final activo = barberiaData?['referido_activo'] as bool? ?? true;
+      if (totalCompletadas == 1) {
+        // SECURITY DEFINER fn necesaria: RLS de users solo permite ver
+        // al propio usuario o usuarios de la misma barbería. Los clientes
+        // referidores tienen barberia_id=null y no serían visibles de otro modo.
+        final referidorId = await _db.rpc(
+          'get_user_id_by_referral_code',
+          params: {'p_ref_code': refCode, 'p_exclude_id': clienteId},
+        ) as String?;
 
-      if (activo) {
-        // 3. Validar que el código existe y no es el propio cliente
-        final referidorData = await _db
-            .from('users')
-            .select('id')
-            .eq('referral_code', codigoReferido.trim())
-            .neq('id', clienteId)
-            .maybeSingle();
+        if (referidorId != null) {
+          final referidorData = {'id': referidorId};
+          final barberiaData = await _db
+              .from('barberias')
+              .select('referidor_premio_pct')
+              .eq('id', barberiaId)
+              .maybeSingle();
+          final premioPct = barberiaData?['referidor_premio_pct'] as int? ?? 10;
 
-        if (referidorData == null) {
-          errorCodigo = 'Código de referido inválido';
-        } else {
-          final referidorId = referidorData['id'] as String;
+          await _db.from('referido_premios').insert({
+            'barberia_id': barberiaId,
+            'referidor_id': referidorId,
+            'referido_id': clienteId,
+            'descuento_pct': premioPct,
+            'canjeado': false,
+            'confirmado': true,
+          });
 
-          // 4. Verificar que es la primera reserva completada del cliente
-          final completadasData = await _db
-              .from('reservas')
-              .select('id')
-              .eq('cliente_id', clienteId)
-              .eq('estado', 'completada');
-          final completadasPrevias = (completadasData as List).length;
-
-          if (completadasPrevias > 0) {
-            errorCodigo = 'El cliente ya tiene cortes previos completados';
-          } else {
-            final dctoReferidoPct =
-                barberiaData?['referido_descuento_referido_pct'] as int? ?? 10;
-            final premioPct =
-                barberiaData?['referidor_premio_pct'] as int? ?? 10;
-
-            // 5. Aplicar descuento retroactivo
-            final montoDescuento = (precio * dctoReferidoPct / 100).round();
-            await _db.from('reservas').update({
-              'descuento': descuentoActual + montoDescuento,
-              'precio_final': precioFinalActual - montoDescuento,
-            }).eq('id', reservaId);
-
-            // 6. Generar premio para el referidor
-            await _db.from('referido_premios').insert({
-              'barberia_id': barberiaId,
-              'referidor_id': referidorId,
-              'referido_id': clienteId,
-              'descuento_pct': premioPct,
-            });
-
-            descuentoAplicado = true;
-            descuentoPct = dctoReferidoPct;
-          }
+          // Notificar al referidor que ganó su premio
+          await _db.functions.invoke('send-push', body: {
+            'userId': referidorData['id'],
+            'title': '🎁 ¡Ganaste un descuento!',
+            'body': 'Tu referido completó su primera cita. Tienes un $premioPct% de descuento disponible.',
+          });
         }
       }
     }
 
-    // 7. Marcar como completada
-    await _db.from('reservas').update({'estado': 'completada'}).eq('id', reservaId);
-
-    return CompletarReservaResult(
-      ok: true,
-      errorCodigo: errorCodigo,
-      descuentoAplicado: descuentoAplicado,
-      descuentoPct: descuentoPct,
-    );
+    return const CompletarReservaResult(ok: true);
   }
 }
