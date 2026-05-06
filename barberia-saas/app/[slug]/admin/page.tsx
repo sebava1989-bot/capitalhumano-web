@@ -244,6 +244,8 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
 
   type AgendaItem = { id: string; fecha_hora: string; estado: string; barbero_id: string | null; cliente_nombre: string | null; precio: number; descuento: number; precio_final: number; servicios: unknown; barberos: unknown }
   const citasHoyList = (citasHoyDetalle ?? []) as AgendaItem[]
+  const citasActivas = citasHoyList.filter(r => ['pendiente', 'confirmada', 'en_curso'].includes(r.estado))
+  const citasCerradas = citasHoyList.filter(r => ['completada', 'cancelada'].includes(r.estado))
 
   // Agrupar agenda por día en hora chilena
   const porDia = new Map<string, AgendaItem[]>()
@@ -270,11 +272,13 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
 
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-white mb-3">Citas de hoy</h2>
-        {citasHoyList.length === 0 ? (
+        {citasActivas.length === 0 && citasCerradas.length === 0 ? (
           <p className="text-zinc-500 text-sm">No hay citas para hoy</p>
+        ) : citasActivas.length === 0 ? (
+          <p className="text-zinc-500 text-sm">Todas las citas de hoy están completadas o canceladas</p>
         ) : (
           <div className="space-y-2">
-            {citasHoyList.map(r => (
+            {citasActivas.map(r => (
               <div key={r.id}
                 className={`flex items-center gap-3 rounded-xl p-3 shadow-[0_2px_12px_rgba(0,0,0,0.3)] border
                   ${r.estado === 'en_curso'
@@ -379,6 +383,31 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
           </div>
         )}
       </div>
+
+      {citasCerradas.length > 0 && (
+        <div className="mt-4">
+          <p className="text-zinc-600 text-xs uppercase tracking-wide mb-2">Historial de hoy ({citasCerradas.length})</p>
+          <div className="space-y-1.5">
+            {citasCerradas.map(r => (
+              <div key={r.id} className="flex items-center gap-3 rounded-xl px-3 py-2 opacity-50
+                bg-zinc-900/60 border border-zinc-800/40">
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${r.estado === 'completada' ? 'bg-green-400' : 'bg-red-500'}`} />
+                <span className="text-zinc-400 font-mono text-sm w-12 flex-shrink-0">
+                  {format(toZonedTime(new Date(r.fecha_hora), TZ), 'HH:mm')}
+                </span>
+                <span className="text-zinc-400 flex-1 text-sm truncate">{r.cliente_nombre ?? 'Sin nombre'}</span>
+                <span className="text-zinc-600 text-xs truncate hidden sm:block max-w-[120px]">
+                  {(r.servicios as unknown as { nombre: string })?.nombre}
+                </span>
+                <span className={`text-xs px-2 py-0.5 rounded-md flex-shrink-0
+                  ${r.estado === 'completada' ? 'bg-green-500/10 text-green-600' : 'bg-red-500/10 text-red-500'}`}>
+                  {r.estado === 'completada' ? '✓ Listo' : 'Cancelada'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-white mb-4">Agenda de la semana</h2>
