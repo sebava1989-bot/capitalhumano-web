@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { SugerenciasButton } from './_components/SugerenciasButton'
+import { AppDownloadBanner } from './_components/AppDownloadBanner'
 
 export default async function BarberiaLanding({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -42,6 +43,8 @@ export default async function BarberiaLanding({ params }: { params: Promise<{ sl
           Ver mis citas
         </Link>
       </section>
+
+      <AppDownloadBanner slug={slug} />
 
       {servicios && servicios.length > 0 && (
         <section className="max-w-2xl mx-auto px-4 py-12">
