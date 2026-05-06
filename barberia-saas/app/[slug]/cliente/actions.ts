@@ -38,15 +38,16 @@ export async function calificarReserva(formData: FormData) {
 
   if (!reservaId || calificacion < 1 || calificacion > 5) return
 
-  // Obtener barberia_id de la reserva para confirmar el premio del referidor
-  const { data: reserva } = await supabase
+  const admin = createAdminClient()
+
+  // Obtener barberia_id de la reserva — debe usar admin client (SSR falla en Vercel)
+  const { data: reserva } = await admin
     .from('reservas')
     .select('barberia_id')
     .eq('id', reservaId)
     .eq('cliente_id', user.id)
     .maybeSingle()
 
-  const admin = createAdminClient()
   await admin.from('reservas')
     .update({ calificacion, nota_cliente: nota || null })
     .eq('id', reservaId)

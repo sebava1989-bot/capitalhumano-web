@@ -1,0 +1,5 @@
+barberia_admin/
+node_modules/
+.next/
+coverage/
+*.pem

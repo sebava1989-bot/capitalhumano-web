@@ -61,7 +61,21 @@ export async function crearReserva(input: ReservaInput) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: userRef } = await (adminSupabase as any)
       .from('users').select('referred_by_code').eq('id', user.id).maybeSingle()
-    effectiveRefCode = userRef?.referred_by_code ?? null
+    const savedCode = userRef?.referred_by_code ?? null
+    if (savedCode) {
+      // Solo aplicar si el referidor tiene historial en ESTA barbería (aislamiento multi-barbería)
+      const { data: referidor } = await adminSupabase
+        .from('users').select('id').eq('referral_code', savedCode).maybeSingle()
+      if (referidor) {
+        const { count: refCount } = await adminSupabase
+          .from('reservas')
+          .select('id', { count: 'exact', head: true })
+          .eq('cliente_id', referidor.id)
+          .eq('barberia_id', input.barberiaId)
+          .neq('estado', 'cancelada')
+        if ((refCount ?? 0) > 0) effectiveRefCode = savedCode
+      }
+    }
   }
   if (effectiveRefCode && !alianzaExcluye) {
     const { count: prevCount } = await adminSupabase

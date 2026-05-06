@@ -85,9 +85,9 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
         if ((prevCount ?? 0) === 0) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const { data: barberiaConf } = await (supabase as any).from('barberias')
-            .select('referido_descuento_nuevo_cliente_pct')
+            .select('referido_descuento_nuevo_cliente_pct, referido_descuento_referido_pct')
             .eq('id', barberia.id).maybeSingle()
-          const pct = (barberiaConf as any)?.referido_descuento_nuevo_cliente_pct ?? 0
+          const pct = (barberiaConf as any)?.referido_descuento_nuevo_cliente_pct || (barberiaConf as any)?.referido_descuento_referido_pct || 0
           if (pct > 0) setReferralDescuento(Math.round(servicio.precio * pct / 100))
         }
       }
@@ -187,11 +187,17 @@ export function BookingConfirm({ barberia, servicio, barbero, fecha, hora, refCo
   }
 
   if (step === 'confirmed') {
+    const slug = pathname.split('/')[1]
     return (
       <div className="text-center py-8">
         <div className="text-5xl mb-4">✅</div>
         <h2 className="text-xl font-bold text-white mb-2">¡Reserva confirmada!</h2>
-        <p className="text-zinc-400 text-sm">Te enviamos la confirmación por email.</p>
+        <p className="text-zinc-400 text-sm mb-6">Te enviamos la confirmación por email.</p>
+        <a href={`/${slug}/cliente`}
+          className="inline-block w-full py-3 bg-yellow-400 text-black font-bold rounded-xl
+            hover:bg-yellow-300 transition-colors text-center">
+          Ver mis citas →
+        </a>
       </div>
     )
   }

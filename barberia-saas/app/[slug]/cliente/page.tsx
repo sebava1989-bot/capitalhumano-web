@@ -56,14 +56,15 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: barberia } = await (supabase as any)
-    .from('barberias').select('id, nombre, referido_descuento_nuevo_cliente_pct').eq('slug', slug).single()
+    .from('barberias').select('id, nombre, referido_descuento_nuevo_cliente_pct, referido_descuento_referido_pct').eq('slug', slug).single()
   if (!barberia) notFound()
 
-  const [{ data: userData }, { data: premios }, { data: descuentosMasivos }] = await Promise.all([
+  const admin = createAdminClient()
+  const [{ data: userData }, { data: premiosRaw }, { data: descuentosMasivos }] = await Promise.all([
     supabase.from('users').select('nombre, referral_code').eq('id', user.id).single(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).from('referido_premios')
-      .select('id, descuento_pct, created_at')
+    (admin as any).from('referido_premios')
+      .select('id, descuento_pct, created_at, referido_id')
       .eq('referidor_id', user.id)
       .eq('barberia_id', barberia.id)
       .eq('canjeado', false)
@@ -76,6 +77,26 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
       .eq('canjeado', false)
       .order('created_at', { ascending: false }),
   ])
+
+  // Enriquecer premios con nombre del referido y servicio de su cita
+  const premios = await Promise.all((premiosRaw ?? []).map(async (p: { id: string; descuento_pct: number; created_at: string; referido_id: string }) => {
+    const [{ data: referido }, { data: ultimaReserva }] = await Promise.all([
+      admin.from('users').select('nombre').eq('id', p.referido_id).maybeSingle(),
+      admin.from('reservas')
+        .select('servicios(nombre)')
+        .eq('cliente_id', p.referido_id)
+        .eq('barberia_id', barberia.id)
+        .eq('estado', 'completada')
+        .order('fecha_hora', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ])
+    return {
+      ...p,
+      referidoNombre: referido?.nombre ?? 'Un amigo',
+      servicioNombre: (ultimaReserva?.servicios as unknown as { nombre: string } | null)?.nombre ?? null,
+    }
+  }))
 
   // Reserva completada reciente sin calificar → mostrar card de feedback prominente
   const { data: sinCalificar } = await supabase
@@ -162,7 +183,7 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
             referralCode={userData.referral_code}
             slug={slug}
             barberiaNombre={barberia.nombre}
-            descuentoPct={(barberia as Record<string, number>).referido_descuento_nuevo_cliente_pct ?? 10}
+            descuentoPct={(barberia as Record<string, number>).referido_descuento_nuevo_cliente_pct || (barberia as Record<string, number>).referido_descuento_referido_pct || 10}
           />
           <p className="text-zinc-500 text-xs mt-2">Tu amigo recibe un descuento en su primera cita, ¡y tú también ganas un premio cuando se atienda!</p>
         </div>
@@ -185,11 +206,17 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
 
       {premios && premios.length > 0 && (
         <div className="bg-zinc-900 border border-green-500/30 rounded-xl p-4 mb-4">
-          <p className="text-zinc-400 text-xs uppercase tracking-wide mb-2">🎁 Premios por referidos</p>
-          {(premios as { id: string; descuento_pct: number }[]).map(p => (
-            <div key={p.id} className="flex items-center justify-between">
-              <p className="text-green-400 font-bold text-lg">{p.descuento_pct}% de descuento</p>
-              <span className="text-zinc-500 text-xs">Se aplica en tu próxima reserva</span>
+          <p className="text-zinc-400 text-xs uppercase tracking-wide mb-3">🎁 Premios por referidos</p>
+          {premios.map(p => (
+            <div key={p.id} className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-green-400 font-bold text-lg">{p.descuento_pct}% de descuento</p>
+                <p className="text-zinc-300 text-sm">
+                  Tu referido <span className="font-semibold text-white">{p.referidoNombre}</span> fue atendido
+                  {p.servicioNombre && <span className="text-zinc-400"> · {p.servicioNombre}</span>}
+                </p>
+                <p className="text-zinc-500 text-xs mt-0.5">Se aplica automáticamente en tu próxima reserva</p>
+              </div>
             </div>
           ))}
         </div>

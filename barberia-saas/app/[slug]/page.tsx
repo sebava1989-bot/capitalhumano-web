@@ -37,6 +37,10 @@ export default async function BarberiaLanding({ params }: { params: Promise<{ sl
             shadow-[0_0_20px_rgba(250,204,21,0.25)] hover:shadow-[0_0_30px_rgba(250,204,21,0.4)]">
           Reservar hora
         </Link>
+        <Link href={`/${slug}/cliente`}
+          className="mt-4 text-zinc-500 text-sm hover:text-zinc-300 transition-colors underline underline-offset-2">
+          Ver mis citas
+        </Link>
       </section>
 
       {servicios && servicios.length > 0 && (

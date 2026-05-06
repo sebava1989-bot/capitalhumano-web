@@ -1,5 +1,5 @@
-name: barberia_admin
-description: Panel de administración Barbería SaaS
+name: barberdesk
+description: BarberDesk — Panel de administración para barberías
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -15,11 +15,21 @@ dependencies:
   flutter_local_notifications: ^17.2.3
   intl: ^0.19.0
   image_picker: ^1.1.2
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/launcher_icon.png"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon.png
