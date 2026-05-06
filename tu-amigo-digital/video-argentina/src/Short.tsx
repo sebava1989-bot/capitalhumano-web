@@ -4,14 +4,16 @@ import { TextReveal } from './components/TextReveal';
 import { MapSudamerica } from './components/MapSudamerica';
 import { ParticleBurst } from './components/ParticleBurst';
 import { ServiceCards } from './components/ServiceCards';
+import { AppShowcase } from './components/AppShowcase';
 import { LogoFinal } from './components/LogoFinal';
 
-// Frame schedule:
+// Frame schedule (510 frames = 17s @ 30fps):
 // 0-60:   Título "Tu Amigo Digital"
 // 60-150: Mapa Sudamérica + Chile brilla
 // 150-270: Burst partículas + "Llegamos a Argentina"
-// 270-360: 3 servicios
-// 360-450: Logo final + URL
+// 270-345: 3 servicios
+// 345-435: Nuestras Apps (6 apps grid)
+// 435-510: Logo final + URL
 
 export const Short: React.FC = () => {
   const frame = useCurrentFrame();
@@ -79,16 +81,23 @@ export const Short: React.FC = () => {
       )}
 
       {/* Escena 4: Servicios */}
-      {frame >= 270 && frame < 370 && (
+      {frame >= 270 && frame < 350 && (
         <div style={{ position: 'absolute', width: '100%' }}>
           <ServiceCards startFrame={272} />
         </div>
       )}
 
-      {/* Escena 5: Logo final */}
-      {frame >= 360 && (
+      {/* Escena 5: Nuestras Apps */}
+      {frame >= 345 && frame < 440 && (
+        <div style={{ position: 'absolute', width: '100%' }}>
+          <AppShowcase startFrame={347} />
+        </div>
+      )}
+
+      {/* Escena 6: Logo final */}
+      {frame >= 435 && (
         <div style={{ position: 'absolute' }}>
-          <LogoFinal startFrame={362} />
+          <LogoFinal startFrame={437} />
         </div>
       )}
     </AbsoluteFill>
