@@ -271,7 +271,7 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
       </div>
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-white mb-3">Citas de hoy</h2>
+        <h2 className="text-lg font-semibold text-white mb-3">Citas de hoy ({citasActivas.length} activas)</h2>
         {citasActivas.length === 0 && citasCerradas.length === 0 ? (
           <p className="text-zinc-500 text-sm">No hay citas para hoy</p>
         ) : citasActivas.length === 0 ? (
