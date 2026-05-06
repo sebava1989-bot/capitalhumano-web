@@ -9,7 +9,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="ShortVertical"
         component={Short}
-        durationInFrames={450}
+        durationInFrames={510}
         fps={30}
         width={1080}
         height={1920}
@@ -18,7 +18,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="ShortHorizontal"
         component={Short}
-        durationInFrames={450}
+        durationInFrames={510}
         fps={30}
         width={1920}
         height={1080}
@@ -27,7 +27,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="LongVertical"
         component={Long}
-        durationInFrames={900}
+        durationInFrames={990}
         fps={30}
         width={1080}
         height={1920}
@@ -36,7 +36,7 @@ export const RemotionRoot: React.FC = () => {
       <Composition
         id="LongHorizontal"
         component={Long}
-        durationInFrames={900}
+        durationInFrames={990}
         fps={30}
         width={1920}
         height={1080}
