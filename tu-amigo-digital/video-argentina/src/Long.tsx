@@ -4,7 +4,18 @@ import { TextReveal } from './components/TextReveal';
 import { MapSudamerica } from './components/MapSudamerica';
 import { ParticleBurst } from './components/ParticleBurst';
 import { ServiceCards } from './components/ServiceCards';
+import { AppShowcase } from './components/AppShowcase';
 import { LogoFinal } from './components/LogoFinal';
+
+// Frame schedule (990 frames = 33s @ 30fps):
+// 0-120:   "En Chile, ayudamos a negocios a crecer digitalmente"
+// 120-240: "Hoy, damos el siguiente paso..."
+// 240-420: Mapa + partículas + "Llegamos a Argentina"
+// 420-600: 3 cards de servicios
+// 600-690: Nuestras Apps (6 apps grid)
+// 690-840: "Porque tu negocio merece un amigo digital"
+// 840-930: WhatsApp + URL
+// 930-990: Logo final
 
 const WordReveal: React.FC<{ text: string; startFrame: number; style?: React.CSSProperties }> = ({
   text,
@@ -48,11 +59,11 @@ export const Long: React.FC = () => {
   const argOpacity = frame >= 240 && frame < 440
     ? interpolate(frame, [415, 440], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
     : 0;
-  const taglineOpacity = frame >= 600 && frame < 770
-    ? interpolate(frame, [745, 770], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+  const taglineOpacity = frame >= 690 && frame < 865
+    ? interpolate(frame, [835, 860], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
     : 0;
-  const contactOpacity = frame >= 750 && frame < 855
-    ? interpolate(frame, [830, 855], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+  const contactOpacity = frame >= 835 && frame < 950
+    ? interpolate(frame, [920, 945], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
     : 0;
 
   return (
@@ -111,26 +122,32 @@ export const Long: React.FC = () => {
         </div>
       )}
 
-      {frame >= 595 && frame < 775 && (
+      {frame >= 600 && frame < 695 && (
+        <div style={{ position: 'absolute', width: '100%' }}>
+          <AppShowcase startFrame={602} />
+        </div>
+      )}
+
+      {frame >= 685 && frame < 865 && (
         <div style={{ position: 'absolute', textAlign: 'center', opacity: taglineOpacity, padding: '0 60px' }}>
           <WordReveal
             text="Porque tu negocio merece un amigo digital"
-            startFrame={605}
+            startFrame={695}
             style={{ fontSize: 68, fontWeight: 900, color: '#fff', lineHeight: 1.4 }}
           />
         </div>
       )}
 
-      {frame >= 745 && frame < 860 && (
+      {frame >= 835 && frame < 950 && (
         <div style={{ position: 'absolute', textAlign: 'center', opacity: contactOpacity }}>
           <div style={{ fontSize: 52, color: '#74ACDF', fontWeight: 700 }}>tuamigodigital.cl</div>
           <div style={{ fontSize: 40, color: '#888', marginTop: 20 }}>📲 +56 9 7154 2893</div>
         </div>
       )}
 
-      {frame >= 840 && (
+      {frame >= 930 && (
         <div style={{ position: 'absolute' }}>
-          <LogoFinal startFrame={845} showWhatsapp={false} />
+          <LogoFinal startFrame={935} showWhatsapp={false} />
         </div>
       )}
     </AbsoluteFill>
