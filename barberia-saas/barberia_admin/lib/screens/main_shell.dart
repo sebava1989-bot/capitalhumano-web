@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import '../services/barberias_service.dart';
 import 'dashboard_screen.dart';
 import 'agenda_screen.dart';
 import 'clientes_screen.dart';
 import 'alianzas_screen.dart';
 import 'config_screen.dart';
+import 'resumen_screen.dart';
 import 'login_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -17,6 +19,7 @@ class MainShell extends StatefulWidget {
 class _MainShellState extends State<MainShell> {
   int _index = 0;
   String? _barberiaId;
+  String _barberiaNombre = '';
   bool _loading = true;
 
   @override
@@ -29,8 +32,15 @@ class _MainShellState extends State<MainShell> {
   Future<void> _loadBarberia() async {
     final id = await AuthService().getBarberiaId();
     if (!mounted) return;
+    String nombre = '';
+    if (id != null) {
+      final data = await BarberiasService().getBarberia(id);
+      nombre = data?['nombre'] as String? ?? '';
+    }
+    if (!mounted) return;
     setState(() {
       _barberiaId = id;
+      _barberiaNombre = nombre;
       _loading = false;
     });
   }
@@ -68,8 +78,9 @@ class _MainShellState extends State<MainShell> {
 
     final screens = [
       DashboardScreen(barberiaId: _barberiaId!),
+      ResumenScreen(barberiaId: _barberiaId!),
       AgendaScreen(barberiaId: _barberiaId!),
-      ClientesScreen(barberiaId: _barberiaId!),
+      ClientesScreen(barberiaId: _barberiaId!, barberiaNombre: _barberiaNombre),
       AlianzasScreen(barberiaId: _barberiaId!),
       ConfigScreen(barberiaId: _barberiaId!),
     ];
@@ -84,13 +95,15 @@ class _MainShellState extends State<MainShell> {
         destinations: const [
           NavigationDestination(
               icon: Icon(Icons.bar_chart_outlined),
-              selectedIcon:
-                  Icon(Icons.bar_chart, color: Color(0xFFFACC15)),
+              selectedIcon: Icon(Icons.bar_chart, color: Color(0xFFFACC15)),
               label: 'Inicio'),
           NavigationDestination(
+              icon: Icon(Icons.insights_outlined),
+              selectedIcon: Icon(Icons.insights, color: Color(0xFFFACC15)),
+              label: 'Resumen'),
+          NavigationDestination(
               icon: Icon(Icons.calendar_today_outlined),
-              selectedIcon:
-                  Icon(Icons.calendar_today, color: Color(0xFFFACC15)),
+              selectedIcon: Icon(Icons.calendar_today, color: Color(0xFFFACC15)),
               label: 'Agenda'),
           NavigationDestination(
               icon: Icon(Icons.people_outline),
