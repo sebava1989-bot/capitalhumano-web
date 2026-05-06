@@ -2,7 +2,14 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+const PUBLIC_ROUTES = ['/', '/guion']
+
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  if (PUBLIC_ROUTES.some((r) => pathname === r || pathname.startsWith(r + '/'))) {
+    return NextResponse.next({ request })
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -26,7 +33,6 @@ export async function proxy(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
   const slugMatch = pathname.match(/^\/([^/]+)\/(.+)/)
 
   if (slugMatch) {
