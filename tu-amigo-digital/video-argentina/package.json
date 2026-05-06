@@ -1,0 +1,25 @@
+{
+  "name": "video-argentina",
+  "version": "1.0.0",
+  "description": "Video publicitario Tu Amigo Digital — Argentina",
+  "scripts": {
+    "studio": "npx remotion studio src/Root.tsx",
+    "render:short-v": "npx remotion render src/Root.tsx ShortVertical out/short-vertical.mp4",
+    "render:short-h": "npx remotion render src/Root.tsx ShortHorizontal out/short-horizontal.mp4",
+    "render:long-v": "npx remotion render src/Root.tsx LongVertical out/long-vertical.mp4",
+    "render:long-h": "npx remotion render src/Root.tsx LongHorizontal out/long-horizontal.mp4"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@remotion/cli": "^4.0.457",
+    "@remotion/google-fonts": "^4.0.457",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "remotion": "^4.0.457"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3"
+  }
+}
