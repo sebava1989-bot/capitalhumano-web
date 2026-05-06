@@ -48,6 +48,18 @@ export function Pricing({ phone }: PricingProps) {
           al mes por barbería
         </p>
 
+        <div className="my-8 flex items-center justify-center gap-4">
+          <div className="h-px flex-1 max-w-[120px]" style={{ background: 'rgba(245,158,11,0.3)' }} />
+          <p
+            className="text-center text-base text-zinc-400 max-w-xs"
+            style={{ fontFamily: 'var(--font-jakarta)' }}
+          >
+            La mitad de lo que cuesta una membresía al gym —<br />
+            <span className="text-white font-semibold">y tu barbería trabaja sola.</span>
+          </p>
+          <div className="h-px flex-1 max-w-[120px]" style={{ background: 'rgba(245,158,11,0.3)' }} />
+        </div>
+
         <p
           className="mb-12 text-sm text-zinc-600"
           style={{ fontFamily: 'var(--font-jakarta)' }}
