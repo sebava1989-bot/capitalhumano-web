@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu Amigo Digital — Páginas Web, IA y Marketing para tu Negocio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span>⚡</span>
+        <span>Tu Amigo <strong>Digital</strong></span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#como-funciona">Cómo funciona</a></li>
+        <li><a href="#clientes">Clientes</a></li>
+        <li><a href="#barberdeck">barberDesk</a></li>
+        <li><a href="#apps">Apps</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+      <a href="https://wa.me/56971542893" target="_blank" class="nav-cta">
+        Hablemos
+      </a>
+      <button class="hamburger" id="hamburger" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="hero-tag">🚀 Tecnología al alcance de todos</div>
+    <h1>Tu negocio merece<br /><span class="highlight">brillar en internet</span></h1>
+    <p class="hero-sub">Creamos tu página web, apps con IA y estrategia de marketing.<br />Sin complicaciones, con resultados reales.</p>
+    <div class="hero-ctas">
+      <a href="https://wa.me/56971542893" target="_blank" class="btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Escríbenos por WhatsApp
+      </a>
+      <a href="#contacto" class="btn-link">Agenda una llamada gratis</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num">3</span><span class="stat-label">Servicios</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">100%</span><span class="stat-label">Digital</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">24/7</span><span class="stat-label">Soporte</span></div>
+    </div>
+  </section>
+
+  <!-- VIDEO -->
+  <section class="video-section">
+    <div class="container">
+      <span class="section-tag section-tag--light">En acción</span>
+      <h2 class="section-title section-title--light">Mira lo que podemos<br />hacer por tu negocio</h2>
+      <div class="video-wrap">
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          poster=""
+          class="video-player"
+        >
+          <source src="assets/video-publicidad.mp4" type="video/mp4" />
+        </video>
+      </div>
+    </div>
+  </section>
+
+  <!-- SERVICIOS -->
+  <section class="section section-gray" id="servicios">
+    <div class="container">
+      <span class="section-tag">Lo que hacemos</span>
+      <h2 class="section-title">Todo lo que tu negocio<br />necesita para crecer</h2>
+      <p class="section-sub">Tres servicios, un solo equipo de confianza.</p>
+      <div class="services-list">
+        <a href="#contacto" class="service-row">
+          <div class="service-icon-wrap service-icon-light">🌐</div>
+          <div class="service-text">
+            <h3>Páginas Web</h3>
+            <p>Sitios modernos, rápidos y optimizados para Google. Tu vitrina digital disponible las 24 horas del día para atraer nuevos clientes.</p>
+          </div>
+          <span class="service-arrow">›</span>
+        </a>
+        <a href="#contacto" class="service-row">
+          <div class="service-icon-wrap service-icon-blue">🤖</div>
+          <div class="service-text">
+            <h3>Apps con Inteligencia Artificial</h3>
+            <p>Automatiza tareas, atiende clientes automáticamente y toma decisiones más inteligentes con herramientas IA a medida.</p>
+          </div>
+          <span class="service-arrow">›</span>
+        </a>
+        <a href="#contacto" class="service-row">
+          <div class="service-icon-wrap service-icon-dark">📈</div>
+          <div class="service-text">
+            <h3>Marketing Digital</h3>
+            <p>Redes sociales, publicidad digital y contenido que realmente atrae clientes. Estrategias para negocios reales con presupuestos reales.</p>
+          </div>
+          <span class="service-arrow">›</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CÓMO FUNCIONA -->
+  <section class="section" id="como-funciona">
+    <div class="container">
+      <span class="section-tag">El proceso</span>
+      <h2 class="section-title">Simple, rápido y sin vueltas</h2>
+      <p class="section-sub">Tres pasos para llevar tu negocio al mundo digital.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-emoji">💬</div>
+          <h3>Hablamos</h3>
+          <p>Cuéntanos tu negocio y lo que necesitas. Sin compromiso ni tecnicismos. Te escuchamos y te asesoramos gratis.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-emoji">🎨</div>
+          <h3>Diseñamos</h3>
+          <p>Creamos tu solución a medida, con tu feedback en cada paso. Tú decides, nosotros ejecutamos.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-emoji">🚀</div>
+          <h3>Lanzamos</h3>
+          <p>Tu proyecto sale al mundo listo para atraer clientes. Y seguimos contigo con soporte post-entrega.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- POR QUÉ NOSOTROS -->
+  <section class="section section-gray" id="por-que">
+    <div class="container">
+      <span class="section-tag">Por qué elegirnos</span>
+      <h2 class="section-title">Somos tu amigo digital<br />de confianza</h2>
+      <p class="section-sub">No somos una agencia fría. Somos tu equipo.</p>
+      <div class="benefits-grid">
+        <div class="benefit">
+          <div class="benefit-icon">🤝</div>
+          <h4>Trato directo y personal</h4>
+          <p>Hablas con quien hace el trabajo. Sin intermediarios, sin call centers, sin burocracia.</p>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">⚡</div>
+          <h4>Tecnología de punta para todos</h4>
+          <p>Las mismas herramientas que usan las grandes empresas, adaptadas a tu presupuesto y realidad.</p>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">🛡️</div>
+          <h4>Soporte continuo</h4>
+          <p>No desaparecemos después de entregar. Estamos disponibles cuando nos necesitas.</p>
+        </div>
+        <div class="benefit">
+          <div class="benefit-icon">📊</div>
+          <h4>Resultados medibles</h4>
+          <p>Todo lo que hacemos tiene un objetivo claro: más clientes, más ventas, más crecimiento para tu negocio.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLIENTES -->
+  <section class="section" id="clientes">
+    <div class="container">
+      <span class="section-tag">Nuestros clientes</span>
+      <h2 class="section-title">Empresas que ya confían<br />en Tu Amigo Digital</h2>
+      <div class="client-card">
+        <div class="client-header">
+          <div class="client-logo-icon">🔒</div>
+          <div>
+            <div class="client-name">Vision Security SPA</div>
+            <div class="client-url">visionsecurityspa.cl</div>
+          </div>
+        </div>
+        <p class="client-desc">Empresa chilena de seguridad para la cual desarrollamos su <strong>página web corporativa</strong>, un <strong>sistema de automatización de redes sociales</strong> con IA, un <strong>agente financiero inteligente</strong> para control de gastos y flujo de caja, y un <strong>sistema de Recursos Humanos</strong> con panel administrativo.</p>
+        <div class="client-tags">
+          <span class="tag">Página Web</span>
+          <span class="tag">Automatización IA</span>
+          <span class="tag">Agente Financiero</span>
+          <span class="tag">Sistema RRHH</span>
+        </div>
+        <a href="https://visionsecurityspa.cl" target="_blank" class="client-link">Ver sitio web →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- BARBERDECK SHOWCASE -->
+  <section class="section section-gray" id="barberdeck">
+    <div class="container">
+      <span class="section-tag">Producto Destacado</span>
+      <h2 class="section-title">barberDesk — el SaaS<br />que construimos para barberías</h2>
+      <p class="section-sub">Una plataforma completa que transforma cómo las barberías chilenas gestionan sus citas, clientes y marketing.</p>
+
+      <div class="bd-cards">
+
+        <div class="bd-card">
+          <div class="bd-num">01</div>
+          <h3>📱 QR que genera citas solas</h3>
+          <p>Imprime el código QR, súbelo a tus redes, ponlo en la vitrina. Cada escaneo es una reserva directa. Sin WhatsApp, sin llamadas, sin "¿hay hora para el viernes?"</p>
+          <span class="bd-accent">Una foto en Instagram = citas en automático.</span>
+        </div>
+
+        <div class="bd-card">
+          <div class="bd-num">02</div>
+          <h3>🎁 Referidos que premian a todos</h3>
+          <p>Tu cliente invita a un amigo y ambos ganan descuento en su próximo corte. El nuevo llega con regalo de bienvenida y siente desde el primer día que entró a algo especial.</p>
+          <span class="bd-accent">Una comunidad que crece sola.</span>
+        </div>
+
+        <div class="bd-card">
+          <div class="bd-num">03</div>
+          <h3>📝 Libro de sugerencias digital</h3>
+          <p>Felicitaciones, ideas, reclamos — directo desde la app del cliente. Sin papeles, sin vergüenza. Tus clientes te llevan al siguiente nivel cada semana.</p>
+          <span class="bd-accent">Innova antes que tu competencia.</span>
+        </div>
+
+      </div>
+
+      <div class="bd-price-row">
+        <div class="bd-price-left">
+          <span class="bd-price-amount">$15.000</span>
+          <span class="bd-price-period">/ mes por barbería</span>
+        </div>
+        <p class="bd-price-text">La mitad de lo que cuesta una membresía al gym — y tu barbería trabaja sola.</p>
+        <a href="barberdeck.html" class="btn-primary">Conocer barberDesk &rsaquo;</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- NUESTRAS APPS -->
+  <section class="section section-gray" id="apps">
+    <div class="container">
+      <span class="section-tag">Nuestras Apps</span>
+      <h2 class="section-title">Aplicaciones que<br />construimos para el mundo</h2>
+      <p class="section-sub">Más allá de los servicios, creamos productos propios con tecnología de punta.</p>
+      <div class="apps-list">
+        <a href="lenslingo.html" class="app-row">
+          <div class="app-icon-wrap">
+            <span class="app-icon-emoji">🔍</span>
+          </div>
+          <div class="app-text">
+            <div class="app-name">LensLingo</div>
+            <div class="app-desc">Apunta tu cámara a cualquier texto y tradúcelo al instante. OCR + IA + voz en tu bolsillo.</div>
+            <div class="app-tags">
+              <span class="app-tag">Traducción</span>
+              <span class="app-tag">Cámara</span>
+              <span class="app-tag">IA</span>
+              <span class="app-tag">Android</span>
+            </div>
+          </div>
+          <div class="app-arrow">›</div>
+        </a>
+        <a href="capitalhumano.html" class="app-row">
+          <div class="app-icon-wrap" style="background:linear-gradient(145deg,#1d1d1f,#3a3a3c);box-shadow:0 4px 16px rgba(0,0,0,0.3);">
+            <span class="app-icon-emoji">👥</span>
+          </div>
+          <div class="app-text">
+            <div class="app-name">Capital Humano</div>
+            <div class="app-desc">Software de RRHH para empresas chilenas. Panel web + app móvil para trabajadores, documentos y solicitudes.</div>
+            <div class="app-tags">
+              <span class="app-tag">RRHH</span>
+              <span class="app-tag">SaaS</span>
+              <span class="app-tag">Web + App</span>
+              <span class="app-tag">Empresas</span>
+            </div>
+          </div>
+          <div class="app-arrow">›</div>
+        </a>
+        <a href="scannerexpress.html" class="app-row">
+          <div class="app-icon-wrap" style="background:linear-gradient(145deg,#0071e3,#005bb5);box-shadow:0 4px 16px rgba(0,113,227,0.35);">
+            <span class="app-icon-emoji">📄</span>
+          </div>
+          <div class="app-text">
+            <div class="app-name">ScannerExpress</div>
+            <div class="app-desc">Escanea documentos, genera PDFs y organiza tu vida. ML Kit + OCR + nube — pago único de $2.</div>
+            <div class="app-tags">
+              <span class="app-tag">Escáner</span>
+              <span class="app-tag">PDF</span>
+              <span class="app-tag">OCR</span>
+              <span class="app-tag">Android</span>
+            </div>
+          </div>
+          <div class="app-arrow">›</div>
+        </a>
+        <a href="fitpulse.html" class="app-row">
+          <div class="app-icon-wrap" style="background:linear-gradient(145deg,#FF4D00,#cc3d00);box-shadow:0 4px 16px rgba(255,77,0,0.35);">
+            <span class="app-icon-emoji">🏋️</span>
+          </div>
+          <div class="app-text">
+            <div class="app-name">FitPulse</div>
+            <div class="app-desc">App fitness gamificada para gimnasios. Rutinas, ranking, nutrición con IA y seguimiento de progreso para aumentar la retención.</div>
+            <div class="app-tags">
+              <span class="app-tag">Fitness</span>
+              <span class="app-tag">SaaS</span>
+              <span class="app-tag">IA</span>
+              <span class="app-tag">Android</span>
+            </div>
+          </div>
+          <div class="app-arrow">›</div>
+        </a>
+        <a href="ketosmart.html" class="app-row">
+          <div class="app-icon-wrap" style="background:linear-gradient(145deg,#1B5E20,#2E7D32);box-shadow:0 4px 16px rgba(27,94,32,0.35);">
+            <span class="app-icon-emoji">🥑</span>
+          </div>
+          <div class="app-text">
+            <div class="app-name">KetoSmart</div>
+            <div class="app-desc">Tu guía inteligente de dieta cetogénica. IA especializada en keto, contador de pasos con descuentos, seguimiento de macros y guía científica de adaptación.</div>
+            <div class="app-tags">
+              <span class="app-tag">Keto</span>
+              <span class="app-tag">Nutrición</span>
+              <span class="app-tag">IA</span>
+              <span class="app-tag">Android</span>
+            </div>
+          </div>
+          <div class="app-arrow">›</div>
+        </a>
+        <a href="barberdeck.html" class="app-row">
+          <div class="app-icon-wrap" style="background:linear-gradient(145deg,#1a1200,#3d2800);box-shadow:0 4px 16px rgba(245,158,11,0.35);">
+            <span class="app-icon-emoji">💈</span>
+          </div>
+          <div class="app-text">
+            <div class="app-name">barberDesk</div>
+            <div class="app-desc">SaaS completo para barberías chilenas. Reservas online, app admin móvil, referidos, campañas con IA y libro de sugerencias.</div>
+            <div class="app-tags">
+              <span class="app-tag" style="background:#fff8e7;color:#b45309;">Reservas</span>
+              <span class="app-tag" style="background:#fff8e7;color:#b45309;">Referidos</span>
+              <span class="app-tag" style="background:#fff8e7;color:#b45309;">IA</span>
+              <span class="app-tag" style="background:#fff8e7;color:#b45309;">SaaS</span>
+              <span class="app-tag" style="background:#fff8e7;color:#b45309;">Web + App</span>
+            </div>
+          </div>
+          <div class="app-arrow">›</div>
+        </a>
+        <div class="app-row app-row--coming">
+          <div class="app-icon-wrap app-icon-wrap--dark">
+            <span class="app-icon-emoji">🌸</span>
+          </div>
+          <div class="app-text">
+            <div class="app-name">Alma AI <span class="coming-badge">Próximamente</span></div>
+            <div class="app-desc">Tu compañero emocional con inteligencia artificial. Conversaciones que cuidan tu bienestar.</div>
+            <div class="app-tags">
+              <span class="app-tag">Bienestar</span>
+              <span class="app-tag">IA</span>
+              <span class="app-tag">Android</span>
+            </div>
+          </div>
+          <div class="app-arrow" style="opacity:0.3;">›</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-section" id="contacto">
+    <div class="container">
+      <h2>¿Listo para llevar tu negocio<br />al siguiente nivel?</h2>
+      <p>La primera consulta es completamente gratis. Sin compromisos.</p>
+      <div class="cta-btns">
+        <a href="https://wa.me/56971542893" target="_blank" class="btn-white">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Escríbenos por WhatsApp
+        </a>
+        <a href="mailto:contacto@tuamigodigital.cl" class="btn-outline-white">Agendar llamada gratis</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">⚡ Tu Amigo <strong>Digital</strong></div>
+        <p>Tecnología accesible para negocios reales.<br />Páginas web, IA y marketing.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Navegación</h5>
+        <ul>
+          <li><a href="#servicios">Servicios</a></li>
+          <li><a href="#como-funciona">Cómo funciona</a></li>
+          <li><a href="#clientes">Clientes</a></li>
+          <li><a href="#apps">Apps</a></li>
+          <li><a href="#contacto">Contacto</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Contáctanos</h5>
+        <ul>
+          <li><a href="https://wa.me/56971542893" target="_blank">📱 WhatsApp</a></li>
+          <li><a href="mailto:contacto@tuamigodigital.cl">✉️ contacto@tuamigodigital.cl</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Tu Amigo Digital. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+
+  <script src="main.js"></script>
+</body>
+</html>

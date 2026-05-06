@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>barberDesk — Reservas, Referidos y Marketing para tu Barbería</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── barberDesk page overrides ── */
+    body { background: #0a0a0a; color: #f5f5f7; }
+
+    .bd-nav {
+      position: sticky; top: 0; z-index: 100; height: 52px;
+      background: rgba(10,10,10,0.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(245,158,11,0.15);
+      display: flex; align-items: center;
+    }
+    .bd-nav-inner {
+      max-width: 980px; margin: 0 auto; width: 100%;
+      padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .bd-nav-logo {
+      font-family: 'Anton', sans-serif;
+      font-size: 22px; color: #f5f5f7; text-decoration: none;
+      letter-spacing: 1px;
+    }
+    .bd-nav-logo span { color: #F59E0B; }
+    .bd-nav-back {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px; color: #888; text-decoration: none;
+      display: flex; align-items: center; gap: 6px;
+      transition: color 0.2s;
+    }
+    .bd-nav-back:hover { color: #f5f5f7; }
+
+    /* HERO */
+    .bd-hero {
+      min-height: 92vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 80px 24px;
+      background-color: #0a0a0a;
+      background-image: radial-gradient(rgba(245,158,11,0.07) 1px, transparent 1px);
+      background-size: 28px 28px;
+      position: relative; overflow: hidden;
+    }
+    .bd-hero-glow {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%,-50%);
+      width: 700px; height: 400px;
+      background: #F59E0B; border-radius: 50%;
+      opacity: 0.12; filter: blur(140px);
+      pointer-events: none;
+    }
+    .bd-hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(245,158,11,0.3);
+      background: rgba(245,158,11,0.08);
+      border-radius: 999px; padding: 6px 16px;
+      margin-bottom: 32px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: #F59E0B;
+    }
+    .bd-hero-badge-dot {
+      width: 6px; height: 6px;
+      background: #F59E0B; border-radius: 50%;
+    }
+    .bd-hero h1 {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(3.2rem, 11vw, 9.5rem);
+      line-height: 1; letter-spacing: 1px;
+      color: #f5f5f7; margin-bottom: 24px;
+      position: relative; z-index: 1;
+    }
+    .bd-hero h1 em { font-style: normal; color: #F59E0B; }
+    .bd-hero-sub {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: #888; line-height: 1.7;
+      max-width: 600px; margin: 0 auto 40px;
+      position: relative; z-index: 1;
+    }
+    .bd-hero-ctas {
+      display: flex; gap: 16px; align-items: center;
+      justify-content: center; flex-wrap: wrap;
+      position: relative; z-index: 1;
+    }
+    .bd-btn-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: #0a0a0a; text-decoration: none;
+      background: linear-gradient(135deg, #F59E0B, #FBBF24);
+      border-radius: 999px; padding: 14px 32px;
+      box-shadow: 0 0 40px rgba(245,158,11,0.35), 0 4px 20px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .bd-btn-primary:hover {
+      transform: scale(1.04);
+      box-shadow: 0 0 60px rgba(245,158,11,0.5), 0 4px 20px rgba(0,0,0,0.4);
+    }
+    .bd-hero-note {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px; color: #555;
+    }
+
+    /* STATS STRIP */
+    .bd-stats {
+      background: #111;
+      border-top: 1px solid rgba(245,158,11,0.2);
+      border-bottom: 1px solid rgba(245,158,11,0.2);
+    }
+    .bd-stats-inner {
+      max-width: 980px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(3,1fr);
+      divide: 1px solid rgba(245,158,11,0.15);
+    }
+    .bd-stat {
+      padding: 28px 24px; text-align: center;
+      border-right: 1px solid rgba(245,158,11,0.15);
+    }
+    .bd-stat:last-child { border-right: none; }
+    .bd-stat-val {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      color: #F59E0B; line-height: 1;
+    }
+    .bd-stat-label {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 12px; color: #555; margin-top: 6px;
+    }
+
+    /* BEFORE/AFTER */
+    .bd-section { padding: 80px 24px; }
+    .bd-section-gray { background: #0f0f0f; }
+    .bd-section-label {
+      display: block;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: #555; text-align: center; margin-bottom: 56px;
+    }
+    .bd-compare {
+      max-width: 900px; margin: 0 auto;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+    }
+    .bd-compare-before {
+      background: #111; border: 1px solid #222;
+      border-radius: 18px; padding: 36px;
+    }
+    .bd-compare-after {
+      border-radius: 18px; padding: 36px;
+      background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(245,158,11,0.02));
+      border: 1px solid rgba(245,158,11,0.25);
+    }
+    .bd-compare-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      margin-bottom: 28px; text-align: center;
+    }
+    .bd-compare-before .bd-compare-title { color: #444; }
+    .bd-compare-after  .bd-compare-title { color: #F59E0B; }
+    .bd-compare ul { list-style: none; display: flex; flex-direction: column; gap: 18px; }
+    .bd-compare li { display: flex; align-items: flex-start; gap: 12px; }
+    .bd-compare-x {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 1px solid #333; display: flex; align-items: center;
+      justify-content: center; font-size: 10px; color: #444;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .bd-compare-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(245,158,11,0.15);
+      border: 1px solid rgba(245,158,11,0.35);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; color: #F59E0B;
+      flex-shrink: 0; margin-top: 2px;
+    }
+    .bd-compare-before li span:last-child {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; color: #555; line-height: 1.5;
+    }
+    .bd-compare-after li span:last-child {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; color: #f5f5f7; line-height: 1.5;
+    }
+
+    /* POWER FEATURES */
+    .bd-powers { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 4px; }
+    .bd-power {
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px; padding: 40px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 40px;
+      position: relative; overflow: hidden;
+      transition: background 0.3s;
+    }
+    .bd-power:hover { background: rgba(255,255,255,0.02); }
+    .bd-power-glow {
+      position: absolute; right: -60px; top: -60px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: #F59E0B; opacity: 0;
+      filter: blur(80px); transition: opacity 0.5s;
+      pointer-events: none;
+    }
+    .bd-power:hover .bd-power-glow { opacity: 0.08; }
+    .bd-power-bar {
+      position: absolute; bottom: 0; left: 0;
+      height: 2px; width: 0; background: #F59E0B;
+      transition: width 0.5s;
+    }
+    .bd-power:hover .bd-power-bar { width: 100%; }
+    .bd-power-num {
+      font-family: 'Anton', sans-serif;
+      font-size: 16px; color: #F59E0B; margin-bottom: 8px;
+    }
+    .bd-power-tag {
+      display: inline-block;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: #F59E0B; background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.25);
+      border-radius: 999px; padding: 4px 12px;
+      margin-bottom: 16px;
+    }
+    .bd-power h3 {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      line-height: 1.1; color: #f5f5f7;
+      white-space: pre-line;
+    }
+    .bd-power-body {
+      display: flex; flex-direction: column; justify-content: center;
+    }
+    .bd-power-body p {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px; color: #888; line-height: 1.7;
+      margin-bottom: 16px;
+    }
+    .bd-power-body strong {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px; font-weight: 700; color: #F59E0B;
+    }
+
+    /* HOW IT WORKS */
+    .bd-how { max-width: 900px; margin: 0 auto; }
+    .bd-how-title {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      color: #f5f5f7; text-align: center;
+      margin-bottom: 56px; letter-spacing: 1px;
+    }
+    .bd-how-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 2px; background: #222;
+      border-radius: 18px; overflow: hidden;
+    }
+    .bd-how-card {
+      background: #0d0d0d; padding: 36px;
+      position: relative; overflow: hidden;
+      transition: background 0.3s;
+    }
+    .bd-how-card:hover { background: #111; }
+    .bd-how-num {
+      font-family: 'Anton', sans-serif;
+      font-size: 4rem; color: #1a1a1a;
+      line-height: 1; margin-bottom: 16px;
+      transition: color 0.3s;
+    }
+    .bd-how-card:hover .bd-how-num { color: rgba(245,158,11,0.15); }
+    .bd-how-card h4 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: #f5f5f7; margin-bottom: 10px;
+    }
+    .bd-how-card p {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 14px; color: #666; line-height: 1.65;
+    }
+    .bd-how-card-bar {
+      position: absolute; bottom: 0; left: 0;
+      height: 2px; width: 0; background: #F59E0B;
+      transition: width 0.5s;
+    }
+    .bd-how-card:hover .bd-how-card-bar { width: 100%; }
+
+    /* PRICING */
+    .bd-pricing {
+      text-align: center; padding: 100px 24px;
+      position: relative; overflow: hidden;
+      background-color: #0a0a0a;
+      background-image: radial-gradient(rgba(245,158,11,0.05) 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .bd-pricing-glow {
+      position: absolute; left: 50%; top: 50%;
+      transform: translate(-50%,-50%);
+      width: 600px; height: 300px;
+      background: #F59E0B; border-radius: 50%;
+      opacity: 0.08; filter: blur(120px);
+      pointer-events: none;
+    }
+    .bd-pricing-label {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: #555; margin-bottom: 16px;
+    }
+    .bd-pricing-price {
+      font-family: 'Anton', sans-serif;
+      font-size: clamp(5rem, 20vw, 13rem);
+      color: #F59E0B; line-height: 1;
+      position: relative; z-index: 1;
+    }
+    .bd-pricing-period {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.3rem; color: #aaa;
+      margin-bottom: 8px;
+    }
+    .bd-pricing-gym {
+      display: inline-block;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 15px; color: #f5f5f7;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 999px; padding: 10px 28px;
+      margin-bottom: 40px;
+    }
+    .bd-pricing-gym em { font-style: normal; font-weight: 700; }
+    .bd-pricing-fine {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px; color: #444; margin-top: 20px;
+    }
+
+    /* FOOTER */
+    .bd-footer {
+      background: #070707;
+      border-top: 1px solid #1a1a1a;
+      padding: 36px 24px;
+      text-align: center;
+    }
+    .bd-footer p {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px; color: #444;
+    }
+    .bd-footer a { color: #F59E0B; text-decoration: none; }
+
+    /* RESPONSIVE */
+    @media (max-width: 700px) {
+      .bd-compare { grid-template-columns: 1fr; }
+      .bd-power { grid-template-columns: 1fr; gap: 20px; }
+      .bd-how-grid { grid-template-columns: 1fr; }
+      .bd-stats-inner { grid-template-columns: 1fr; }
+      .bd-stat { border-right: none; border-bottom: 1px solid rgba(245,158,11,0.15); }
+      .bd-stat:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="bd-nav">
+    <div class="bd-nav-inner">
+      <a href="#" class="bd-nav-logo">barber<span>Desk</span></a>
+      <a href="index.html" class="bd-nav-back">
+        ← Tu Amigo Digital
+      </a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="bd-hero">
+    <div class="bd-hero-glow"></div>
+    <div class="bd-hero-badge">
+      <div class="bd-hero-badge-dot"></div>
+      barberDesk
+    </div>
+    <h1>TU BARBERÍA<br /><em>SE LLENA SOLA.</em></h1>
+    <p class="bd-hero-sub">
+      Don Rodrigo perdía 2 horas al día coordinando WhatsApps. Hoy su agenda se llena online, sus clientes vuelven solos y sabe exactamente qué servicios le dejan más plata.
+    </p>
+    <div class="bd-hero-ctas">
+      <a href="https://wa.me/56971542893?text=Hola%2C%20quiero%20una%20demo%20de%20barberDesk%20para%20mi%20barber%C3%ADa." target="_blank" class="bd-btn-primary">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Agendar demo gratuita
+      </a>
+      <span class="bd-hero-note">Sin contrato · $15.000/mes</span>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="bd-stats">
+    <div class="bd-stats-inner">
+      <div class="bd-stat">
+        <div class="bd-stat-val">24/7</div>
+        <div class="bd-stat-label">Reservas online</div>
+      </div>
+      <div class="bd-stat">
+        <div class="bd-stat-val">0</div>
+        <div class="bd-stat-label">WhatsApps de agenda</div>
+      </div>
+      <div class="bd-stat">
+        <div class="bd-stat-val">$15K</div>
+        <div class="bd-stat-label">Al mes, todo incluido</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BEFORE / AFTER -->
+  <section class="bd-section bd-section-gray">
+    <span class="bd-section-label">La diferencia</span>
+    <div class="bd-compare">
+      <div class="bd-compare-before">
+        <div class="bd-compare-title">Sin barberDesk</div>
+        <ul>
+          <li><span class="bd-compare-x">✕</span><span>Reservas por WhatsApp que se pierden o se olvidan</span></li>
+          <li><span class="bd-compare-x">✕</span><span>Sin idea de qué servicio vende más ni quién es tu mejor cliente</span></li>
+          <li><span class="bd-compare-x">✕</span><span>Clientes que no vuelven porque nadie los llama</span></li>
+        </ul>
+      </div>
+      <div class="bd-compare-after">
+        <div class="bd-compare-title">Con barberDesk</div>
+        <ul>
+          <li><span class="bd-compare-check">✓</span><span>Reservas online 24/7 desde el celular del cliente</span></li>
+          <li><span class="bd-compare-check">✓</span><span>Panel con estadísticas reales de tu negocio</span></li>
+          <li><span class="bd-compare-check">✓</span><span>Sistema de referidos y descuentos automáticos que fideliza</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- POWER FEATURES -->
+  <section class="bd-section">
+    <div class="bd-powers">
+
+      <div class="bd-power">
+        <div class="bd-power-glow"></div>
+        <div class="bd-power-bar"></div>
+        <div>
+          <div class="bd-power-num">01</div>
+          <div class="bd-power-tag">Más citas. Sin esfuerzo.</div>
+          <h3>Comparte tu barbería con un QR.
+Las citas llegan solas.</h3>
+        </div>
+        <div class="bd-power-body">
+          <p>Imprime el código QR, súbelo a tus redes, ponlo en la ventana. Cada escaneo es una reserva directa. Sin intermediarios, sin WhatsApp, sin "¿hay hora para el viernes?".</p>
+          <strong>Una foto en Instagram = citas en automático.</strong>
+        </div>
+      </div>
+
+      <div class="bd-power">
+        <div class="bd-power-glow"></div>
+        <div class="bd-power-bar"></div>
+        <div>
+          <div class="bd-power-num">02</div>
+          <div class="bd-power-tag">Clientes que traen clientes.</div>
+          <h3>Referidos que premian
+a todos.</h3>
+        </div>
+        <div class="bd-power-body">
+          <p>Tu cliente invita a un amigo y ambos ganan descuento en su próximo corte. El nuevo llega con un regalo de bienvenida y siente desde el primer día que entró a algo especial.</p>
+          <strong>Una comunidad que crece sola.</strong>
+        </div>
+      </div>
+
+      <div class="bd-power">
+        <div class="bd-power-glow"></div>
+        <div class="bd-power-bar"></div>
+        <div>
+          <div class="bd-power-num">03</div>
+          <div class="bd-power-tag">Tu barbería mejora cada semana.</div>
+          <h3>Un libro de sugerencias
+que sí se lee.</h3>
+        </div>
+        <div class="bd-power-body">
+          <p>Felicitaciones, ideas, reclamos — todo llega directo desde la app de tu cliente. Sin papeles, sin vergüenza. Tus clientes te llevan al siguiente nivel.</p>
+          <strong>Innova antes que tu competencia.</strong>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="bd-section bd-section-gray">
+    <div class="bd-how">
+      <h2 class="bd-how-title">ASÍ FUNCIONA</h2>
+      <div class="bd-how-grid">
+        <div class="bd-how-card">
+          <div class="bd-how-num">01</div>
+          <h4>Reserva en 3 pasos</h4>
+          <p>El cliente elige barbero, servicio y hora desde su celular. Sin llamadas, sin WhatsApp.</p>
+          <div class="bd-how-card-bar"></div>
+        </div>
+        <div class="bd-how-card">
+          <div class="bd-how-num">02</div>
+          <h4>App admin en tu bolsillo</h4>
+          <p>Ve la agenda del día, gestiona clientes y servicios desde la app móvil.</p>
+          <div class="bd-how-card-bar"></div>
+        </div>
+        <div class="bd-how-card">
+          <div class="bd-how-num">03</div>
+          <h4>Recordatorios automáticos</h4>
+          <p>Emails 24h antes de cada reserva. Cero no-shows, cero llamadas de confirmación.</p>
+          <div class="bd-how-card-bar"></div>
+        </div>
+        <div class="bd-how-card">
+          <div class="bd-how-num">04</div>
+          <h4>Campañas con IA</h4>
+          <p>Descuentos personalizados a tus clientes con un clic. La IA escribe los mensajes.</p>
+          <div class="bd-how-card-bar"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="bd-pricing">
+    <div class="bd-pricing-glow"></div>
+    <p class="bd-pricing-label">Precio</p>
+    <div class="bd-pricing-price">$15.000</div>
+    <p class="bd-pricing-period">al mes por barbería</p>
+    <p class="bd-pricing-gym">
+      <em>La mitad</em> de lo que cuesta una membresía al gym —<br />y tu barbería trabaja sola.
+    </p>
+    <br />
+    <a href="https://wa.me/56971542893?text=Hola%2C%20quiero%20una%20demo%20de%20barberDesk%20para%20mi%20barber%C3%ADa." target="_blank" class="bd-btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Agendar demo gratuita
+    </a>
+    <p class="bd-pricing-fine">Demo gratuita · Lo ves funcionando con el nombre de tu barbería</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bd-footer">
+    <p>barberDesk es un producto de <a href="index.html">Tu Amigo Digital SpA</a> · <a href="https://wa.me/56971542893" target="_blank">WhatsApp</a></p>
+  </footer>
+
+</body>
+</html>
