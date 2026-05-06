@@ -9,8 +9,8 @@ interface Props {
 
 export function WspReferralButton({ referralCode, slug, barberiaNombre, descuentoPct }: Props) {
   function compartir() {
-    const url = `${window.location.origin}/${slug}/registro?ref=${referralCode}`
-    const texto = `¡Hola! Te recomiendo *${barberiaNombre}*, el mejor lugar para tu próximo corte. Usa mi invitación y obtén un ${descuentoPct}% de descuento en tu primera cita: ${url}`
+    const apkUrl = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/BarberDesk-cliente.apk'
+    const texto = `¡Hola! Te invito a *${barberiaNombre}* 💈\n\nDescarga la app y reserva tu hora fácil:\n👉 ${apkUrl}\n\nUsa mi código *${referralCode}* al registrarte y obtén *${descuentoPct}% de descuento* en tu primera cita.\n\n_(Si no puedes instalar la app, reserva desde el navegador aquí: ${window.location.origin}/${slug}/reservar?ref=${referralCode})_`
     window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, '_blank')
   }
 
