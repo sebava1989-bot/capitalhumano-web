@@ -9,7 +9,7 @@ interface Props {
 
 export function WspReferralButton({ referralCode, slug, barberiaNombre, descuentoPct }: Props) {
   function compartir() {
-    const apkUrl = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/BarberDesk-cliente.apk'
+    const apkUrl = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/app-release.apk'
     const webUrl = `${window.location.origin}/${slug}/reservar?ref=${referralCode}`
     const texto = [
       `¡Hola! Te invito a reservar en *${barberiaNombre}* 💈`,

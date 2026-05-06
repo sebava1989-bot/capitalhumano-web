@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-const APK_URL = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/BarberDesk-cliente.apk'
+const APK_URL = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/app-release.apk'
 
 export function AppDownloadBanner({ slug }: { slug: string }) {
   const [isAndroid, setIsAndroid] = useState<boolean | null>(null)

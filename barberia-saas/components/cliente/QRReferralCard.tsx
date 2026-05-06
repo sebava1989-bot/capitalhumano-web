@@ -11,7 +11,7 @@ interface Props {
 
 export function QRReferralCard({ referralCode, slug, descuentoPct }: Props) {
   const [show, setShow] = useState(false)
-  const apkUrl = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/BarberDesk-cliente.apk'
+  const apkUrl = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/app-release.apk'
 
   return (
     <div>
