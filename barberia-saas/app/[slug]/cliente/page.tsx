@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { WspReferralButton } from '@/components/cliente/WspReferralButton'
+import { QRReferralCard } from '@/components/cliente/QRReferralCard'
 import { CalificarReservaForm } from '@/components/cliente/CalificarReservaForm'
 import { CancelarCitaButton } from '@/components/cliente/CancelarCitaButton'
 import { FeedbackServicioCard } from '@/components/cliente/FeedbackServicioCard'
@@ -198,6 +199,13 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
             barberiaNombre={barberia.nombre}
             descuentoPct={(barberia as Record<string, number>).referido_descuento_nuevo_cliente_pct || (barberia as Record<string, number>).referido_descuento_referido_pct || 10}
           />
+          <div className="mt-2">
+            <QRReferralCard
+              referralCode={userData.referral_code}
+              slug={slug}
+              descuentoPct={(barberia as Record<string, number>).referido_descuento_nuevo_cliente_pct || (barberia as Record<string, number>).referido_descuento_referido_pct || 10}
+            />
+          </div>
           <p className="text-zinc-500 text-xs mt-2">Tu amigo recibe un descuento en su primera cita, ¡y tú también ganas un premio cuando se atienda!</p>
         </div>
       )}
