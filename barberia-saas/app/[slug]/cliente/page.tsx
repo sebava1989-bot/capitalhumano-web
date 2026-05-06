@@ -8,7 +8,16 @@ import { WspReferralButton } from '@/components/cliente/WspReferralButton'
 import { CalificarReservaForm } from '@/components/cliente/CalificarReservaForm'
 import { CancelarCitaButton } from '@/components/cliente/CancelarCitaButton'
 import { FeedbackServicioCard } from '@/components/cliente/FeedbackServicioCard'
+import { InstallPWAButton } from '@/components/cliente/InstallPWAButton'
 import { RecomendacionIA } from './recomendacion'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  return {
+    manifest: `/${slug}/cliente/manifest.webmanifest`,
+  }
+}
 
 async function cancelarReserva(reservaId: string) {
   'use server'
@@ -174,6 +183,10 @@ export default async function ClientePage({ params }: { params: Promise<{ slug: 
           <CancelarCitaButton reservaId={proximaCita.id} slug={slug} cancelarAction={cancelarReserva} />
         </div>
       )}
+
+      <div className="mb-4">
+        <InstallPWAButton />
+      </div>
 
       {userData?.referral_code && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mb-4">
