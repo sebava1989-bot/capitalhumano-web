@@ -34,11 +34,17 @@ export function FeedbackServicioCard({ reservaId, barberiaNombre, barberiaId, se
     setStep('sugerencia')
   }
 
+  const [errorMsg, setErrorMsg] = useState('')
+
   async function enviarFeedback() {
     if (!mensaje.trim()) { setStep('done'); return }
     setLoading(true)
-    await enviarSugerencia(barberiaId, tipo, mensaje, anonimo ? undefined : nombre || undefined)
+    const result = await enviarSugerencia(barberiaId, tipo, mensaje, anonimo ? undefined : nombre || undefined)
     setLoading(false)
+    if (!result.ok) {
+      setErrorMsg(result.error === 'rate_limit' ? 'Ya enviaste una opinión hoy. ¡Gracias!' : 'Error al enviar, intenta de nuevo.')
+      return
+    }
     setStep('done')
   }
 
@@ -106,6 +112,7 @@ export function FeedbackServicioCard({ reservaId, barberiaNombre, barberiaId, se
           />
         )}
 
+        {errorMsg && <p className="text-red-400 text-xs mb-2">{errorMsg}</p>}
         <div className="flex gap-2">
           <button
             type="button"
