@@ -34,31 +34,19 @@ class _LoginScreenState extends State<LoginScreen> {
         await db.auth.signInWithPassword(email: _emailCtrl.text.trim(), password: _passCtrl.text.trim());
       } else {
         final res = await db.auth.signUp(email: _emailCtrl.text.trim(), password: _passCtrl.text.trim());
-        final userId = res.user?.id;
-        if (userId != null) {
+        if (res.user?.id != null) {
           final refCode = _refCtrl.text.trim().isNotEmpty ? _refCtrl.text.trim().toUpperCase() : null;
-          // Generar referral_code único
+          // Generar referral_code simple
           final chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-          String myCode = '';
-          for (int i = 0; i < 3; i++) {
-            final candidate = String.fromCharCodes(
-              List.generate(6, (_) => chars.codeUnitAt(DateTime.now().microsecondsSinceEpoch % chars.length)),
-            );
-            final check = await db.from('users').select('id').eq('referral_code', candidate).maybeSingle();
-            if (check == null) { myCode = candidate; break; }
-          }
-          await db.from('users').upsert({
-            'id': userId,
-            'nombre': _nombreCtrl.text.trim(),
-            'rol': 'cliente',
-            'referral_code': myCode.isEmpty ? null : myCode,
-            'referred_by_code': refCode,
+          final rng = DateTime.now().microsecondsSinceEpoch;
+          final myCode = String.fromCharCodes(List.generate(6, (i) => chars.codeUnitAt((rng >> (i * 4)) % chars.length)));
+          // Usar RPC con SECURITY DEFINER para bypasear RLS
+          await db.rpc('crear_perfil_cliente', params: {
+            'p_nombre': _nombreCtrl.text.trim(),
+            'p_referral_code': myCode,
+            'p_referred_by_code': refCode,
+            'p_barberia_slug': barberiaSlug,
           });
-          // Obtener barberia_id para guardar slug
-          final barberia = await db.from('barberias').select('id').eq('slug', barberiaSlug).maybeSingle();
-          if (barberia != null) {
-            await db.from('users').update({'barberia_id': barberia['id']}).eq('id', userId);
-          }
         }
       }
       if (!mounted) return;
