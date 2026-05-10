@@ -10,10 +10,9 @@ const MAX_BASE64_CHARS = 7_400_000
 const MAX_PROMPT_CHARS = 800
 
 function buildPrompt(promptEstilo: string): string {
-  return `Apply this hairstyle to the person: ${promptEstilo}. The mask marks the exact area to change. Make the result look like a real photo taken after a haircut, matching the original lighting and skin tone.`
+  return `Apply this hairstyle: ${promptEstilo}. The mask marks exactly the hair pixels to change. Result must look like a real photo taken after a professional haircut, matching original lighting and skin tone.`
 }
 
-// PNG CRC-32 checksum
 function crc32(buf: Buffer): number {
   const t = new Uint32Array(256)
   for (let i = 0; i < 256; i++) {
@@ -28,39 +27,82 @@ function crc32(buf: Buffer): number {
 
 function pngChunk(type: string, data: Buffer): Buffer {
   const tb = Buffer.from(type, 'ascii')
-  const len = Buffer.alloc(4)
-  len.writeUInt32BE(data.length)
-  const crcVal = Buffer.alloc(4)
-  crcVal.writeUInt32BE(crc32(Buffer.concat([tb, data])))
+  const len = Buffer.alloc(4); len.writeUInt32BE(data.length)
+  const crcVal = Buffer.alloc(4); crcVal.writeUInt32BE(crc32(Buffer.concat([tb, data])))
   return Buffer.concat([len, tb, data, crcVal])
 }
 
-// Hair mask: top 45% transparent (model edits = hair zone)
-//            45-60% gradient transition
-//            below 60% fully opaque (model preserves = face/body)
-function createHairMaskPng(width: number, height: number): Buffer {
+interface HairCoords {
+  hairTop: number    // fraction of image height where hair starts (top of head)
+  hairBottom: number // fraction where hair ends at forehead/temples
+}
+
+// Phase 1: GPT-4o-mini detects exact hair coordinates in the photo
+async function detectHairCoords(base64Data: string): Promise<HairCoords> {
+  const resp = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [{
+      role: 'user',
+      content: [
+        {
+          type: 'image_url',
+          image_url: { url: `data:image/jpeg;base64,${base64Data}`, detail: 'low' }
+        },
+        {
+          type: 'text',
+          text: 'Look at the person\'s hair in this photo. Return ONLY a JSON object with decimal values 0-1 representing fractions of the image height: "hairTop" (very top of head/hair) and "hairBottom" (where hair meets forehead/temples). Example: {"hairTop":0.03,"hairBottom":0.38}. Only JSON, no text.'
+        }
+      ]
+    }],
+    max_tokens: 60,
+    temperature: 0,
+  })
+
+  const text = resp.choices[0].message.content ?? ''
+  const match = text.match(/\{[^}]+\}/)
+  if (!match) throw new Error('parse_failed')
+
+  const raw = JSON.parse(match[0]) as Record<string, number>
+  const hairTop = Math.max(0, Math.min(0.45, raw.hairTop ?? 0.03))
+  const hairBottom = Math.max(hairTop + 0.08, Math.min(0.65, raw.hairBottom ?? 0.40))
+  return { hairTop, hairBottom }
+}
+
+// Phase 2: Create a precise PNG mask — transparent only in the hair zone
+function createPreciseMaskPng(width: number, height: number, coords: HairCoords): Buffer {
+  const { hairTop, hairBottom } = coords
+  const fade = 0.03 // gradient size for smooth blending
+
   const rows: number[] = []
   for (let y = 0; y < height; y++) {
     rows.push(0) // PNG filter byte per row
     const r = y / height
-    const alpha = r < 0.45
-      ? 0
-      : r < 0.60
-        ? Math.round(((r - 0.45) / 0.15) * 255)
-        : 255
+
+    let alpha: number
+    if (r < hairTop - fade) {
+      alpha = 255 // above hair: preserve background
+    } else if (r < hairTop) {
+      alpha = Math.round(((hairTop - r) / fade) * 255) // fade in to transparent
+    } else if (r < hairBottom) {
+      alpha = 0 // hair zone: fully transparent = model edits here
+    } else if (r < hairBottom + fade) {
+      alpha = Math.round(((r - hairBottom) / fade) * 255) // fade out from transparent
+    } else {
+      alpha = 255 // face, body, background below: preserve exactly
+    }
+
     for (let x = 0; x < width; x++) {
-      rows.push(0, 0, 0, alpha) // RGBA
+      rows.push(0, 0, 0, alpha) // RGBA: black with computed alpha
     }
   }
 
   const ihdr = Buffer.alloc(13)
   ihdr.writeUInt32BE(width, 0)
   ihdr.writeUInt32BE(height, 4)
-  ihdr[8] = 8  // bit depth
-  ihdr[9] = 6  // color type: RGBA
+  ihdr[8] = 8; ihdr[9] = 6 // 8-bit RGBA
 
   return Buffer.concat([
-    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), // PNG signature
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
     pngChunk('IHDR', ihdr),
     pngChunk('IDAT', deflateSync(Buffer.from(rows))),
     pngChunk('IEND', Buffer.alloc(0)),
@@ -111,8 +153,15 @@ export async function POST(
   const imageBuffer = Buffer.from(base64Data, 'base64')
   const imageFile = new File([imageBuffer], 'photo.jpg', { type: 'image/jpeg' })
 
+  // Phase 1: detect hair coordinates (fallback to safe defaults if it fails)
+  const coords = await detectHairCoords(base64Data).catch(() => ({
+    hairTop: 0.02,
+    hairBottom: 0.40,
+  }))
+
+  // Phase 2: build precise mask and apply style
   const { width, height } = getJpegDimensions(imageBuffer)
-  const maskBuffer = createHairMaskPng(width, height)
+  const maskBuffer = createPreciseMaskPng(width, height, coords)
   const maskFile = new File([maskBuffer], 'mask.png', { type: 'image/png' })
 
   let response
