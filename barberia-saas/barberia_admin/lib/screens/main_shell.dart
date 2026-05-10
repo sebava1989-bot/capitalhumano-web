@@ -8,6 +8,8 @@ import 'alianzas_screen.dart';
 import 'config_screen.dart';
 import 'resumen_screen.dart';
 import 'login_screen.dart';
+import 'prueba_estilo_screen.dart';
+import 'gestion_estilos_screen.dart';
 
 class MainShell extends StatefulWidget {
   const MainShell({super.key, this.initialIndex = 0});
@@ -20,6 +22,7 @@ class _MainShellState extends State<MainShell> {
   int _index = 0;
   String? _barberiaId;
   String _barberiaNombre = '';
+  String _barberiaSlug = '';
   bool _loading = true;
 
   @override
@@ -33,14 +36,17 @@ class _MainShellState extends State<MainShell> {
     final id = await AuthService().getBarberiaId();
     if (!mounted) return;
     String nombre = '';
+    String slug = '';
     if (id != null) {
       final data = await BarberiasService().getBarberia(id);
       nombre = data?['nombre'] as String? ?? '';
+      slug = data?['slug'] as String? ?? '';
     }
     if (!mounted) return;
     setState(() {
       _barberiaId = id;
       _barberiaNombre = nombre;
+      _barberiaSlug = slug;
       _loading = false;
     });
   }
@@ -83,6 +89,16 @@ class _MainShellState extends State<MainShell> {
       ClientesScreen(barberiaId: _barberiaId!, barberiaNombre: _barberiaNombre),
       AlianzasScreen(barberiaId: _barberiaId!),
       ConfigScreen(barberiaId: _barberiaId!),
+      PruebaEstiloScreen(
+        barberiaId: _barberiaId!,
+        barberiaSlug: _barberiaSlug,
+        onGestionarEstilos: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => GestionEstilosScreen(barberiaId: _barberiaId!),
+          ),
+        ),
+      ),
     ];
 
     return Scaffold(
@@ -119,6 +135,11 @@ class _MainShellState extends State<MainShell> {
               selectedIcon:
                   Icon(Icons.settings, color: Color(0xFFFACC15)),
               label: 'Config'),
+          NavigationDestination(
+              icon: Icon(Icons.auto_fix_high_outlined),
+              selectedIcon:
+                  Icon(Icons.auto_fix_high, color: Color(0xFFFACC15)),
+              label: 'Estilos IA'),
         ],
       ),
     );

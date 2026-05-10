@@ -8,11 +8,13 @@ import '../services/estilos_service.dart';
 class PruebaEstiloScreen extends StatefulWidget {
   final String barberiaId;
   final String barberiaSlug;
+  final VoidCallback? onGestionarEstilos;
 
   const PruebaEstiloScreen({
     super.key,
     required this.barberiaId,
     required this.barberiaSlug,
+    this.onGestionarEstilos,
   });
 
   @override
@@ -92,6 +94,14 @@ class _PruebaEstiloScreenState extends State<PruebaEstiloScreen> {
         title: const Text('Prueba de Estilo'),
         backgroundColor: const Color(0xFF18181B),
         foregroundColor: Colors.white,
+        actions: [
+          if (widget.onGestionarEstilos != null)
+            IconButton(
+              icon: const Icon(Icons.tune),
+              tooltip: 'Gestionar estilos',
+              onPressed: widget.onGestionarEstilos,
+            ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
