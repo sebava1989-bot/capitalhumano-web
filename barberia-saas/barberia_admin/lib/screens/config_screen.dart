@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../services/auth_service.dart';
 import '../services/barberias_service.dart';
 import 'barberos_screen.dart';
 import 'servicios_screen.dart';
 import 'campana_referidos_screen.dart';
 import 'logo_upload_screen.dart';
+import 'horario_screen.dart';
+import 'alianzas_screen.dart';
 import 'login_screen.dart';
 
 class ConfigScreen extends StatefulWidget {
@@ -55,14 +58,44 @@ class _ConfigScreenState extends State<ConfigScreen> {
             _load();
           }),
           const SizedBox(height: 8),
+          _NavTile(Icons.schedule_outlined, 'Horario de atención', () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => HorarioScreen(barberiaId: widget.barberiaId)))),
+          const SizedBox(height: 8),
           _NavTile(Icons.content_cut, 'Barberos', () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => BarberosScreen(barberiaId: widget.barberiaId)))),
           const SizedBox(height: 8),
           _NavTile(Icons.list_alt, 'Servicios', () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => ServiciosScreen(barberiaId: widget.barberiaId)))),
           const SizedBox(height: 8),
+          _NavTile(Icons.card_giftcard_outlined, 'Alianzas', () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => AlianzasScreen(barberiaId: widget.barberiaId)))),
+          const SizedBox(height: 8),
           _NavTile(Icons.people_outline, 'Campaña de Referidos', () => Navigator.push(context,
               MaterialPageRoute(builder: (_) => CampanaReferidosScreen(barberiaId: widget.barberiaId)))),
+          const SizedBox(height: 8),
+          _NavTile(Icons.share_outlined, 'Invitar por WhatsApp', () async {
+            final slug = _barberia?['slug'] as String? ?? '';
+            final nombre = _barberia?['nombre'] as String? ?? 'nuestra barbería';
+            final pct = (_barberia?['referido_descuento_nuevo_cliente_pct'] as num?)?.toInt() ?? 0;
+            final descTxt = pct > 0 ? '$pct% de descuento' : 'un descuento';
+            const apkUrl = 'https://github.com/sebava1989-bot/capitalhumano-web/releases/download/v1.0.0-cliente/app-release.apk';
+            final portalUrl = 'https://barberia-saas-gamma.vercel.app/$slug';
+            final texto = Uri.encodeComponent(
+              '✂️ ¡Reserva tu hora en $nombre!\n\n'
+              '🎁 Obtén *$descTxt* en tu primera cita.\n\n'
+              '📱 *¿Tienes Android?*\n'
+              '1️⃣ Descarga la app: $apkUrl\n'
+              '2️⃣ Al registrarte anota que vienes de parte de *$nombre*\n\n'
+              '🍎 *¿Tienes iPhone?* Reserva aquí:\n👉 $portalUrl'
+            );
+            final url = Uri.parse('whatsapp://send?text=$texto');
+            if (await canLaunchUrl(url)) {
+              await launchUrl(url);
+            } else {
+              final wspUrl = Uri.parse('https://wa.me/?text=$texto');
+              await launchUrl(wspUrl, mode: LaunchMode.externalApplication);
+            }
+          }),
           const SizedBox(height: 32),
           SizedBox(
             width: double.infinity,

@@ -4,7 +4,6 @@ import '../services/barberias_service.dart';
 import 'dashboard_screen.dart';
 import 'agenda_screen.dart';
 import 'clientes_screen.dart';
-import 'alianzas_screen.dart';
 import 'config_screen.dart';
 import 'login_screen.dart';
 import 'prueba_estilo_screen.dart';
@@ -85,7 +84,6 @@ class _MainShellState extends State<MainShell> {
       DashboardScreen(barberiaId: _barberiaId!),
       AgendaScreen(barberiaId: _barberiaId!),
       ClientesScreen(barberiaId: _barberiaId!, barberiaNombre: _barberiaNombre),
-      AlianzasScreen(barberiaId: _barberiaId!),
       ConfigScreen(barberiaId: _barberiaId!),
       PruebaEstiloScreen(
         barberiaId: _barberiaId!,
@@ -119,11 +117,6 @@ class _MainShellState extends State<MainShell> {
               icon: Icon(Icons.people_outline),
               selectedIcon: Icon(Icons.people, color: Color(0xFFFACC15)),
               label: 'Clientes'),
-          NavigationDestination(
-              icon: Icon(Icons.card_giftcard_outlined),
-              selectedIcon:
-                  Icon(Icons.card_giftcard, color: Color(0xFFFACC15)),
-              label: 'Alianzas'),
           NavigationDestination(
               icon: Icon(Icons.settings_outlined),
               selectedIcon:
