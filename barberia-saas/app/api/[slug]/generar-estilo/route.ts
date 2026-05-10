@@ -4,10 +4,19 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export const maxDuration = 60
 
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const MAX_BASE64_CHARS = 7_400_000 // ~5.5 MB base64 ≈ 4 MB decoded
+const MAX_PROMPT_CHARS = 500
+
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const secret = req.headers.get('x-internal-secret')
+  if (secret !== process.env.INTERNAL_API_SECRET) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
   const { slug } = await params
 
   const supabase = createAdminClient()
@@ -28,11 +37,17 @@ export async function POST(
     promptEstilo: string
   }
 
-  if (!imageBase64 || !promptEstilo) {
+  if (typeof imageBase64 !== 'string' || typeof promptEstilo !== 'string' || !imageBase64 || !promptEstilo) {
     return NextResponse.json({ error: 'missing_params' }, { status: 400 })
   }
 
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  if (imageBase64.length > MAX_BASE64_CHARS) {
+    return NextResponse.json({ error: 'image_too_large' }, { status: 413 })
+  }
+
+  if (promptEstilo.length > MAX_PROMPT_CHARS) {
+    return NextResponse.json({ error: 'prompt_too_long' }, { status: 400 })
+  }
 
   const base64Data = imageBase64.includes(',')
     ? imageBase64.split(',')[1]
@@ -40,12 +55,18 @@ export async function POST(
   const imageBuffer = Buffer.from(base64Data, 'base64')
   const imageFile = new File([imageBuffer], 'photo.jpg', { type: 'image/jpeg' })
 
-  const response = await openai.images.edit({
-    model: 'gpt-image-1',
-    image: imageFile,
-    prompt: promptEstilo,
-    size: '1024x1024',
-  })
+  let response
+  try {
+    response = await openai.images.edit({
+      model: 'gpt-image-1',
+      image: imageFile,
+      prompt: promptEstilo,
+      size: '1024x1024',
+    })
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'openai_error'
+    return NextResponse.json({ error: msg }, { status: 502 })
+  }
 
   const resultBase64 = response.data?.[0]?.b64_json
   if (!resultBase64) {
