@@ -9,7 +9,7 @@ import { WspInviteButton } from '@/components/admin/WspInviteButton'
 import { ReasignarBarberoButton } from '@/components/admin/ReasignarBarberoButton'
 import { RealtimeAdminRefresh } from '@/components/admin/RealtimeAdminRefresh'
 import { AdminActionButton } from '@/components/admin/AdminActionButton'
-import { startOfDay, endOfDay, startOfMonth, startOfWeek, endOfWeek, format, isSameDay } from 'date-fns'
+import { startOfDay, endOfDay, startOfMonth, endOfMonth, format, isSameDay } from 'date-fns'
 import { toZonedTime, fromZonedTime } from 'date-fns-tz'
 import { es } from 'date-fns/locale'
 
@@ -230,16 +230,15 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
     .lte('fecha_hora', todayEndISO)
     .order('fecha_hora')
 
-  const semanaStart = fromZonedTime(startOfWeek(today, { weekStartsOn: 1 }), TZ)
-  const semanaEnd = fromZonedTime(endOfWeek(today, { weekStartsOn: 1 }), TZ)
+  const mesEndISO = fromZonedTime(endOfMonth(today), TZ).toISOString()
 
   const { data: agendaSemana } = await supabase
     .from('reservas')
     .select('id, fecha_hora, estado, barbero_id, cliente_nombre, precio, descuento, precio_final, servicios(nombre), barberos(nombre)')
     .eq('barberia_id', barberia.id)
     .in('estado', ['confirmada', 'en_curso', 'completada', 'pendiente', 'cancelada'])
-    .gte('fecha_hora', semanaStart.toISOString())
-    .lte('fecha_hora', semanaEnd.toISOString())
+    .gte('fecha_hora', mesStartISO)
+    .lte('fecha_hora', mesEndISO)
     .order('fecha_hora')
 
   type AgendaItem = { id: string; fecha_hora: string; estado: string; barbero_id: string | null; cliente_nombre: string | null; precio: number; descuento: number; precio_final: number; servicios: unknown; barberos: unknown }
@@ -410,10 +409,10 @@ export default async function AdminDashboard({ params }: { params: Promise<{ slu
       )}
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-white mb-4">Agenda de la semana</h2>
+        <h2 className="text-lg font-semibold text-white mb-4">Agenda del mes — {format(today, 'MMMM yyyy', { locale: es })}</h2>
 
         {porDia.size === 0 && (
-          <p className="text-zinc-500 text-sm">No hay citas esta semana</p>
+          <p className="text-zinc-500 text-sm">No hay citas este mes</p>
         )}
 
         <div className="space-y-5">
