@@ -134,24 +134,37 @@ class _PruebaEstiloScreenState extends State<PruebaEstiloScreen> {
               ]),
             ] else ...[
               if (_resultadoBase64 != null) ...[
-                Row(children: [
-                  Expanded(
-                    child: _ImagenCard(
-                      label: 'ANTES',
-                      child: Image.memory(_fotoBytes!, fit: BoxFit.cover),
-                    ),
+                const Text(
+                  'RESULTADO',
+                  style: TextStyle(
+                      color: Colors.white38, fontSize: 11, letterSpacing: 1.5),
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.memory(
+                    base64Decode(_resultadoBase64!),
+                    width: double.infinity,
+                    height: 340,
+                    fit: BoxFit.cover,
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _ImagenCard(
-                      label: 'DESPUÉS',
-                      child: Image.memory(
-                        base64Decode(_resultadoBase64!),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'FOTO ORIGINAL',
+                  style: TextStyle(
+                      color: Colors.white38, fontSize: 11, letterSpacing: 1.5),
+                ),
+                const SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    _fotoBytes!,
+                    width: double.infinity,
+                    height: 160,
+                    fit: BoxFit.cover,
                   ),
-                ]),
+                ),
                 const SizedBox(height: 12),
                 SizedBox(
                   width: double.infinity,
