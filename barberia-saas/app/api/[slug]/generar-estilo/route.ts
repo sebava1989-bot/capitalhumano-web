@@ -6,7 +6,19 @@ export const maxDuration = 60
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 const MAX_BASE64_CHARS = 7_400_000 // ~5.5 MB base64 ≈ 4 MB decoded
-const MAX_PROMPT_CHARS = 500
+const MAX_PROMPT_CHARS = 800
+
+function buildPrompt(promptEstilo: string): string {
+  return (
+    'Photorealistic photo edit of a REAL person. ' +
+    'Modify ONLY the hairstyle: ' + promptEstilo + '. ' +
+    'Keep absolutely identical: the person\'s face, facial features, skin tone, skin texture, ' +
+    'beard, eyes, nose, mouth, ears, neck, clothing, background, lighting, shadows, and photo quality. ' +
+    'Do NOT change facial structure, age, or skin color. ' +
+    'The result must look like an authentic photograph, not a drawing or CGI. ' +
+    'Only the hair on top of the head changes.'
+  )
+}
 
 export async function POST(
   req: NextRequest,
@@ -66,7 +78,7 @@ export async function POST(
     response = await openai.images.edit({
       model: 'gpt-image-1',
       image: imageFile,
-      prompt: promptEstilo,
+      prompt: buildPrompt(promptEstilo),
       size: '1024x1024',
     })
   } catch (err: unknown) {
