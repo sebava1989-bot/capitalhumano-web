@@ -23,7 +23,8 @@ export async function POST(
     .from('barberias').select('id').eq('slug', slug).eq('activo', true).maybeSingle()
   if (!barberia) return NextResponse.json({ error: 'barberia_not_found' }, { status: 404 })
 
-  const { data: estilos } = await supabase
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: estilos } = await (supabase as any)
     .from('estilos_corte')
     .select('nombre, descripcion')
     .or(`es_predefinido.eq.true,barberia_id.eq.${barberia.id}`)
@@ -36,7 +37,7 @@ export async function POST(
 
   const base64Data = imageBase64.includes(',') ? imageBase64.split(',')[1] : imageBase64
 
-  const listaEstilos = (estilos ?? [])
+  const listaEstilos = ((estilos ?? []) as Array<{ nombre: string; descripcion: string | null }>)
     .map((e) => `- ${e.nombre}${e.descripcion ? ': ' + e.descripcion : ''}`)
     .join('\n')
 
