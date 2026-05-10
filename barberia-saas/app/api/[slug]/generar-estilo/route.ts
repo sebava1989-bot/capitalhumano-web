@@ -82,6 +82,7 @@ export async function POST(
       image: imageFile,
       prompt: buildPrompt(promptEstilo),
       size: '1024x1024',
+      quality: 'low',
     })
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'openai_error'
