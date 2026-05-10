@@ -27,7 +27,13 @@ CREATE POLICY "admin_lee_estilos" ON estilos_corte
   );
 
 CREATE POLICY "admin_gestiona_estilos" ON estilos_corte
-  FOR ALL USING (
+  FOR ALL
+  USING (
+    barberia_id IN (
+      SELECT barberia_id FROM users WHERE id = auth.uid() AND rol IN ('admin','superadmin')
+    )
+  )
+  WITH CHECK (
     barberia_id IN (
       SELECT barberia_id FROM users WHERE id = auth.uid() AND rol IN ('admin','superadmin')
     )
