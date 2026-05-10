@@ -48,6 +48,31 @@ class EstilosService {
         .eq('id', estiloId);
   }
 
+  Future<Map<String, dynamic>> analizarRostro({
+    required String slug,
+    required Uint8List fotoBytes,
+  }) async {
+    final token = _db.auth.currentSession?.accessToken;
+    if (token == null) throw Exception('No hay sesión activa');
+
+    final base64Img = base64Encode(fotoBytes);
+    final response = await http
+        .post(
+          Uri.parse('$_apiBase/api/$slug/analizar-rostro'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: jsonEncode({'imageBase64': base64Img}),
+        )
+        .timeout(const Duration(seconds: 30));
+
+    if (response.statusCode != 200) {
+      throw Exception('Error ${response.statusCode}: ${response.body}');
+    }
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
   Future<String> generarTransformacion({
     required String slug,
     required Uint8List fotoBytes,
