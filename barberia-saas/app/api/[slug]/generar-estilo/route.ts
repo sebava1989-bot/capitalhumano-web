@@ -10,13 +10,15 @@ const MAX_PROMPT_CHARS = 800
 
 function buildPrompt(promptEstilo: string): string {
   return (
-    'Photorealistic photo edit of a REAL person. ' +
-    'Modify ONLY the hairstyle: ' + promptEstilo + '. ' +
-    'Keep absolutely identical: the person\'s face, facial features, skin tone, skin texture, ' +
-    'beard, eyes, nose, mouth, ears, neck, clothing, background, lighting, shadows, and photo quality. ' +
-    'Do NOT change facial structure, age, or skin color. ' +
-    'The result must look like an authentic photograph, not a drawing or CGI. ' +
-    'Only the hair on top of the head changes.'
+    'This is a real photograph. Edit ONLY the hair. ' +
+    'New hairstyle: ' + promptEstilo + '. ' +
+    'Preserve with 100% fidelity: face shape, skin texture, skin pores, skin color, ' +
+    'beard, mustache, eyebrows, eyes, nose, lips, wrinkles, ears, neck, shoulders, ' +
+    'clothing, background, room lighting, photo grain, and image quality. ' +
+    'Do NOT smooth skin. Do NOT change face proportions. Do NOT alter lighting. ' +
+    'Do NOT make it look like a render or illustration. ' +
+    'The edit must be indistinguishable from a real barbershop result photo. ' +
+    'Change only the hair strands above the forehead and on the sides of the head.'
   )
 }
 
