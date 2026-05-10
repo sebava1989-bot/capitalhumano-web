@@ -8,7 +8,7 @@ const MAX_BASE64_CHARS = 7_400_000
 const MAX_PROMPT_CHARS = 800
 
 function buildPrompt(promptEstilo: string): string {
-  return `Change only the hairstyle: ${promptEstilo}. Keep the face, skin, beard, ears, eyes, neck, clothing and background completely unchanged. Only modify the hair.`
+  return `Change only the hairstyle: ${promptEstilo}. Keep the face, exact skin tone, skin color, beard, ears, eyes, neck, clothing, photo lighting and background completely unchanged. Do not alter brightness, contrast or color temperature. Only modify the hair on top of the head.`
 }
 
 export async function POST(
