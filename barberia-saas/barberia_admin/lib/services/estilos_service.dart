@@ -41,6 +41,21 @@ class EstilosService {
     });
   }
 
+  Future<String> subirFotoReferencia({
+    required String estiloId,
+    required Uint8List imageBytes,
+  }) async {
+    final path = 'estilos/$estiloId.jpg';
+    await _db.storage.from('estilos-referencia').uploadBinary(
+      path,
+      imageBytes,
+      fileOptions: const FileOptions(contentType: 'image/jpeg', upsert: true),
+    );
+    final url = _db.storage.from('estilos-referencia').getPublicUrl(path);
+    await _db.from('estilos_corte').update({'foto_referencia_url': url}).eq('id', estiloId);
+    return url;
+  }
+
   Future<void> eliminarEstilo(String estiloId) async {
     await _db
         .from('estilos_corte')

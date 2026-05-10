@@ -339,6 +339,19 @@ class _PruebaEstiloScreenState extends State<PruebaEstiloScreen> {
                     final esRecomendado = recomendados.contains(e.nombre);
                     return GestureDetector(
                       onTap: () => setState(() => _estiloSeleccionado = e),
+                      onLongPress: e.fotoReferenciaUrl != null
+                          ? () => showDialog(
+                                context: context,
+                                builder: (_) => Dialog(
+                                  backgroundColor: Colors.transparent,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(16),
+                                    child: Image.network(e.fotoReferenciaUrl!,
+                                        fit: BoxFit.contain),
+                                  ),
+                                ),
+                              )
+                          : null,
                       child: Container(
                         margin: const EdgeInsets.only(bottom: 10),
                         padding: const EdgeInsets.all(10),
