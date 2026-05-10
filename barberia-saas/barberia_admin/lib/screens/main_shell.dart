@@ -6,7 +6,6 @@ import 'agenda_screen.dart';
 import 'clientes_screen.dart';
 import 'alianzas_screen.dart';
 import 'config_screen.dart';
-import 'resumen_screen.dart';
 import 'login_screen.dart';
 import 'prueba_estilo_screen.dart';
 import 'gestion_estilos_screen.dart';
@@ -84,7 +83,6 @@ class _MainShellState extends State<MainShell> {
 
     final screens = [
       DashboardScreen(barberiaId: _barberiaId!),
-      ResumenScreen(barberiaId: _barberiaId!),
       AgendaScreen(barberiaId: _barberiaId!),
       ClientesScreen(barberiaId: _barberiaId!, barberiaNombre: _barberiaNombre),
       AlianzasScreen(barberiaId: _barberiaId!),
@@ -113,10 +111,6 @@ class _MainShellState extends State<MainShell> {
               icon: Icon(Icons.bar_chart_outlined),
               selectedIcon: Icon(Icons.bar_chart, color: Color(0xFFFACC15)),
               label: 'Inicio'),
-          NavigationDestination(
-              icon: Icon(Icons.insights_outlined),
-              selectedIcon: Icon(Icons.insights, color: Color(0xFFFACC15)),
-              label: 'Resumen'),
           NavigationDestination(
               icon: Icon(Icons.calendar_today_outlined),
               selectedIcon: Icon(Icons.calendar_today, color: Color(0xFFFACC15)),

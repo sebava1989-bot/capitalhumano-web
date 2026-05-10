@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import '../models/reserva.dart';
 import '../services/reservas_service.dart';
 import 'reserva_detail_screen.dart';
+import 'resumen_screen.dart';
 
 class AgendaScreen extends StatefulWidget {
   final String barberiaId;
@@ -20,7 +21,7 @@ class _AgendaScreenState extends State<AgendaScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 3, vsync: this);
+    _tabs = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -50,6 +51,7 @@ class _AgendaScreenState extends State<AgendaScreen>
             Tab(text: 'Hoy'),
             Tab(text: 'Mañana'),
             Tab(text: 'Esta semana'),
+            Tab(text: 'Resumen'),
           ],
         ),
       ),
@@ -69,6 +71,7 @@ class _AgendaScreenState extends State<AgendaScreen>
               key: ValueKey('semana$_refresh'),
               future: _service.getSemana(widget.barberiaId, hoy),
               onTap: _abrir),
+          ResumenScreen(barberiaId: widget.barberiaId),
         ],
       ),
     );
