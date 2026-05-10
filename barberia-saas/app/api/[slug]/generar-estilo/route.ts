@@ -12,14 +12,20 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  const secret = req.headers.get('x-internal-secret')
-  if (secret !== process.env.INTERNAL_API_SECRET) {
+  const authHeader = req.headers.get('authorization')
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) {
+    return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
+  }
+
+  const supabase = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser(token)
+  if (!user) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 })
   }
 
   const { slug } = await params
 
-  const supabase = createAdminClient()
   const { data: barberia } = await supabase
     .from('barberias')
     .select('id')
