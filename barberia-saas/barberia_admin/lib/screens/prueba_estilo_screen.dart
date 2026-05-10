@@ -331,27 +331,24 @@ class _PruebaEstiloScreenState extends State<PruebaEstiloScreen> {
                       color: Color(0xFFFACC15)),
                 )
               else
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
+                Column(
                   children: _estilos.map((e) {
                     final seleccionado = _estiloSeleccionado?.id == e.id;
                     final recomendados = (_analisis?['estilosRecomendados'] as List?)
                         ?.cast<String>() ?? [];
                     final esRecomendado = recomendados.contains(e.nombre);
                     return GestureDetector(
-                      onTap: () =>
-                          setState(() => _estiloSeleccionado = e),
+                      onTap: () => setState(() => _estiloSeleccionado = e),
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 10),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                           color: seleccionado
-                              ? const Color(0xFFFACC15).withValues(alpha: 0.15)
+                              ? const Color(0xFFFACC15).withValues(alpha: 0.12)
                               : esRecomendado
-                                  ? const Color(0xFF22C55E).withValues(alpha: 0.08)
+                                  ? const Color(0xFF22C55E).withValues(alpha: 0.07)
                                   : const Color(0xFF27272A),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: seleccionado
                                 ? const Color(0xFFFACC15)
@@ -360,53 +357,73 @@ class _PruebaEstiloScreenState extends State<PruebaEstiloScreen> {
                                     : const Color(0xFF3F3F46),
                           ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Row(
                           children: [
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  e.nombre,
-                                  style: TextStyle(
-                                    color: seleccionado
-                                        ? const Color(0xFFFACC15)
-                                        : Colors.white,
-                                    fontWeight: seleccionado
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                                if (esRecomendado && !seleccionado) ...[
-                                  const SizedBox(width: 6),
-                                  const Icon(Icons.star,
-                                      color: Color(0xFF22C55E), size: 12),
-                                ],
-                              ],
+                            // Miniatura del estilo
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: e.fotoReferenciaUrl != null
+                                  ? Image.network(
+                                      e.fotoReferenciaUrl!,
+                                      width: 72,
+                                      height: 72,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          _EstiloPlaceholder(seleccionado: seleccionado),
+                                    )
+                                  : _EstiloPlaceholder(seleccionado: seleccionado),
                             ),
-                            if (e.descripcion != null)
-                              Text(
-                                e.descripcion!,
-                                style: const TextStyle(
-                                    color: Colors.white38,
-                                    fontSize: 11),
+                            const SizedBox(width: 12),
+                            // Nombre + descripción + badges
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(children: [
+                                    Expanded(
+                                      child: Text(
+                                        e.nombre,
+                                        style: TextStyle(
+                                          color: seleccionado
+                                              ? const Color(0xFFFACC15)
+                                              : Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ),
+                                    if (seleccionado)
+                                      const Icon(Icons.check_circle,
+                                          color: Color(0xFFFACC15), size: 18),
+                                  ]),
+                                  if (e.descripcion != null) ...[
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      e.descripcion!,
+                                      style: const TextStyle(
+                                          color: Colors.white54, fontSize: 12),
+                                    ),
+                                  ],
+                                  const SizedBox(height: 4),
+                                  if (esRecomendado)
+                                    Row(children: const [
+                                      Icon(Icons.star,
+                                          color: Color(0xFF22C55E), size: 12),
+                                      SizedBox(width: 4),
+                                      Text('Recomendado para tu rostro',
+                                          style: TextStyle(
+                                              color: Color(0xFF22C55E),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold)),
+                                    ])
+                                  else if (!e.esPredefinido)
+                                    const Text('Estilo propio',
+                                        style: TextStyle(
+                                            color: Color(0xFFFACC15),
+                                            fontSize: 11)),
+                                ],
                               ),
-                            if (esRecomendado)
-                              const Text(
-                                'Recomendado',
-                                style: TextStyle(
-                                    color: Color(0xFF22C55E),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold),
-                              )
-                            else if (!e.esPredefinido)
-                              const Text(
-                                'Propio',
-                                style: TextStyle(
-                                    color: Color(0xFFFACC15),
-                                    fontSize: 10),
-                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -484,6 +501,22 @@ class _FotoButton extends StatelessWidget {
                 style:
                     const TextStyle(color: Colors.white, fontSize: 13)),
           ]),
+        ),
+      );
+}
+
+class _EstiloPlaceholder extends StatelessWidget {
+  final bool seleccionado;
+  const _EstiloPlaceholder({required this.seleccionado});
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 72,
+        height: 72,
+        color: const Color(0xFF3F3F46),
+        child: Icon(
+          Icons.content_cut,
+          color: seleccionado ? const Color(0xFFFACC15) : const Color(0xFF71717A),
+          size: 28,
         ),
       );
 }
