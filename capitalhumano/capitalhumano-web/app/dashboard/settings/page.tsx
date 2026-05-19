@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
-import { Building2, Key, ImageIcon, Upload, CheckCircle, X, Pencil } from 'lucide-react';
+import { Building2, Key, ImageIcon, Upload, CheckCircle, X, Pencil, Banknote } from 'lucide-react';
 import api from '@/lib/api';
 
 function SignatureUpload() {
@@ -75,6 +75,71 @@ function SignatureUpload() {
         {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
         <p className="text-xs text-gray-400 mt-2">Recomendado: PNG con fondo transparente, 400×150px</p>
       </div>
+    </div>
+  );
+}
+
+function MaxAdvanceCard() {
+  const [maxAmount, setMaxAmount] = useState('');
+  const [loaded, setLoaded] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [ok, setOk] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    api.get('/dashboard/max-advance').then(r => {
+      setMaxAmount(r.data.maxAmount > 0 ? String(r.data.maxAmount) : '');
+      setLoaded(true);
+    }).catch(() => setLoaded(true));
+  }, []);
+
+  async function handleSave() {
+    setSaving(true); setOk(false); setError('');
+    try {
+      await api.put('/dashboard/max-advance', { maxAmount: parseFloat(maxAmount) || 0 });
+      setOk(true);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Error al guardar');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
+      <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+        <Banknote size={18} className="text-sky-600" /> Anticipo de sueldo
+      </h3>
+      <p className="text-sm text-gray-500 mb-4">
+        Define el monto máximo que un trabajador puede solicitar como anticipo. Ingresa 0 para no aplicar límite.
+      </p>
+      {!loaded ? (
+        <p className="text-sm text-gray-400">Cargando...</p>
+      ) : (
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1 max-w-xs">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">$</span>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              value={maxAmount}
+              onChange={e => { setMaxAmount(e.target.value); setOk(false); }}
+              placeholder="Ej: 300000"
+              className="w-full pl-7 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+          </div>
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-sky-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:bg-sky-700 disabled:opacity-50 transition-colors"
+          >
+            {saving ? 'Guardando...' : 'Guardar'}
+          </button>
+        </div>
+      )}
+      {ok && <p className="flex items-center gap-1 text-green-600 text-sm mt-3"><CheckCircle size={14} /> Guardado correctamente</p>}
+      {error && <p className="text-red-600 text-sm mt-3">{error}</p>}
     </div>
   );
 }
@@ -256,7 +321,7 @@ export default function SettingsPage() {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-4">
         <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
           <ImageIcon size={18} className="text-sky-600" /> Firma digital del administrador
         </h3>
@@ -265,6 +330,8 @@ export default function SettingsPage() {
         </p>
         <SignatureUpload />
       </div>
+
+      <MaxAdvanceCard />
     </div>
   );
 }

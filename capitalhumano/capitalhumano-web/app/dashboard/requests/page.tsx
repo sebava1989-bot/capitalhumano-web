@@ -53,6 +53,7 @@ export default function RequestsPage() {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trabajador</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Monto</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
                 {filter === 'pendiente' && <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acciones</th>}
@@ -65,7 +66,16 @@ export default function RequestsPage() {
                     <p className="font-medium text-gray-900">{r.full_name}</p>
                     <p className="text-sm text-gray-500">{r.rut}</p>
                   </td>
-                  <td className="px-6 py-4 capitalize text-gray-600">{r.type}</td>
+                  <td className="px-6 py-4 text-gray-600">
+                    {r.type === 'vacaciones' ? '🌴 Vacaciones' :
+                     r.type === 'permiso' ? '🕐 Permiso' :
+                     r.type === 'anticipo' ? '💰 Anticipo' : r.type}
+                  </td>
+                  <td className="px-6 py-4 text-gray-600 text-sm">
+                    {r.type === 'anticipo' && r.amount
+                      ? <span className="font-semibold text-emerald-700">${Number(r.amount).toLocaleString('es-CL')}</span>
+                      : <span className="text-gray-400">—</span>}
+                  </td>
                   <td className="px-6 py-4 text-gray-600 text-sm">
                     {new Date(r.created_at).toLocaleDateString('es-CL')}
                   </td>
