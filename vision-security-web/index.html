@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vision Security - Protección para Empresas</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f6f9;
+      color: #222;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(10, 30, 80, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 2.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+
+    .navbar img.nav-logo {
+      height: 56px;
+      filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4));
+    }
+
+    .navbar nav {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .navbar nav a {
+      color: #cde;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+
+    .navbar nav a:hover { color: #fff; }
+
+    .navbar .nav-cta {
+      background: #1565c0;
+      color: #fff !important;
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      transition: background 0.2s !important;
+    }
+
+    .navbar .nav-cta:hover { background: #0d47a1 !important; }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      overflow: hidden;
+    }
+
+    .hero video {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .hero .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(5,20,60,0.7) 0%, rgba(10,42,110,0.5) 100%);
+      z-index: 1;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 780px;
+      padding: 2rem;
+    }
+
+    .hero-content h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+      margin-bottom: 1rem;
+    }
+
+    .hero-content p {
+      font-size: 1.25rem;
+      opacity: 0.92;
+      margin-bottom: 2rem;
+      line-height: 1.7;
+    }
+
+    .hero-btns {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-primary {
+      background: #1565c0;
+      color: white;
+      padding: 0.85rem 2.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-primary:hover { background: #0d47a1; transform: translateY(-2px); }
+
+    .btn-outline {
+      border: 2px solid white;
+      color: white;
+      padding: 0.85rem 2.2rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .btn-outline:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+
+    /* ── STATS ── */
+    .stats {
+      background: #0a2a6e;
+      color: white;
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      flex: 1;
+      min-width: 180px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-item .num {
+      font-size: 2.6rem;
+      font-weight: 800;
+      color: #64b5f6;
+    }
+
+    .stat-item p {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-top: 0.25rem;
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 5rem 2rem;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-title h2 {
+      font-size: 2rem;
+      color: #0a2a6e;
+      margin-bottom: 0.5rem;
+    }
+
+    .section-title p {
+      color: #666;
+      font-size: 1.05rem;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    .section-title .line {
+      width: 60px;
+      height: 4px;
+      background: #1565c0;
+      margin: 0.75rem auto 0;
+      border-radius: 2px;
+    }
+
+    /* ── SERVICIOS ── */
+    .services { background: white; }
+
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.75rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .service-card {
+      background: #f4f6f9;
+      border-radius: 14px;
+      padding: 2rem 1.5rem;
+      border-left: 5px solid #1565c0;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(21,101,192,0.15);
+    }
+
+    .service-card .svc-icon {
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .service-card h3 {
+      font-size: 1.15rem;
+      color: #0a2a6e;
+      margin-bottom: 0.6rem;
+    }
+
+    .service-card p {
+      color: #666;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    /* ── POR QUÉ ELEGIRNOS ── */
+    .why { background: #f4f6f9; }
+
+    .why-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .why-item {
+      background: white;
+      border-radius: 12px;
+      padding: 1.75rem;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+
+    .why-item .wi-icon {
+      font-size: 2.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .why-item h4 {
+      color: #0a2a6e;
+      font-size: 1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .why-item p {
+      color: #777;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ── DRONES ── */
+    .drone-section {
+      position: relative;
+      min-height: 500px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      text-align: center;
+      color: white;
+    }
+
+    .drone-bg {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+
+    .drone-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 15, 50, 0.65);
+      z-index: 1;
+    }
+
+    .drone-content {
+      position: relative;
+      z-index: 2;
+      max-width: 720px;
+      padding: 3rem 2rem;
+    }
+
+    .drone-content h2 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      margin: 0.5rem 0 1rem;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
+    .drone-content p {
+      font-size: 1.05rem;
+      opacity: 0.92;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .drone-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+    }
+
+    .drone-pills span {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      padding: 0.45rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* ── CAMPOS AGRÍCOLAS ── */
+    .agro-section {
+      background: #fff;
+      padding: 5rem 2rem;
+    }
+
+    .agro-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .agro-badge {
+      display: inline-block;
+      background: rgba(10,42,110,0.1);
+      color: #0a2a6e;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+
+    .agro-text h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0a2a6e;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .agro-text > p {
+      font-size: 1rem;
+      color: #444;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .agro-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .agro-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.97rem;
+      color: #333;
+      line-height: 1.5;
+    }
+
+    .agro-list li .agro-icon {
+      font-size: 1.3rem;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .agro-list li strong { color: #0a2a6e; }
+
+    .agro-cta {
+      display: inline-block;
+      background: #0a2a6e;
+      color: #fff;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .agro-cta:hover { background: #1565c0; }
+
+    .agro-visual {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .agro-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .agro-stat-card {
+      background: #f4f6fb;
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid #e0e6f0;
+    }
+
+    .agro-stat-card .agro-stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0a2a6e;
+      letter-spacing: -1px;
+      display: block;
+    }
+
+    .agro-stat-card .agro-stat-label {
+      font-size: 0.8rem;
+      color: #666;
+      margin-top: 4px;
+    }
+
+    .agro-highlight {
+      background: linear-gradient(135deg, #0a2a6e, #1565c0);
+      border-radius: 14px;
+      padding: 22px 24px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .agro-highlight-icon { font-size: 2.2rem; flex-shrink: 0; }
+
+    .agro-highlight-text strong {
+      display: block;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .agro-highlight-text p {
+      font-size: 0.88rem;
+      opacity: 0.85;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .agro-wrapper { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+
+    /* ── VISION TRACK ── */
+    .vt-section {
+      background: #f4f6f9;
+      padding: 5rem 2rem;
+    }
+
+    .vt-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .vt-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(10,42,110,0.08);
+      color: #0a2a6e;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.35rem 1rem;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+
+    .vt-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #1565c0;
+      animation: vt-pulse 1.5s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes vt-pulse {
+      0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(21,101,192,0.4); }
+      50% { opacity: 0.5; box-shadow: 0 0 0 6px rgba(21,101,192,0); }
+    }
+
+    .vt-text h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0a2a6e;
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+    }
+
+    .vt-text h2 span { color: #1565c0; }
+
+    .vt-text > p {
+      font-size: 1rem;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 1.75rem;
+    }
+
+    .vt-beneficios {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .vt-bene {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem;
+      border-left: 4px solid #1565c0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .vt-bene.orange { border-left-color: #e65100; }
+
+    .vt-bene .vb-icon { font-size: 1.3rem; margin-bottom: 0.4rem; display: block; }
+
+    .vt-bene strong {
+      display: block;
+      font-size: 0.88rem;
+      color: #0a2a6e;
+      margin-bottom: 0.25rem;
+    }
+
+    .vt-bene p { font-size: 0.82rem; color: #666; line-height: 1.4; }
+
+    .vt-cta-group { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    .vt-cta {
+      display: inline-block;
+      background: #0a2a6e;
+      color: #fff;
+      padding: 0.75rem 1.75rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .vt-cta:hover { background: #1565c0; }
+
+    .vt-cta.outline {
+      background: transparent;
+      color: #0a2a6e;
+      border: 2px solid #0a2a6e;
+    }
+
+    .vt-cta.outline:hover { background: #0a2a6e; color: #fff; }
+
+    .vt-visual { display: flex; flex-direction: column; gap: 14px; }
+
+    .vt-stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .vt-stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+      border: 1px solid #e0e6f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .vt-stat-num {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #0a2a6e;
+      display: block;
+    }
+
+    .vt-stat-label { font-size: 0.78rem; color: #666; margin-top: 4px; }
+
+    .vt-alertas {
+      background: white;
+      border-radius: 12px;
+      padding: 18px 20px;
+      border: 1px solid #e0e6f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .vt-alertas-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #0a2a6e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .vt-alerta-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .vt-alerta-list li {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: #444;
+    }
+
+    .vt-alerta-list li::before {
+      content: '●';
+      color: #1565c0;
+      font-size: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .vt-highlight {
+      background: linear-gradient(135deg, #0a2a6e, #1565c0);
+      border-radius: 12px;
+      padding: 18px 20px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .vt-highlight-icon { font-size: 2rem; flex-shrink: 0; }
+
+    .vt-highlight strong { display: block; font-size: 0.95rem; margin-bottom: 4px; }
+
+    .vt-highlight p { font-size: 0.84rem; opacity: 0.88; line-height: 1.5; }
+
+    @media (max-width: 768px) {
+      .vt-wrapper { grid-template-columns: 1fr; gap: 2.5rem; }
+      .vt-beneficios { grid-template-columns: 1fr; }
+      .vt-alerta-list { grid-template-columns: 1fr; }
+    }
+
+    /* ── K9 ── */
+    .k9-section {
+      background: white;
+      padding: 5rem 2rem;
+    }
+
+    .k9-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3.5rem;
+      align-items: center;
+    }
+
+    .k9-media {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .k9-media img,
+    .k9-media video {
+      width: 100%;
+      border-radius: 14px;
+      object-fit: cover;
+      height: 260px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    }
+
+    .k9-text h2 {
+      font-size: 2rem;
+      color: #0a2a6e;
+      margin: 0.5rem 0 1rem;
+      font-weight: 800;
+    }
+
+    .k9-text p {
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .k9-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .k9-list li {
+      background: #f4f6f9;
+      border-left: 4px solid #1565c0;
+      padding: 0.65rem 1rem;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.95rem;
+      color: #333;
+      font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+      .k9-wrapper { grid-template-columns: 1fr; }
+      .k9-media { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── APP ── */
+    .app-section {
+      background: linear-gradient(135deg, #0a2a6e 0%, #1565c0 100%);
+      padding: 5rem 2rem;
+      color: white;
+    }
+
+    .app-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
+      align-items: center;
+    }
+
+    .app-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      color: #cde;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 0.35rem 0.9rem;
+      border-radius: 20px;
+      margin-bottom: 1rem;
+    }
+
+    .app-text h2 {
+      font-size: 1.9rem;
+      font-weight: 800;
+      margin-bottom: 0.85rem;
+      line-height: 1.3;
+    }
+
+    .app-text > p {
+      opacity: 0.88;
+      font-size: 1rem;
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    .app-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1.1rem;
+    }
+
+    .app-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+
+    .feat-icon {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      margin-top: 0.1rem;
+    }
+
+    .app-features li div {
+      font-size: 0.93rem;
+      line-height: 1.5;
+      opacity: 0.95;
+    }
+
+    .app-features li strong {
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 0.97rem;
+    }
+
+    .app-image {
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-image img {
+      width: 280px;
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    @media (max-width: 768px) {
+      .app-wrapper { grid-template-columns: 1fr; gap: 2.5rem; }
+      .app-image { order: -1; }
+      .app-image img { width: 220px; }
+    }
+
+    /* ── CONTACTO ── */
+    .contact { background: white; }
+
+    .contact-wrapper {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #f4f6f9;
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 0.35rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.7rem 0.9rem;
+      border: 1.5px solid #dde;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      background: white;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #1565c0;
+    }
+
+    .form-group textarea { resize: vertical; min-height: 110px; }
+
+    .form-submit {
+      width: 100%;
+      background: #1565c0;
+      color: white;
+      border: none;
+      padding: 0.9rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .form-submit:hover { background: #0d47a1; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #071530;
+      color: #aab;
+      padding: 2.5rem;
+      text-align: center;
+    }
+
+    footer img.footer-logo {
+      height: 60px;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 1px 4px rgba(0,0,0,0.5));
+    }
+
+    footer p { font-size: 0.9rem; margin-top: 0.5rem; }
+
+    footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+    }
+
+    footer .footer-links a {
+      color: #99b;
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color 0.2s;
+    }
+
+    footer .footer-links a:hover { color: #fff; }
+
+    /* ── WHATSAPP FLOTANTE ── */
+    .whatsapp-btn {
+      position: fixed;
+      bottom: 1.75rem;
+      right: 1.75rem;
+      z-index: 999;
+      background: #25d366;
+      width: 58px;
+      height: 58px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.45);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+
+    .whatsapp-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 24px rgba(37,211,102,0.6);
+    }
+
+    .wa-tooltip {
+      position: absolute;
+      right: 68px;
+      background: #111;
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .wa-tooltip::after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: 6px solid transparent;
+      border-left-color: #111;
+      border-right: 0;
+    }
+
+    .whatsapp-btn:hover .wa-tooltip { opacity: 1; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .hero-content h1 { font-size: 2rem; }
+      .form-row { grid-template-columns: 1fr; }
+      .navbar nav { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <img src="images/logo.png" alt="Vision Security" class="nav-logo">
+    <nav>
+      <a href="#servicios">Servicios</a>
+      <a href="#por-que">¿Por qué elegirnos?</a>
+      <a href="#app">Nuestra App</a>
+      <a href="#vision-track">📍 Vision Track</a>
+      <a href="#contacto">Contacto</a>
+      <a href="presentacion-agricola/login.html" class="nav-cta" style="background:#1a5c28; margin-right:0.5rem;">&#127807; Sector Agrícola</a>
+      <a href="#contacto" class="nav-cta">Cotizar ahora</a>
+    </nav>
+  </div>
+
+  <!-- HERO con video -->
+  <section class="hero" id="inicio">
+    <video autoplay muted loop playsinline>
+      <source src="videos/hero.mp4" type="video/mp4">
+    </video>
+    <div class="overlay"></div>
+    <div class="hero-content">
+      <h1>VISION SECURITY</h1>
+      <p>Soluciones de seguridad avanzadas para proteger tu empresa, personas y activos con tecnología de vanguardia.</p>
+      <div class="hero-btns">
+        <a href="#contacto" class="btn-primary">Solicitar cotización</a>
+        <a href="#servicios" class="btn-outline">Ver servicios</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item">
+      <div class="num">24/7</div>
+      <p>Centro de monitoreo</p>
+    </div>
+    <div class="stat-item">
+      <div class="num">+10</div>
+      <p>Años de experiencia</p>
+    </div>
+    <div class="stat-item">
+      <div class="num">100%</div>
+      <p>Compromiso con tu seguridad</p>
+    </div>
+  </div>
+
+  <!-- SERVICIOS -->
+  <section class="services" id="servicios">
+    <div class="section-title">
+      <img src="images/logo.png" alt="Vision Security" style="height:100px; margin-bottom:1rem;">
+      <h2>Nuestros Servicios</h2>
+      <p>Ofrecemos soluciones integrales de seguridad adaptadas a las necesidades de tu empresa.</p>
+      <div class="line"></div>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="svc-icon">&#128110;</div>
+        <h3>Guardias de Seguridad</h3>
+        <p>Personal altamente capacitado para la protección física de tus instalaciones, colaboradores y activos.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">&#128247;</div>
+        <h3>Cámaras con Inteligencia Artificial</h3>
+        <p>Monitoreo efectivo de alta calidad con cámaras IA capaces de detectar movimiento, reconocer rostros y generar alertas automáticas en tiempo real.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">&#128683;</div>
+        <h3>Control de Acceso</h3>
+        <p>Soluciones de control de acceso con QR, credenciales físicas, biometría y reconocimiento de patentes.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">&#128205;</div>
+        <h3>Monitoreo Remoto</h3>
+        <p>Centro de operaciones activo las 24 horas con respuesta inmediata ante cualquier incidente.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">&#128161;</div>
+        <h3>Consultoría en Seguridad</h3>
+        <p>Evaluación de riesgos y diseño de planes de seguridad personalizados para tu empresa.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">&#129302;</div>
+        <h3>Gestión Inteligente con IA</h3>
+        <p>Aplicaciones con inteligencia artificial para el control de acceso, seguimiento en tiempo real y generación automática de informes de seguridad.</p>
+      </div>
+      <div class="service-card">
+        <div class="svc-icon">&#128641;</div>
+        <h3>Drones de Vigilancia</h3>
+        <p>Patrullaje aéreo con drones de alta precisión para vigilancia perimetral, zonas de difícil acceso y respuesta rápida ante incidentes.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DRONES -->
+  <section class="drone-section">
+    <video class="drone-bg" autoplay muted loop playsinline>
+      <source src="videos/drones.mp4" type="video/mp4">
+    </video>
+    <div class="drone-overlay"></div>
+    <div class="drone-content">
+      <span class="app-badge">Tecnología Aérea</span>
+      <h2>Vigilancia con Drones</h2>
+      <p>Nuestros drones de última generación realizan patrullajes autónomos, cobertura perimetral y detección de intrusos en tiempo real, brindando una capa adicional de seguridad que ningún guardia puede alcanzar.</p>
+      <div class="drone-pills">
+        <span>&#128205; Cobertura perimetral</span>
+        <span>&#127909; Grabación en 4K</span>
+        <span>&#128269; Detección nocturna</span>
+        <span>&#9889; Respuesta inmediata</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAMPOS AGRÍCOLAS -->
+  <section class="agro-section" id="campos-agricolas">
+    <div class="agro-wrapper">
+      <div class="agro-text">
+        <span class="agro-badge">&#127807; Seguridad Agrícola</span>
+        <h2>Protección Inteligente para Campos Agrícolas</h2>
+        <p>El sector agrícola enfrenta amenazas únicas: robo de cosechas, abigeato, vandalismo y acceso no autorizado a extensas superficies. Vision Security despliega tecnología de vigilancia avanzada para proteger tu campo, maquinaria e inversión, incluso en las zonas más remotas.</p>
+        <ul class="agro-list">
+          <li>
+            <span class="agro-icon">&#128641;</span>
+            <div><strong>Drones de patrullaje autónomo</strong><br>Cobertura aérea programada sobre cientos de hectáreas con grabación 4K, detección térmica nocturna y alertas en tiempo real ante movimientos sospechosos.</div>
+          </li>
+          <li>
+            <span class="agro-icon">&#128247;</span>
+            <div><strong>Cámaras IA perimetrales</strong><br>Instalación en puntos estratégicos con inteligencia artificial que distingue personas, vehículos y animales, reduciendo falsas alarmas y enfocando la respuesta.</div>
+          </li>
+          <li>
+            <span class="agro-icon">&#128110;</span>
+            <div><strong>Guardias y unidades K9</strong><br>Personal en terreno complementado con unidades caninas especializadas para patrullaje nocturno y disuasión activa en perímetros rurales.</div>
+          </li>
+          <li>
+            <span class="agro-icon">&#128683;</span>
+            <div><strong>Control de acceso vehicular</strong><br>Reconocimiento automático de patentes en portones de entrada con registro histórico y alertas ante vehículos no autorizados.</div>
+          </li>
+          <li>
+            <span class="agro-icon">&#128205;</span>
+            <div><strong>Monitoreo remoto 24/7</strong><br>Centro de operaciones activo las 24 horas con coordinación inmediata con fuerzas de orden ante cualquier incidente en tu predio.</div>
+          </li>
+        </ul>
+        <a href="#contacto" class="agro-cta">Solicitar diagnóstico gratuito &#8594;</a>
+        <a href="presentacion-agricola/login.html" class="agro-cta" style="background:#1a5c28; margin-left:1rem;">&#127807; Ver presentación completa</a>
+      </div>
+      <div class="agro-visual">
+        <div class="agro-stat-grid">
+          <div class="agro-stat-card">
+            <span class="agro-stat-num">500+</span>
+            <div class="agro-stat-label">Hectáreas monitoreadas con drones</div>
+          </div>
+          <div class="agro-stat-card">
+            <span class="agro-stat-num">24/7</span>
+            <div class="agro-stat-label">Monitoreo remoto continuo</div>
+          </div>
+          <div class="agro-stat-card">
+            <span class="agro-stat-num">-80%</span>
+            <div class="agro-stat-label">Reducción de robos en predios</div>
+          </div>
+          <div class="agro-stat-card">
+            <span class="agro-stat-num">&lt;3min</span>
+            <div class="agro-stat-label">Tiempo de respuesta ante alerta</div>
+          </div>
+        </div>
+        <div class="agro-highlight">
+          <div class="agro-highlight-icon">&#129302;</div>
+          <div class="agro-highlight-text">
+            <strong>IA entrenada para entornos rurales</strong>
+            <p>Nuestros sistemas distinguen trabajadores, maquinaria y animales propios del predio para eliminar falsas alarmas y enfocarse en amenazas reales.</p>
+          </div>
+        </div>
+        <div class="agro-highlight" style="background: linear-gradient(135deg, #14532d, #166534);">
+          <div class="agro-highlight-icon">&#127807;</div>
+          <div class="agro-highlight-text">
+            <strong>Solución a medida según el tamaño de tu predio</strong>
+            <p>Desde pequeñas parcelas hasta grandes extensiones. Diseñamos el plan de seguridad según tu superficie, cultivo y riesgo específico.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section class="app-section" id="app">
+    <div class="app-wrapper">
+      <div class="app-text">
+        <span class="app-badge">Tecnología Vision Security</span>
+        <h2>Agente Virtual · Plataforma de Reportes</h2>
+        <p>Nuestra aplicación te entrega el control total de lo que ocurre en tu instalación, en tiempo real y con historial completo.</p>
+        <ul class="app-features">
+          <li><span class="feat-icon">&#128197;</span><div><strong>Reportes históricos y del día</strong><br>Consulta todo lo registrado en tu instalación por fecha y hora exacta.</div></li>
+          <li><span class="feat-icon">&#128100;</span><div><strong>Nombres e identificación</strong><br>Registro de personas que ingresan o salen con nombre y datos asociados.</div></li>
+          <li><span class="feat-icon">&#128663;</span><div><strong>Reconocimiento de patentes</strong><br>Control vehicular automático con registro de patentes en cada acceso.</div></li>
+          <li><span class="feat-icon">&#128680;</span><div><strong>Gestión de incidencias</strong><br>Registro detallado de eventos, alertas e incidentes con seguimiento en tiempo real.</div></li>
+          <li><span class="feat-icon">&#128274;</span><div><strong>Acceso seguro</strong><br>Plataforma protegida con usuario y contraseña, accesible desde cualquier dispositivo.</div></li>
+        </ul>
+      </div>
+      <div class="app-image">
+        <img src="images/app.jpg" alt="Vision Security App">
+      </div>
+    </div>
+  </section>
+
+  <!-- VISION TRACK -->
+  <section class="vt-section" id="vision-track">
+    <div style="text-align:center; margin-bottom:3rem;">
+      <h2 style="font-size:2rem; color:#0a2a6e; margin-bottom:0.5rem;">Tecnología incluida en nuestro servicio</h2>
+      <p style="color:#666; font-size:1.05rem; max-width:600px; margin:0 auto; line-height:1.6;">Cada cliente de Vision Security tiene acceso a Vision Track, nuestra plataforma de rastreo GPS que te permite saber en tiempo real dónde están tus vehículos y personal de seguridad.</p>
+      <div style="width:60px; height:4px; background:#1565c0; margin:0.75rem auto 0; border-radius:2px;"></div>
+    </div>
+    <div class="vt-wrapper">
+      <div class="vt-text">
+        <div class="vt-badge"><span class="vt-dot"></span>Activo · Tiempo real</div>
+        <h2>Vision Track — <span>GPS inteligente</span> para tu operación</h2>
+        <p>Incluido con tu contrato de seguridad privada, Vision Track te entrega visibilidad total sobre tus vehículos y guardias en terreno. Sin costos extra, sin hardware adicional para el personal.</p>
+
+        <div class="vt-beneficios">
+          <div class="vt-bene">
+            <span class="vb-icon">🛡️</span>
+            <strong>Anti-robo de vehículos</strong>
+            <p>Alerta inmediata si un vehículo sale de zona o se mueve fuera de horario.</p>
+          </div>
+          <div class="vt-bene orange">
+            <span class="vb-icon">👮</span>
+            <strong>Supervisión de guardias</strong>
+            <p>Ubicación en tiempo real de tu personal de seguridad desde su celular.</p>
+          </div>
+          <div class="vt-bene">
+            <span class="vb-icon">📊</span>
+            <strong>Panel web 24/7</strong>
+            <p>Acceso desde cualquier dispositivo, con historial completo de movimientos.</p>
+          </div>
+          <div class="vt-bene">
+            <span class="vb-icon">🔔</span>
+            <strong>7 tipos de alerta</strong>
+            <p>Salida de zona, movimiento nocturno, corte de energía, jammer y más.</p>
+          </div>
+        </div>
+
+        <div class="vt-cta-group">
+          <a href="#contacto" class="vt-cta">Consultar por Vision Track →</a>
+          <a href="https://landing-woad-psi.vercel.app" target="_blank" rel="noopener" class="vt-cta outline">Ver presentación completa</a>
+        </div>
+      </div>
+
+      <div class="vt-visual">
+        <div class="vt-stat-grid">
+          <div class="vt-stat-card">
+            <span class="vt-stat-num">24/7</span>
+            <div class="vt-stat-label">Monitoreo continuo</div>
+          </div>
+          <div class="vt-stat-card">
+            <span class="vt-stat-num">&lt;10s</span>
+            <div class="vt-stat-label">Tiempo de alerta</div>
+          </div>
+          <div class="vt-stat-card">
+            <span class="vt-stat-num">$0</span>
+            <div class="vt-stat-label">Hardware para guardias</div>
+          </div>
+          <div class="vt-stat-card">
+            <span class="vt-stat-num">7</span>
+            <div class="vt-stat-label">Alertas inteligentes</div>
+          </div>
+        </div>
+
+        <div class="vt-alertas">
+          <div class="vt-alertas-title">🔔 Alertas incluidas</div>
+          <ul class="vt-alerta-list">
+            <li>Salida de zona autorizada</li>
+            <li>Movimiento nocturno</li>
+            <li>Detención en perímetro</li>
+            <li>Corte de energía GPS</li>
+            <li>Vehículo de visita no devuelto</li>
+            <li>Jammer detectado</li>
+            <li>Guardia inactivo en turno</li>
+          </ul>
+        </div>
+
+        <div class="vt-highlight">
+          <div class="vt-highlight-icon">📍</div>
+          <div>
+            <strong>Incluido en tu contrato de seguridad</strong>
+            <p>Vision Track no es un costo extra — es parte de lo que entregamos cuando contratas a Vision Security. Tecnología real al servicio de tu tranquilidad.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- K9 -->
+  <section class="k9-section">
+    <div class="k9-wrapper">
+      <div class="k9-media">
+        <img src="images/k9.jpg" alt="Unidad K9 Vision Security">
+        <video autoplay muted loop playsinline>
+          <source src="videos/k9.mp4" type="video/mp4">
+        </video>
+      </div>
+      <div class="k9-text">
+        <span class="app-badge" style="background:rgba(10,42,110,0.12); color:#0a2a6e;">Unidad Especializada</span>
+        <h2>Unidad Canina K9</h2>
+        <p>Contamos con unidades caninas especializadas en seguridad, con perros entrenados para la detección, disuasión y apoyo a guardias en terreno.</p>
+        <ul class="k9-list">
+          <li>&#128062; Perros de raza Malinois certificados</li>
+          <li>&#128269; Detección de sustancias y amenazas</li>
+          <li>&#128110; Trabajo conjunto con guardias en terreno</li>
+          <li>&#9889; Alta capacidad de disuasión y respuesta</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- POR QUÉ ELEGIRNOS -->
+  <section class="why" id="por-que">
+    <div class="section-title">
+      <h2>¿Por qué elegirnos?</h2>
+      <p>Nos diferenciamos por nuestra tecnología, profesionalismo y compromiso con cada cliente.</p>
+      <div class="line"></div>
+    </div>
+    <div class="why-grid">
+      <div class="why-item">
+        <img src="images/os10.jpg" alt="OS10 Carabineros de Chile" style="width:110px; margin-bottom:0.75rem; border-radius:8px;">
+        <h4>Acreditada por OS10 Carabineros</h4>
+        <p>Empresa autorizada y acreditada por el Departamento OS10 de Carabineros de Chile, garantizando operación bajo la normativa vigente.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-icon">&#128295;</div>
+        <h4>Tecnología de Vanguardia</h4>
+        <p>Equipos y plataformas digitales de última generación para una protección eficaz.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-icon">&#128101;</div>
+        <h4>Equipo Profesional</h4>
+        <p>Personal entrenado, certificado y con experiencia en seguridad privada.</p>
+      </div>
+      <div class="why-item">
+        <div class="wi-icon">&#127759;</div>
+        <h4>Cobertura Nacional</h4>
+        <p>Presencia en las principales ciudades del país para atender donde nos necesites.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACTO -->
+  <section class="contact" id="contacto">
+    <div class="section-title">
+      <h2>Contáctanos</h2>
+      <p>Cuéntanos sobre tu empresa y te diseñamos una solución a tu medida.</p>
+      <div class="line"></div>
+    </div>
+    <div style="display:flex; justify-content:center; gap:2.5rem; flex-wrap:wrap; margin-bottom:2rem; font-size:1rem; color:#0a2a6e; font-weight:600;">
+      <span>&#128222; +56 9 3398 1726</span>
+      <span>&#9993; <a href="mailto:contacto@visionsecurityspa.cl" style="color:#1565c0; text-decoration:none;">contacto@visionsecurityspa.cl</a></span>
+    </div>
+    <div class="contact-wrapper">
+      <form action="enviar.php" method="POST">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" name="nombre" placeholder="Tu nombre" required>
+        </div>
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" name="apellido" placeholder="Tu apellido">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" name="correo" placeholder="correo@empresa.cl" required>
+        </div>
+        <div class="form-group">
+          <label>Teléfono</label>
+          <input type="tel" name="telefono" placeholder="+56 9 XXXX XXXX">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Empresa</label>
+          <input type="text" name="empresa" placeholder="Nombre de tu empresa">
+        </div>
+        <div class="form-group">
+          <label>Servicio de interés</label>
+          <select name="servicio">
+            <option value="">Seleccionar...</option>
+            <option>Guardias de Seguridad</option>
+            <option>CCTV / Videovigilancia</option>
+            <option>Control de Acceso</option>
+            <option>Monitoreo Remoto</option>
+            <option>Consultoría en Seguridad</option>
+            <option>Protección contra Incendios</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Mensaje</label>
+        <textarea name="mensaje" placeholder="Cuéntanos sobre tus necesidades de seguridad..." required></textarea>
+      </div>
+      <button type="submit" class="form-submit">Enviar solicitud</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- WHATSAPP FLOTANTE -->
+  <a href="https://wa.me/56933981726?text=Hola%2C%20me%20interesa%20cotizar%20un%20servicio%20de%20seguridad"
+     class="whatsapp-btn" target="_blank" rel="noopener" aria-label="Contactar por WhatsApp">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="28" height="28">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+    <span class="wa-tooltip">¡Escríbenos!</span>
+  </a>
+
+  <!-- FOOTER -->
+  <footer>
+    <img class="footer-logo" src="images/logo.png" alt="Vision Security">
+    <div class="footer-contact" style="margin-bottom:1rem; font-size:0.95rem;">
+      <span style="margin-right:1.5rem;">&#128222; +56 9 3398 1726</span>
+      <span>&#9993; <a href="mailto:contacto@visionsecurityspa.cl" style="color:#64b5f6; text-decoration:none;">contacto@visionsecurityspa.cl</a></span>
+    </div>
+    <div class="footer-links">
+      <a href="#inicio">Inicio</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#vision-track">Vision Track</a>
+      <a href="#por-que">¿Por qué elegirnos?</a>
+      <a href="#contacto">Contacto</a>
+    </div>
+    <p>&copy; 2026 Vision Security. Todos los derechos reservados.</p>
+  </footer>
+
+</body>
+</html>
