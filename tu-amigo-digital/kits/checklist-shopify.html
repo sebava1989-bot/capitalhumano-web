@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checklist Setup Shopify — Tu Amigo Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1d1d1f; background: #f5f5f7; padding: 40px 24px; }
+    .doc { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .doc-header { background: #22c55e; color: #fff; padding: 36px 40px; }
+    .doc-header .badge { background: rgba(255,255,255,0.2); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; letter-spacing: 1px; }
+    .doc-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    .doc-header p { font-size: 14px; opacity: 0.9; }
+    .doc-body { padding: 40px; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .meta-field { background: #f5f5f7; border-radius: 10px; padding: 12px 16px; }
+    .meta-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6e6e73; display: block; margin-bottom: 4px; }
+    .meta-field input { border: none; background: transparent; font-size: 14px; font-family: inherit; outline: none; width: 100%; }
+    .checklist { display: flex; flex-direction: column; gap: 10px; }
+    .item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 12px; border: 1.5px solid #e5e5e5; transition: border-color 0.15s; cursor: pointer; }
+    .item:hover { border-color: #22c55e; }
+    .item.done { background: #f0fff4; border-color: #22c55e; }
+    .item-check { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .item.done .item-check { background: #22c55e; border-color: #22c55e; color: #fff; font-size: 13px; }
+    .item-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .item-text p { font-size: 12px; color: #6e6e73; }
+    .doc-footer { background: #f5f5f7; padding: 24px 40px; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-between; font-size: 13px; color: #6e6e73; }
+    .doc-footer a { color: #22c55e; text-decoration: none; font-weight: 500; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .doc { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+  <script>
+    function toggleItem(el) {
+      el.classList.toggle('done');
+      const check = el.querySelector('.item-check');
+      check.textContent = el.classList.contains('done') ? '✓' : '';
+    }
+  </script>
+</head>
+<body>
+  <div class="doc">
+    <div class="doc-header">
+      <div class="badge">DOCUMENTO 2 DE 4 · USO INTERNO</div>
+      <h1>Checklist Setup Shopify</h1>
+      <p>Completar en orden. Marcar cada ítem solo cuando esté 100% verificado.</p>
+    </div>
+    <div class="doc-body">
+
+      <div class="meta">
+        <div class="meta-field"><label>Cliente</label><input type="text" placeholder="Nombre del negocio" /></div>
+        <div class="meta-field"><label>Estilo elegido</label><input type="text" placeholder="Minimalista / Vibrante / Elegante" /></div>
+        <div class="meta-field"><label>Fecha inicio</label><input type="text" placeholder="dd/mm/aaaa" /></div>
+        <div class="meta-field"><label>Fecha entrega</label><input type="text" placeholder="dd/mm/aaaa" /></div>
+      </div>
+
+      <div class="checklist">
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Tema instalado y activado</h4><p>Seleccionar el tema correspondiente al estilo elegido desde la tienda de temas de Shopify.</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Logo y colores de marca aplicados</h4><p>Subir logo PNG con fondo transparente. Aplicar colores primario y secundario en la configuración del tema.</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Banner/hero personalizado</h4><p>Reemplazar imagen de hero con foto del cliente o imagen de marca. Actualizar título y subtítulo del banner.</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Productos cargados con fotos y precios</h4><p>Cargar hasta 20 productos según la lista del brief. Cada producto con foto, nombre, precio y descripción.</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Carrito y checkout probados</h4><p>Realizar un pedido de prueba completo: agregar al carro → checkout → verificar email de confirmación.</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Métodos de pago configurados</h4><p>Activar los medios de pago indicados en el brief (Webpay, Mercado Pago, transferencia, etc.).</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Dominio conectado (si aplica)</h4><p>Configurar dominio personalizado del cliente. Verificar que HTTPS esté activo y el redirect funcione.</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Política de envíos y devoluciones cargada</h4><p>Cargar la política de despacho indicada en el brief en Configuración → Envío y entrega.</p></div>
+        </div>
+        <div class="item" onclick="toggleItem(this)">
+          <div class="item-check"></div>
+          <div class="item-text"><h4>Tienda activada para el público</h4><p>Desactivar contraseña de protección en Configuración → Preferencias. Verificar que la tienda sea accesible sin login.</p></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="doc-footer">
+      <p>Tu Amigo Digital SpA</p>
+      <p><a href="mailto:contacto@tuamigospa.cl">contacto@tuamigospa.cl</a> · <a href="https://wa.me/56971542893">+56 9 7154 2893</a></p>
+    </div>
+  </div>
+</body>
+</html>
