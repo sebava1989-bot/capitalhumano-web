@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Protocolo de Entrega — Tu Amigo Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1d1d1f; background: #f5f5f7; padding: 40px 24px; }
+    .doc { max-width: 740px; margin: 0 auto; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .doc-header { background: #a855f7; color: #fff; padding: 36px 40px; }
+    .doc-header .badge { background: rgba(255,255,255,0.2); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; letter-spacing: 1px; }
+    .doc-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    .doc-header p { font-size: 14px; opacity: 0.9; }
+    .doc-body { padding: 40px; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 36px; }
+    .meta-field { background: #f5f5f7; border-radius: 10px; padding: 12px 16px; }
+    .meta-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6e6e73; display: block; margin-bottom: 4px; }
+    .meta-field input { border: none; background: transparent; font-size: 14px; font-family: inherit; outline: none; width: 100%; }
+    .section { margin-bottom: 32px; }
+    .section-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #a855f7; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f3e8ff; }
+    .field label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+    .field .line { border: none; border-bottom: 1.5px solid #d2d2d7; display: block; width: 100%; padding: 8px 0; font-size: 14px; font-family: inherit; background: transparent; outline: none; margin-bottom: 14px; }
+    .field .area { border: 1.5px solid #d2d2d7; border-radius: 8px; width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit; min-height: 70px; resize: vertical; outline: none; margin-bottom: 14px; }
+    .recordatorios { display: flex; flex-direction: column; gap: 10px; }
+    .recordatorio { display: flex; align-items: flex-start; gap: 12px; background: #faf5ff; border: 1px solid #e9d5ff; border-radius: 12px; padding: 14px 16px; }
+    .recordatorio-icon { font-size: 20px; flex-shrink: 0; }
+    .recordatorio-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .recordatorio-text p { font-size: 12px; color: #6e6e73; }
+    .soporte-box { background: #faf5ff; border: 2px solid #a855f7; border-radius: 14px; padding: 20px 24px; }
+    .soporte-box h3 { font-size: 16px; font-weight: 700; color: #a855f7; margin-bottom: 8px; }
+    .soporte-box p { font-size: 14px; color: #6e6e73; margin-bottom: 12px; }
+    .soporte-box a { display: inline-flex; align-items: center; gap: 8px; background: #25d366; color: #fff; font-size: 13px; font-weight: 600; padding: 10px 20px; border-radius: 980px; text-decoration: none; }
+    .firma-section { margin-top: 8px; }
+    .firma-box { border: 1.5px solid #d2d2d7; border-radius: 10px; padding: 20px; text-align: center; min-height: 80px; display: flex; flex-direction: column; justify-content: flex-end; }
+    .firma-box .firma-line { border-top: 1.5px solid #d2d2d7; padding-top: 8px; margin-top: 20px; font-size: 12px; color: #6e6e73; }
+    .firma-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .doc-footer { background: #1d1d1f; padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; }
+    .doc-footer p { font-size: 13px; color: #888; }
+    .doc-footer a { color: #a855f7; text-decoration: none; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .doc { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <div class="doc-header">
+      <div class="badge">DOCUMENTO 4 DE 4 · ENTREGA AL CLIENTE</div>
+      <h1>Protocolo de Entrega</h1>
+      <p>Documento oficial de cierre del proyecto. Se entrega al cliente junto con los accesos.</p>
+    </div>
+    <div class="doc-body">
+
+      <div class="meta-grid">
+        <div class="meta-field"><label>Cliente</label><input type="text" placeholder="Nombre del negocio" /></div>
+        <div class="meta-field"><label>Fecha de entrega</label><input type="text" placeholder="dd/mm/aaaa" /></div>
+        <div class="meta-field"><label>URL de la tienda</label><input type="text" placeholder="https://sunegocio.com o .myshopify.com" /></div>
+        <div class="meta-field"><label>Estilo aplicado</label><input type="text" placeholder="Minimalista / Vibrante / Elegante" /></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">1. Accesos entregados</div>
+        <div class="field">
+          <label>URL del panel de administración</label>
+          <input class="line" type="text" placeholder="https://sunegocio.myshopify.com/admin" />
+          <label>Email de acceso</label>
+          <input class="line" type="text" placeholder="email registrado en Shopify" />
+          <label>Notas adicionales de acceso</label>
+          <textarea class="area" placeholder="Ej: La contraseña fue enviada por WhatsApp. Instagram ya está conectado con la cuenta @usuario."></textarea>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">2. Resumen de lo entregado</div>
+        <div class="field">
+          <label>Productos cargados</label>
+          <input class="line" type="text" placeholder="Ej: 14 productos cargados con foto, precio y descripción" />
+          <label>Redes conectadas</label>
+          <input class="line" type="text" placeholder="Ej: Instagram Shopping activo + Facebook Shop activo + Pixel Meta instalado" />
+          <label>Observaciones</label>
+          <textarea class="area" placeholder="Ej: Dominio propio pendiente de conexión por parte del cliente. 3 productos sin foto entregada quedan pendientes."></textarea>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">3. Recordatorios importantes</div>
+        <div class="recordatorios">
+          <div class="recordatorio">
+            <div class="recordatorio-icon">💳</div>
+            <div class="recordatorio-text"><h4>Mantén tu plan Shopify activo</h4><p>El plan mensual se cobra directamente a tu tarjeta en Shopify. Si vence, tu tienda se desactiva automáticamente.</p></div>
+          </div>
+          <div class="recordatorio">
+            <div class="recordatorio-icon">🔗</div>
+            <div class="recordatorio-text"><h4>No desconectes el canal de ventas Meta</h4><p>Si desvinculás Instagram o Facebook de Shopify, el catálogo se desincroniza y debemos reconectarlo desde cero.</p></div>
+          </div>
+          <div class="recordatorio">
+            <div class="recordatorio-icon">📦</div>
+            <div class="recordatorio-text"><h4>Actualizá el stock de tus productos</h4><p>Cuando vendas o recibas mercadería, actualizá el stock en Shopify para que las redes muestren la disponibilidad correcta.</p></div>
+          </div>
+          <div class="recordatorio">
+            <div class="recordatorio-icon">📖</div>
+            <div class="recordatorio-text"><h4>Mini-guía de administración</h4><p>Recibiste una guía PDF con los pasos básicos: agregar productos, ver pedidos y gestionar el stock.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">4. Soporte post-entrega</div>
+        <div class="soporte-box">
+          <h3>7 días de soporte incluidos</h3>
+          <p>Hasta el <strong><input type="text" style="border:none;border-bottom:1px solid #a855f7;background:transparent;font-size:14px;font-family:inherit;outline:none;width:120px" placeholder="dd/mm/aaaa" /></strong> podés escribirnos por cualquier duda relacionada con el funcionamiento de tu tienda.</p>
+          <a href="https://wa.me/56971542893" target="_blank">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            Escribir por WhatsApp
+          </a>
+        </div>
+      </div>
+
+      <div class="section firma-section">
+        <div class="section-title">5. Confirmación de conformidad</div>
+        <p style="font-size:13px;color:#6e6e73;margin-bottom:16px">El cliente confirma haber recibido el proyecto completo y estar conforme con el trabajo entregado.</p>
+        <div class="firma-grid">
+          <div class="firma-box"><div class="firma-line">Firma del cliente · Fecha</div></div>
+          <div class="firma-box"><div class="firma-line">Tu Amigo Digital SpA · Fecha</div></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="doc-footer">
+      <p>© Tu Amigo Digital SpA · <a href="mailto:contacto@tuamigospa.cl">contacto@tuamigospa.cl</a></p>
+      <p style="color:#888">+56 9 7154 2893</p>
+    </div>
+  </div>
+</body>
+</html>
