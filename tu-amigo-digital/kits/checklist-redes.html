@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checklist Instagram + Facebook — Tu Amigo Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1d1d1f; background: #f5f5f7; padding: 40px 24px; }
+    .doc { max-width: 640px; margin: 0 auto; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .doc-header { background: linear-gradient(135deg, #833ab4, #e1306c); color: #fff; padding: 36px 40px; }
+    .doc-header .badge { background: rgba(255,255,255,0.2); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; letter-spacing: 1px; }
+    .doc-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    .doc-header p { font-size: 14px; opacity: 0.9; }
+    .doc-body { padding: 40px; }
+    .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 32px; }
+    .meta-field { background: #f5f5f7; border-radius: 10px; padding: 12px 16px; }
+    .meta-field label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6e6e73; display: block; margin-bottom: 4px; }
+    .meta-field input { border: none; background: transparent; font-size: 14px; font-family: inherit; outline: none; width: 100%; }
+    .red-section { margin-bottom: 28px; }
+    .red-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; margin-bottom: 12px; padding: 10px 14px; border-radius: 10px; }
+    .red-title.ig { background: linear-gradient(135deg, #833ab4, #e1306c); color: #fff; }
+    .red-title.fb { background: #1877f2; color: #fff; }
+    .checklist { display: flex; flex-direction: column; gap: 10px; }
+    .item { display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 12px; border: 1.5px solid #e5e5e5; cursor: pointer; transition: border-color 0.15s; }
+    .item:hover { border-color: #e1306c; }
+    .item.done { background: #fdf0f6; border-color: #e1306c; }
+    .item.fb-item:hover { border-color: #1877f2; }
+    .item.fb-item.done { background: #eff5ff; border-color: #1877f2; }
+    .item-check { width: 22px; height: 22px; border: 2px solid #d2d2d7; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .item.done .item-check { background: #e1306c; border-color: #e1306c; color: #fff; font-size: 13px; }
+    .item.fb-item.done .item-check { background: #1877f2; border-color: #1877f2; }
+    .item-text h4 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .item-text p { font-size: 12px; color: #6e6e73; }
+    .doc-footer { background: #f5f5f7; padding: 24px 40px; border-top: 1px solid #e5e5e5; display: flex; justify-content: space-between; font-size: 13px; color: #6e6e73; }
+    .doc-footer a { color: #e1306c; text-decoration: none; font-weight: 500; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .doc { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+  <script>
+    function toggleItem(el) {
+      el.classList.toggle('done');
+      const check = el.querySelector('.item-check');
+      check.textContent = el.classList.contains('done') ? '✓' : '';
+    }
+  </script>
+</head>
+<body>
+  <div class="doc">
+    <div class="doc-header">
+      <div class="badge">DOCUMENTO 3 DE 4 · USO INTERNO</div>
+      <h1>Checklist Instagram + Facebook</h1>
+      <p>Conectar la tienda Shopify con Instagram Shopping y Facebook Shop.</p>
+    </div>
+    <div class="doc-body">
+
+      <div class="meta">
+        <div class="meta-field"><label>Cliente</label><input type="text" placeholder="Nombre del negocio" /></div>
+        <div class="meta-field"><label>URL Shopify</label><input type="text" placeholder="nombretienda.myshopify.com" /></div>
+        <div class="meta-field"><label>Instagram</label><input type="text" placeholder="@usuario" /></div>
+        <div class="meta-field"><label>Página Facebook</label><input type="text" placeholder="Nombre de la página" /></div>
+      </div>
+
+      <div class="red-section">
+        <div class="red-title ig">📱 Instagram Shopping</div>
+        <div class="checklist">
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Perfil convertido a cuenta Business</h4><p>En Instagram: Configuración → Cuenta → Cambiar a cuenta profesional → Negocio.</p></div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Catálogo Shopify vinculado a Instagram</h4><p>En Shopify: Canal de ventas → Instagram → Conectar con cuenta de Facebook Business y sincronizar catálogo.</p></div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Instagram Shopping aprobado y activo</h4><p>Esperar aprobación de Meta (puede tomar hasta 48 hs). Verificar en Instagram → Configuración → Compras.</p></div>
+          </div>
+          <div class="item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Etiquetas de producto probadas en post</h4><p>Crear un post de prueba y etiquetar un producto. Verificar que el link lleva correctamente a la tienda Shopify.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="red-section">
+        <div class="red-title fb">👍 Facebook Shop</div>
+        <div class="checklist">
+          <div class="item fb-item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Página Facebook vinculada a Shopify</h4><p>En Shopify: Canal de ventas → Facebook → Conectar con la página de Facebook del cliente.</p></div>
+          </div>
+          <div class="item fb-item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Facebook Shop configurado y activo</h4><p>Verificar en Commerce Manager de Meta que la tienda esté activa y visible en la página de Facebook.</p></div>
+          </div>
+          <div class="item fb-item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Catálogo sincronizado correctamente</h4><p>En Commerce Manager: verificar que todos los productos aparecen con foto, precio y stock actualizado.</p></div>
+          </div>
+          <div class="item fb-item" onclick="toggleItem(this)">
+            <div class="item-check"></div>
+            <div class="item-text"><h4>Pixel Meta instalado en Shopify</h4><p>En Shopify: Canal de ventas → Facebook → Pixel. Verificar con Meta Pixel Helper (extensión Chrome) que el pixel dispara al cargar la tienda.</p></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="doc-footer">
+      <p>Tu Amigo Digital SpA</p>
+      <p><a href="mailto:contacto@tuamigospa.cl">contacto@tuamigospa.cl</a></p>
+    </div>
+  </div>
+</body>
+</html>
