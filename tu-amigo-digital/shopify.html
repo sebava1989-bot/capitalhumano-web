@@ -56,6 +56,21 @@
       .steps { flex-direction: row; flex-wrap: wrap; }
       .step { flex: 1 1 calc(50% - 8px); }
     }
+
+    /* ESTILOS */
+    .styles-grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+    @media (min-width: 768px) { .styles-grid { grid-template-columns: repeat(3, 1fr); } }
+    .style-card { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s; }
+    .style-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+    .style-preview { height: 160px; display: flex; align-items: center; justify-content: center; font-size: 40px; }
+    .style-preview.minimal { background: linear-gradient(135deg, #f8f8f8, #e8e8e8); }
+    .style-preview.vibrant { background: linear-gradient(135deg, #ff6b35, #ffb347); }
+    .style-preview.elegant { background: linear-gradient(135deg, #1a0a2e, #4a1a8e); }
+    .style-body { padding: 20px; }
+    .style-body h3 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+    .style-body p { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+    .style-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .style-tag { font-size: 11px; background: var(--bg-gray); color: var(--muted); padding: 3px 10px; border-radius: 20px; }
   </style>
 </head>
 <body>
@@ -116,6 +131,60 @@
             <p>Conectada a tus redes sociales y lista para recibir tu primer pedido.</p>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- GALERÍA DE ESTILOS -->
+  <section class="section" style="background: var(--bg-gray);">
+    <div class="section-inner" style="max-width: 980px;">
+      <div class="section-label">Personalización</div>
+      <h2 class="section-title">Elegí tu estilo</h2>
+      <div class="styles-grid">
+
+        <div class="style-card">
+          <div class="style-preview minimal">⬜</div>
+          <div class="style-body">
+            <h3>Minimalista</h3>
+            <p>Limpio, sofisticado, con el foco puesto en tu producto. Mucho espacio en blanco y tipografía elegante.</p>
+            <div class="style-tags">
+              <span class="style-tag">Ropa</span>
+              <span class="style-tag">Accesorios</span>
+              <span class="style-tag">Decoración</span>
+              <span class="style-tag">Fotografía</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="style-card">
+          <div class="style-preview vibrant">🎨</div>
+          <div class="style-body">
+            <h3>Vibrante</h3>
+            <p>Colores que llaman la atención y generan urgencia de compra. Energético y cercano al cliente.</p>
+            <div class="style-tags">
+              <span class="style-tag">Comida</span>
+              <span class="style-tag">Mascotas</span>
+              <span class="style-tag">Belleza</span>
+              <span class="style-tag">Artesanías</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="style-card">
+          <div class="style-preview elegant">💎</div>
+          <div class="style-body">
+            <h3>Elegante</h3>
+            <p>Tonos oscuros y sofisticados que transmiten exclusividad y justifican precios premium.</p>
+            <div class="style-tags">
+              <span class="style-tag">Joyería</span>
+              <span class="style-tag">Cosméticos</span>
+              <span class="style-tag">Vinos</span>
+              <span class="style-tag">Spa</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
