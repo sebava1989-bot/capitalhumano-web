@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brief del Cliente — Tu Amigo Digital</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; color: #1d1d1f; background: #f5f5f7; padding: 40px 24px; }
+    .doc { max-width: 740px; margin: 0 auto; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .doc-header { background: #0071e3; color: #fff; padding: 36px 40px; }
+    .doc-header .badge { background: rgba(255,255,255,0.2); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; display: inline-block; margin-bottom: 12px; letter-spacing: 1px; }
+    .doc-header h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    .doc-header p { font-size: 14px; opacity: 0.85; }
+    .doc-body { padding: 40px; }
+    .section { margin-bottom: 36px; }
+    .section-title { font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #0071e3; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #e8f0fd; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: #1d1d1f; margin-bottom: 6px; }
+    .field .hint { font-size: 12px; color: #6e6e73; margin-bottom: 6px; }
+    .field .line { border: none; border-bottom: 1.5px solid #d2d2d7; display: block; width: 100%; padding: 8px 0; font-size: 14px; font-family: inherit; background: transparent; outline: none; }
+    .field .line:focus { border-bottom-color: #0071e3; }
+    .field .area { border: 1.5px solid #d2d2d7; border-radius: 8px; width: 100%; padding: 10px 12px; font-size: 14px; font-family: inherit; min-height: 80px; resize: vertical; outline: none; }
+    .field .area:focus { border-color: #0071e3; }
+    .style-options { display: flex; gap: 12px; }
+    .style-opt { flex: 1; border: 2px solid #d2d2d7; border-radius: 12px; padding: 14px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+    .style-opt:hover { border-color: #0071e3; }
+    .style-opt .emoji { font-size: 24px; margin-bottom: 6px; }
+    .style-opt .name { font-size: 13px; font-weight: 700; }
+    .style-opt .desc { font-size: 11px; color: #6e6e73; margin-top: 2px; }
+    .accesos-list { display: flex; flex-direction: column; gap: 10px; }
+    .acceso { display: flex; align-items: center; gap: 10px; background: #f5f5f7; border-radius: 10px; padding: 12px 16px; }
+    .acceso-check { width: 20px; height: 20px; border: 2px solid #d2d2d7; border-radius: 4px; flex-shrink: 0; }
+    .acceso-text { font-size: 13px; color: #1d1d1f; }
+    .doc-footer { background: #f5f5f7; padding: 24px 40px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e5e5; }
+    .doc-footer p { font-size: 13px; color: #6e6e73; }
+    .doc-footer a { color: #0071e3; text-decoration: none; font-weight: 500; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .doc { box-shadow: none; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="doc">
+    <div class="doc-header">
+      <div class="badge">DOCUMENTO 1 DE 4</div>
+      <h1>Brief del Cliente</h1>
+      <p>Completa este formulario antes de comenzar tu proyecto. Mientras más detalle nos das, mejor quedará tu tienda.</p>
+    </div>
+    <div class="doc-body">
+
+      <div class="section">
+        <div class="section-title">1. Datos del negocio</div>
+        <div class="field"><label>Nombre del negocio</label><input class="line" type="text" placeholder="Ej: Florería Valentina" /></div>
+        <div class="field"><label>Rubro o categoría</label><input class="line" type="text" placeholder="Ej: Flores y plantas, Ropa femenina, Comida saludable..." /></div>
+        <div class="field"><label>Público objetivo</label><div class="hint">¿A quién le vendés? Edad, género, intereses.</div><textarea class="area" placeholder="Ej: Mujeres de 25 a 45 años, interesadas en decoración del hogar y regalos especiales"></textarea></div>
+        <div class="field"><label>Descripción del negocio</label><div class="hint">Cuéntanos qué hacés y qué te hace diferente.</div><textarea class="area" placeholder="Ej: Somos una florería familiar con 10 años de experiencia, especializados en arreglos para eventos y envíos a domicilio en Santiago..."></textarea></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">2. Estilo visual elegido</div>
+        <div class="style-options">
+          <div class="style-opt"><div class="emoji">⬜</div><div class="name">Minimalista</div><div class="desc">Limpio y sofisticado</div></div>
+          <div class="style-opt"><div class="emoji">🎨</div><div class="name">Vibrante</div><div class="desc">Colorido y energético</div></div>
+          <div class="style-opt"><div class="emoji">💎</div><div class="name">Elegante</div><div class="desc">Oscuro y premium</div></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">3. Identidad visual</div>
+        <div class="field"><label>Logo</label><div class="hint">Enviarlo por WhatsApp en formato PNG con fondo transparente (si lo tenés).</div><input class="line" type="text" placeholder="Ej: Te lo envío por WhatsApp / Aún no tengo logo" /></div>
+        <div class="field"><label>Colores de marca</label><div class="hint">Si tenés colores definidos, indicá los códigos HEX o descríbelos.</div><input class="line" type="text" placeholder="Ej: Rosa pastel #f8b4c8 y blanco / No tengo colores definidos" /></div>
+        <div class="field"><label>Tipografía preferida</label><div class="hint">Opcional — si tenés alguna preferencia de estilo de letra.</div><input class="line" type="text" placeholder="Ej: Algo moderno y sans-serif / Sin preferencia" /></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">4. Productos iniciales</div>
+        <div class="field"><label>Lista de productos</label><div class="hint">Hasta 20 productos. Por cada uno: nombre, precio, foto y descripción breve. Podés enviarlo como lista o tabla por WhatsApp.</div><textarea class="area" style="min-height:120px" placeholder="Ej:&#10;1. Ramo de rosas rojas — $15.990 — Foto por WS&#10;2. Cactus decorativo — $8.490 — Foto por WS&#10;..."></textarea></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">5. Logística y pagos</div>
+        <div class="field"><label>Método de pago preferido</label><div class="hint">¿Cómo quieren cobrar? (Webpay, Mercado Pago, transferencia, etc.)</div><input class="line" type="text" placeholder="Ej: Webpay + Mercado Pago" /></div>
+        <div class="field"><label>Política de envíos</label><div class="hint">¿Hacen despacho? ¿A qué comunas? ¿Cuánto cuesta? ¿Tienen retiro en tienda?</div><textarea class="area" placeholder="Ej: Despacho a RM $3.000, regiones $5.000. Retiro en Providencia sin costo. 3–5 días hábiles."></textarea></div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">6. Accesos necesarios</div>
+        <p style="font-size:13px;color:#6e6e73;margin-bottom:16px">Antes de empezar, necesitamos que tengas listos estos accesos:</p>
+        <div class="accesos-list">
+          <div class="acceso"><div class="acceso-check"></div><div class="acceso-text"><strong>Cuenta Shopify creada</strong> — shopify.com/cl (plan a elección)</div></div>
+          <div class="acceso"><div class="acceso-check"></div><div class="acceso-text"><strong>Página de Facebook</strong> — con rol de administrador</div></div>
+          <div class="acceso"><div class="acceso-check"></div><div class="acceso-text"><strong>Cuenta de Instagram Business</strong> — vinculada a la página Facebook</div></div>
+          <div class="acceso"><div class="acceso-check"></div><div class="acceso-text"><strong>Dominio</strong> — si ya tenés uno o querés conectar uno nuevo</div></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="doc-footer">
+      <p>Tu Amigo Digital SpA · <a href="mailto:contacto@tuamigospa.cl">contacto@tuamigospa.cl</a></p>
+      <p>📱 <a href="https://wa.me/56971542893">+56 9 7154 2893</a></p>
+    </div>
+  </div>
+</body>
+</html>
