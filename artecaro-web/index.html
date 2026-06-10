@@ -17,18 +17,44 @@
       --whatsapp: #25d366;
       --font-serif: 'Cormorant Garamond', serif;
       --font-sans: 'Lato', sans-serif;
+      --bar-h: 36px;
+      --header-h: 70px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: var(--font-sans); background: var(--cream); color: var(--dark); }
     img { max-width: 100%; display: block; }
     a { text-decoration: none; color: inherit; }
 
+    /* ── ANNOUNCEMENT BAR ── */
+    #announcement-bar {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 102; height: var(--bar-h);
+      background: var(--dark);
+      overflow: hidden; display: flex; align-items: center;
+    }
+    .ticker-track {
+      display: flex; white-space: nowrap;
+      animation: marquee 28s linear infinite;
+      will-change: transform;
+    }
+    .ticker-track span {
+      font-family: var(--font-sans); font-size: 10px;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--white); padding: 0 36px;
+    }
+    .ticker-track span.sep { color: var(--accent); padding: 0 4px; font-size: 8px; }
+    @keyframes marquee {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
     /* ── HEADER ── */
     #header {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      background: var(--dark);
+      position: fixed; top: var(--bar-h); left: 0; right: 0;
+      z-index: 100; background: var(--dark);
       display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 32px; height: 70px;
+      padding: 0 32px; height: var(--header-h);
+      border-top: 1px solid rgba(255,255,255,0.08);
     }
     .header-logo img {
       height: 46px; width: 46px;
@@ -58,7 +84,7 @@
     }
     #hero-overlay {
       position: absolute; inset: 0;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(0,0,0,0.45);
     }
     #hero-content {
       position: relative; z-index: 2;
@@ -94,7 +120,7 @@
 
     /* ── COLECCIÓN ── */
     #coleccion {
-      padding: 90px 32px 80px;
+      padding: 110px 32px 80px;
       max-width: 1200px; margin: 0 auto;
     }
     #coleccion h2 {
@@ -114,31 +140,48 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 28px;
     }
+
+    /* ── PRODUCT CARD ── */
     .product-card {
       background: var(--white);
       border: 1px solid var(--sand); border-radius: 4px;
-      overflow: hidden;
+      overflow: hidden; cursor: pointer;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     .product-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 14px 36px rgba(58,46,40,0.13);
     }
-    .card-img { aspect-ratio: 3/4; overflow: hidden; }
-    .card-img img {
+    .card-img-wrap { aspect-ratio: 3/4; overflow: hidden; position: relative; }
+    .card-img-wrap img {
       width: 100%; height: 100%; object-fit: cover;
       transition: transform 0.5s ease;
     }
-    .product-card:hover .card-img img { transform: scale(1.05); }
-    .card-body { padding: 18px; }
+    .product-card:hover .card-img-wrap img { transform: scale(1.05); }
+    .card-badge {
+      position: absolute; top: 12px; left: 12px;
+      background: var(--dark); color: var(--white);
+      font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 2px;
+      font-family: var(--font-sans);
+    }
+    .card-body { padding: 16px 18px 18px; }
+    .card-cat {
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 5px;
+    }
     .card-body h3 {
       font-family: var(--font-serif);
-      font-size: 1.15rem; font-weight: 400;
-      margin-bottom: 6px;
+      font-size: 1.15rem; font-weight: 400; margin-bottom: 8px;
     }
-    .card-body .precio {
-      font-size: 1rem; color: var(--accent);
-      font-weight: 700; margin-bottom: 16px;
+    .card-prices { margin-bottom: 14px; }
+    .precio-main {
+      display: block; font-size: 1.05rem;
+      color: var(--dark); font-weight: 700; margin-bottom: 3px;
+    }
+    .precio-transfer {
+      font-size: 0.78rem; color: var(--accent);
+      font-style: italic;
     }
     .card-actions { display: flex; flex-direction: column; gap: 8px; }
     .btn-agregar {
@@ -151,7 +194,7 @@
     }
     .btn-agregar:hover { background: var(--accent); }
     .btn-wsp-card {
-      width: 100%; padding: 11px;
+      width: 100%; padding: 10px;
       background: transparent; color: var(--whatsapp);
       border: 1px solid var(--whatsapp);
       font-family: var(--font-sans); font-size: 11px;
@@ -195,9 +238,7 @@
       color: var(--white); font-size: 26px;
       cursor: pointer; line-height: 1;
     }
-    #cart-items {
-      flex: 1; overflow-y: auto; padding: 16px 24px;
-    }
+    #cart-items { flex: 1; overflow-y: auto; padding: 16px 24px; }
     #cart-empty {
       text-align: center; color: #999;
       font-style: italic; margin-top: 48px;
@@ -217,35 +258,31 @@
       font-size: 0.95rem; margin-bottom: 4px;
     }
     .item-precio { color: var(--accent); font-size: 0.85rem; font-weight: 700; }
-    .qty-controls {
-      display: flex; align-items: center;
-      gap: 8px; margin-top: 8px;
-    }
+    .qty-controls { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
     .qty-btn {
       width: 26px; height: 26px;
       background: var(--sand); border: none;
-      cursor: pointer; font-size: 16px;
-      border-radius: 2px;
+      cursor: pointer; font-size: 16px; border-radius: 2px;
       display: flex; align-items: center; justify-content: center;
     }
     .qty-num { font-size: 13px; min-width: 20px; text-align: center; }
     .cart-item-remove {
       background: none; border: none;
       color: #ccc; cursor: pointer;
-      font-size: 20px; align-self: flex-start;
-      line-height: 1; padding: 2px 0;
+      font-size: 20px; align-self: flex-start; line-height: 1; padding: 2px 0;
     }
     .cart-item-remove:hover { color: #e44; }
     #cart-footer {
       padding: 20px 24px;
-      border-top: 1px solid var(--sand);
-      background: var(--white);
+      border-top: 1px solid var(--sand); background: var(--white);
     }
     #cart-subtotal {
       display: flex; justify-content: space-between;
       font-size: 1rem; font-weight: 700;
-      margin-bottom: 16px;
-      font-family: var(--font-serif);
+      margin-bottom: 6px; font-family: var(--font-serif);
+    }
+    .cart-transfer-note {
+      font-size: 11px; color: var(--accent); margin-bottom: 14px; font-style: italic;
     }
     #btn-checkout-wsp {
       width: 100%; padding: 14px;
@@ -256,6 +293,186 @@
       border-radius: 2px; transition: background 0.3s ease;
     }
     #btn-checkout-wsp:hover { background: #1da851; }
+
+    /* ── PRODUCT MODAL ── */
+    #modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.65); z-index: 300;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    #modal-backdrop.active { opacity: 1; pointer-events: all; }
+    #product-modal {
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(0.96);
+      width: min(920px, 95vw);
+      max-height: 92vh;
+      background: var(--white);
+      z-index: 301; border-radius: 8px;
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+    }
+    #product-modal.active {
+      opacity: 1; pointer-events: all;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    #modal-close-btn {
+      position: absolute; top: 14px; right: 18px;
+      background: none; border: none;
+      font-size: 30px; cursor: pointer;
+      color: var(--dark); z-index: 2; line-height: 1;
+      opacity: 0.6; transition: opacity 0.2s;
+    }
+    #modal-close-btn:hover { opacity: 1; }
+    .modal-body {
+      display: grid; grid-template-columns: 1fr 1fr;
+      overflow-y: auto; max-height: 92vh;
+    }
+    .modal-img-col {
+      background: var(--cream); overflow: hidden;
+      position: relative; min-height: 420px;
+    }
+    .modal-img-col img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .modal-info-col {
+      padding: 44px 36px 36px;
+      overflow-y: auto;
+    }
+    .modal-breadcrumb {
+      font-size: 11px; color: #aaa; margin-bottom: 12px; letter-spacing: 0.5px;
+    }
+    .modal-breadcrumb span { color: var(--accent); }
+    .modal-category-tag {
+      font-size: 10px; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .modal-title {
+      font-family: var(--font-serif);
+      font-size: 1.85rem; font-weight: 400;
+      margin-bottom: 18px; line-height: 1.2; color: var(--dark);
+    }
+    .modal-price-block { margin-bottom: 16px; }
+    .modal-precio-main {
+      font-size: 1.55rem; font-weight: 700;
+      color: var(--dark); display: block; margin-bottom: 5px;
+    }
+    .modal-precio-transfer {
+      display: inline-block;
+      background: #fdf3e7; border: 1px solid #f0c080;
+      color: #a06020; font-size: 12px; font-weight: 600;
+      padding: 4px 12px; border-radius: 20px;
+    }
+    .modal-badge-envio {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #e8f5e9; color: #2e7d32;
+      font-size: 11px; padding: 5px 12px;
+      border-radius: 20px; margin: 12px 0 18px;
+      font-weight: 600; letter-spacing: 0.3px;
+    }
+    .modal-description {
+      font-size: 0.88rem; line-height: 1.75;
+      color: #5a4a40; margin-bottom: 22px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--sand);
+    }
+    .modal-section-label {
+      font-size: 10px; letter-spacing: 2px;
+      text-transform: uppercase; color: #999;
+      margin-bottom: 10px;
+    }
+    .modal-sizes {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 22px;
+    }
+    .size-pill {
+      padding: 7px 16px; border: 1px solid var(--sand);
+      border-radius: 4px; font-size: 12px; cursor: pointer;
+      transition: all 0.2s; background: var(--white);
+      font-family: var(--font-sans); color: var(--dark);
+    }
+    .size-pill:hover { border-color: var(--accent); }
+    .size-pill.selected {
+      border-color: var(--dark); background: var(--dark); color: white;
+    }
+    .modal-qty-row {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 16px;
+    }
+    .modal-qty-label { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #999; }
+    .modal-qty-controls {
+      display: flex; align-items: center;
+      border: 1px solid var(--sand); border-radius: 4px; overflow: hidden;
+    }
+    .mqty-btn {
+      width: 36px; height: 36px;
+      background: var(--cream); border: none;
+      cursor: pointer; font-size: 18px;
+      transition: background 0.2s; line-height: 1;
+    }
+    .mqty-btn:hover { background: var(--sand); }
+    #modal-qty-num {
+      width: 44px; text-align: center;
+      font-size: 14px; font-weight: 700;
+      border-left: 1px solid var(--sand);
+      border-right: 1px solid var(--sand);
+      padding: 8px 0;
+    }
+    .modal-btn-primary {
+      width: 100%; padding: 15px;
+      background: var(--dark); color: white;
+      border: none; font-family: var(--font-sans);
+      font-size: 12px; letter-spacing: 2px;
+      text-transform: uppercase; cursor: pointer;
+      transition: background 0.3s; margin-bottom: 10px;
+      border-radius: 2px;
+    }
+    .modal-btn-primary:hover { background: var(--accent); }
+    .modal-btn-wsp {
+      width: 100%; padding: 14px;
+      background: transparent; color: var(--whatsapp);
+      border: 1px solid var(--whatsapp);
+      font-family: var(--font-sans); font-size: 12px;
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.3s;
+      text-align: center; display: block; margin-bottom: 20px;
+      border-radius: 2px;
+    }
+    .modal-btn-wsp:hover { background: var(--whatsapp); color: white; }
+    .modal-pagos {
+      border-top: 1px solid var(--sand);
+      padding-top: 4px; margin-bottom: 12px;
+    }
+    .modal-pagos details summary {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; padding: 12px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      color: var(--dark); list-style: none; user-select: none;
+    }
+    .modal-pagos details summary::after { content: '+'; font-size: 18px; font-weight: 300; }
+    .modal-pagos details[open] summary::after { content: '−'; }
+    .modal-pagos details summary::-webkit-details-marker { display: none; }
+    .modal-pagos ul {
+      list-style: none; padding: 4px 0 12px;
+      font-size: 13px; line-height: 2.2; color: #5a4a40;
+    }
+    .modal-pagos li { display: flex; gap: 8px; align-items: center; }
+    .modal-pagos li::before { content: '✓'; color: var(--accent); font-weight: 700; }
+    .modal-meta {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-top: 16px; font-size: 12px;
+      border-top: 1px solid var(--sand); padding-top: 16px;
+    }
+    .modal-meta-item .meta-label {
+      color: #aaa; display: block; margin-bottom: 2px;
+      text-transform: uppercase; letter-spacing: 1px; font-size: 10px;
+    }
+    .modal-meta-item .meta-val { color: var(--dark); font-weight: 600; }
 
     /* ── WHATSAPP FLOTANTE ── */
     #wsp-float {
@@ -295,18 +512,40 @@
     /* ── RESPONSIVE ── */
     @media (max-width: 900px) {
       #products-grid { grid-template-columns: repeat(2, 1fr); }
+      .modal-body { grid-template-columns: 1fr; }
+      .modal-img-col { min-height: 300px; max-height: 340px; }
     }
     @media (max-width: 600px) {
       #products-grid { grid-template-columns: 1fr; }
-      #header { padding: 12px 16px; }
-      #coleccion { padding: 70px 16px 60px; }
+      #header { padding: 0 16px; }
+      #coleccion { padding: 110px 16px 60px; }
       #cart-panel { width: 100vw; }
       #wsp-float span { display: none; }
       #wsp-float { padding: 14px; border-radius: 50%; }
+      .modal-info-col { padding: 28px 20px 28px; }
+      .modal-title { font-size: 1.4rem; }
     }
   </style>
 </head>
 <body>
+
+  <!-- ANNOUNCEMENT BAR -->
+  <div id="announcement-bar">
+    <div class="ticker-track">
+      <span>10% OFF pagando con transferencia</span><span class="sep">✦</span>
+      <span>Envíos a todo el país</span><span class="sep">✦</span>
+      <span>3 y 6 cuotas sin interés</span><span class="sep">✦</span>
+      <span>Piezas artesanales únicas</span><span class="sep">✦</span>
+      <span>10% OFF pagando con transferencia</span><span class="sep">✦</span>
+      <span>Envíos a todo el país</span><span class="sep">✦</span>
+      <span>3 y 6 cuotas sin interés</span><span class="sep">✦</span>
+      <span>Piezas artesanales únicas</span><span class="sep">✦</span>
+      <span>10% OFF pagando con transferencia</span><span class="sep">✦</span>
+      <span>Envíos a todo el país</span><span class="sep">✦</span>
+      <span>3 y 6 cuotas sin interés</span><span class="sep">✦</span>
+      <span>Piezas artesanales únicas</span><span class="sep">✦</span>
+    </div>
+  </div>
 
   <!-- HEADER -->
   <header id="header">
@@ -356,7 +595,78 @@
         <span>Subtotal</span>
         <span id="cart-subtotal-amount">$0</span>
       </div>
+      <p class="cart-transfer-note">💳 10% OFF pagando con transferencia</p>
       <button id="btn-checkout-wsp">💬 Finalizar pedido por WhatsApp</button>
+    </div>
+  </div>
+
+  <!-- MODAL BACKDROP -->
+  <div id="modal-backdrop"></div>
+
+  <!-- PRODUCT MODAL -->
+  <div id="product-modal">
+    <button id="modal-close-btn" aria-label="Cerrar">×</button>
+    <div class="modal-body">
+      <div class="modal-img-col">
+        <img id="modal-img" src="" alt="">
+      </div>
+      <div class="modal-info-col">
+        <p class="modal-breadcrumb">Inicio &rsaquo; Colección &rsaquo; <span id="modal-breadcrumb-nombre"></span></p>
+        <p class="modal-category-tag" id="modal-category"></p>
+        <h2 class="modal-title" id="modal-nombre"></h2>
+        <div class="modal-price-block">
+          <span class="modal-precio-main" id="modal-precio-main"></span>
+          <span class="modal-precio-transfer" id="modal-precio-transfer"></span>
+        </div>
+        <span class="modal-badge-envio">🚚 Envío a todo el país</span>
+        <p class="modal-description" id="modal-descripcion"></p>
+
+        <p class="modal-section-label">Medida</p>
+        <div class="modal-sizes" id="modal-sizes"></div>
+
+        <div class="modal-qty-row">
+          <span class="modal-qty-label">Cantidad</span>
+          <div class="modal-qty-controls">
+            <button class="mqty-btn" onclick="changeModalQty(-1)">−</button>
+            <span id="modal-qty-num">1</span>
+            <button class="mqty-btn" onclick="changeModalQty(1)">+</button>
+          </div>
+        </div>
+
+        <button class="modal-btn-primary" id="modal-btn-agregar">Agregar al carrito</button>
+        <a class="modal-btn-wsp" id="modal-btn-wsp" href="#" target="_blank" rel="noopener">💬 Consultar por WhatsApp</a>
+
+        <div class="modal-pagos">
+          <details>
+            <summary>Métodos de pago</summary>
+            <ul>
+              <li>10% OFF pagando con transferencia bancaria</li>
+              <li>3 y 6 cuotas sin interés con tarjeta</li>
+              <li>Débito y crédito (todas las tarjetas)</li>
+              <li>Mercado Pago</li>
+            </ul>
+          </details>
+          <details>
+            <summary>Envío y entrega</summary>
+            <ul>
+              <li>Envíos a todo el país</li>
+              <li>Despacho en 3 a 7 días hábiles</li>
+              <li>Retiro en taller disponible</li>
+            </ul>
+          </details>
+        </div>
+
+        <div class="modal-meta">
+          <div class="modal-meta-item">
+            <span class="meta-label">Material</span>
+            <span class="meta-val" id="modal-material"></span>
+          </div>
+          <div class="modal-meta-item">
+            <span class="meta-label">Instalación</span>
+            <span class="meta-val" id="modal-instalacion"></span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -380,51 +690,141 @@
     const WSP_NUMBER = '569XXXXXXXX';
 
     const productos = [
-      { id: 1, nombre: 'Cortina Macramé Premium',   precio: 89990,  imagen: 'assets/producto-1.jpeg' },
-      { id: 2, nombre: 'Cenefa Macramé Ventana',     precio: 45990,  imagen: 'assets/producto-2.jpeg' },
-      { id: 3, nombre: 'Cortina Separador Boho',     precio: 119990, imagen: 'assets/producto-3.jpeg' },
-      { id: 4, nombre: 'Cortina de Baño Macramé',    precio: 79990,  imagen: 'assets/producto-4.jpeg' },
-      { id: 5, nombre: 'Cortina Macramé Diamante',   precio: 99990,  imagen: 'assets/producto-5.jpeg' },
-      { id: 6, nombre: 'Cortina Ambiente Camel',     precio: 89990,  imagen: 'assets/producto-6.jpeg' },
-      { id: 7, nombre: 'Cortina Baño Flecos',        precio: 69990,  imagen: 'assets/producto-7.jpeg' },
-      { id: 8, nombre: 'Cortina Clásica Crema',      precio: 59990,  imagen: 'assets/producto-8.jpeg' },
+      {
+        id: 1,
+        nombre: 'Cortina Macramé Premium',
+        precio: 89990,
+        imagen: 'assets/producto-1.jpeg',
+        categoria: 'Cortinas de Ambiente',
+        descripcion: 'Elegante cortina de ambiente confeccionada en hilo de algodón natural 100%. Los flecos artesanales con nudo corazón en el borde inferior aportan un toque bohemio inigualable. Ideal para living, dormitorio o comedor. Cada pieza es única y tejida a mano con dedicación artesanal. El tejido semitransparente tamiza la luz creando una atmósfera cálida y acogedora.',
+        medidas: ['1.4m × 2.2m', '1.6m × 2.2m', '1.8m × 2.2m'],
+        material: 'Algodón natural 100%',
+        instalacion: 'Barra corrida (no incluida)'
+      },
+      {
+        id: 2,
+        nombre: 'Cenefa Macramé Ventana',
+        precio: 45990,
+        imagen: 'assets/producto-2.jpeg',
+        categoria: 'Cenefas',
+        descripcion: 'Delicada cenefa de macramé tejida a mano con diseño de rombos entrelazados. Perfecta para ventanas que buscan un toque artesanal sin perder luminosidad. Incluye anillos de madera para colgar. Transforma cualquier rincón del hogar con esta pieza decorativa única que combina textura y ligereza en perfecta armonía.',
+        medidas: ['0.8m × 0.5m', '1.0m × 0.5m', '1.2m × 0.5m'],
+        material: 'Cordón de algodón trenzado',
+        instalacion: 'Anillos de madera incluidos'
+      },
+      {
+        id: 3,
+        nombre: 'Cortina Separador Boho',
+        precio: 119990,
+        imagen: 'assets/producto-3.jpeg',
+        categoria: 'Separadores de Ambiente',
+        descripcion: 'Impresionante cortina separadora en macramé puro con patrones geométricos tejidos a mano. Ideal para dividir ambientes conservando la continuidad visual. Cada nudo es trabajado a mano siguiendo técnicas artesanales tradicionales. Una pieza de alto impacto decorativo que funciona como obra de arte en tu hogar.',
+        medidas: ['0.9m × 2.0m', '1.0m × 2.0m', '1.2m × 2.0m'],
+        material: 'Hilo de algodón grueso natural',
+        instalacion: 'Barra o percha (no incluida)'
+      },
+      {
+        id: 4,
+        nombre: 'Cortina de Baño Macramé',
+        precio: 79990,
+        imagen: 'assets/producto-4.jpeg',
+        categoria: 'Cortinas de Baño',
+        descripcion: 'Exclusiva cortina de ducha con parte superior en macramé artesanal y cuerpo en lino lavado. El contraste entre el tejido de nudos y la tela natural crea un efecto de lujo bohemio. Resistente a la humedad, fácil de mantener. Incluye 12 ojales para instalar en cualquier barra estándar de baño.',
+        medidas: ['1.8m × 2.0m (estándar)'],
+        material: 'Lino lavado + algodón macramé',
+        instalacion: '12 ojales incluidos'
+      },
+      {
+        id: 5,
+        nombre: 'Cortina Macramé Diamante',
+        precio: 99990,
+        imagen: 'assets/producto-5.jpeg',
+        categoria: 'Cortinas de Ambiente',
+        descripcion: 'Cortina artesanal con espectacular diseño de diamantes y flecos largos que crean una cascada visual de gran impacto. Tejida con hilo de algodón premium. El diseño geométrico es trabajado nudo a nudo, haciendo de cada cortina una obra de arte única. Perfecta como elemento decorativo principal en cualquier espacio.',
+        medidas: ['0.8m × 1.8m', '1.0m × 1.8m', '1.2m × 2.0m'],
+        material: 'Algodón natural grueso premium',
+        instalacion: 'Barra de madera incluida'
+      },
+      {
+        id: 6,
+        nombre: 'Cortina Ambiente Camel',
+        precio: 89990,
+        imagen: 'assets/producto-6.jpeg',
+        categoria: 'Cortinas de Ambiente',
+        descripcion: 'Cortina de ambiente en tono camel con flecos de macramé en la parte inferior. El color tierra cálido armoniza a la perfección con cualquier decoración nórdica o boho. El tejido semitransparente tamiza la luz creando una atmósfera cálida y envolvente. Un básico elegante que nunca pasa de moda.',
+        medidas: ['1.4m × 2.2m', '1.6m × 2.2m', '1.8m × 2.2m'],
+        material: 'Lino algodón blend color camel',
+        instalacion: 'Trabillas superiores incluidas'
+      },
+      {
+        id: 7,
+        nombre: 'Cortina Baño Flecos',
+        precio: 69990,
+        imagen: 'assets/producto-7.jpeg',
+        categoria: 'Cortinas de Baño',
+        descripcion: 'Cortina de baño en tela cruda con delicados flecos de macramé en el borde inferior. Diseño minimalista y elegante que eleva el estilo del baño sin complicaciones. Muy fácil de instalar con argollas estándar. Resistente a la humedad y de fácil limpieza. La opción perfecta para quienes buscan un look artesanal accesible.',
+        medidas: ['1.8m × 1.8m', '1.8m × 2.0m'],
+        material: '100% algodón crudo',
+        instalacion: '12 argollas plásticas incluidas'
+      },
+      {
+        id: 8,
+        nombre: 'Cortina Clásica Crema',
+        precio: 59990,
+        imagen: 'assets/producto-8.jpeg',
+        categoria: 'Cortinas de Baño',
+        descripcion: 'Cortina de baño en color crema natural con flecos artesanales discretos en su borde. El diseño limpio y atemporal combina con cualquier estilo de baño. Confeccionada en algodón lavado de primera calidad. Perfecta para quienes buscan un look artesanal sutil y sofisticado a la vez. Calidad artesanal a un precio accesible.',
+        medidas: ['1.8m × 1.8m', '1.8m × 2.0m'],
+        material: 'Algodón lavado premium',
+        instalacion: 'Bolsillos superiores para barra'
+      }
     ];
 
     let cart = [];
+    let modalQty = 1;
+    let modalProductId = null;
 
     function formatPrice(num) {
       return '$' + num.toLocaleString('es-CL');
     }
 
+    function transferPrice(num) {
+      return Math.round(num * 0.9);
+    }
+
+    /* ── PRODUCTOS GRID ── */
     function renderProducts() {
       const grid = document.getElementById('products-grid');
       grid.innerHTML = productos.map(p => `
-        <div class="product-card">
-          <div class="card-img">
+        <div class="product-card" onclick="openProductModal(${p.id})">
+          <div class="card-img-wrap">
+            <span class="card-badge">Artesanal</span>
             <img src="${p.imagen}" alt="${p.nombre}" loading="lazy">
           </div>
           <div class="card-body">
+            <p class="card-cat">${p.categoria}</p>
             <h3>${p.nombre}</h3>
-            <p class="precio">${formatPrice(p.precio)}</p>
-            <div class="card-actions">
+            <div class="card-prices">
+              <span class="precio-main">${formatPrice(p.precio)}</span>
+              <span class="precio-transfer">o ${formatPrice(transferPrice(p.precio))} c/transferencia</span>
+            </div>
+            <div class="card-actions" onclick="event.stopPropagation()">
               <button class="btn-agregar" onclick="addToCart(${p.id})">Agregar al carrito</button>
               <a class="btn-wsp-card"
                  href="https://wa.me/${WSP_NUMBER}?text=${encodeURIComponent('Hola ARTECARO! Me interesa la ' + p.nombre + ' ¿Está disponible?')}"
-                 target="_blank" rel="noopener">💬 Consultar por WhatsApp</a>
+                 target="_blank" rel="noopener">💬 Consultar</a>
             </div>
           </div>
         </div>
       `).join('');
     }
 
+    /* ── CARRITO ── */
     function addToCart(id) {
       const producto = productos.find(p => p.id === id);
       const existing = cart.find(i => i.id === id);
-      if (existing) {
-        existing.qty++;
-      } else {
-        cart.push({ ...producto, qty: 1 });
-      }
+      if (existing) { existing.qty++; }
+      else { cart.push({ ...producto, qty: 1 }); }
       updateCartCounter();
       renderCart();
       openCart();
@@ -453,13 +853,11 @@
     function renderCart() {
       const container = document.getElementById('cart-items');
       const subtotalEl = document.getElementById('cart-subtotal-amount');
-
       if (cart.length === 0) {
         container.innerHTML = '<p id="cart-empty">Tu carrito está vacío</p>';
         subtotalEl.textContent = '$0';
         return;
       }
-
       container.innerHTML = cart.map(item => `
         <div class="cart-item">
           <img src="${item.imagen}" alt="${item.nombre}">
@@ -475,24 +873,19 @@
           <button class="cart-item-remove" onclick="removeFromCart(${item.id})">×</button>
         </div>
       `).join('');
-
       const subtotal = cart.reduce((sum, i) => sum + i.precio * i.qty, 0);
       subtotalEl.textContent = formatPrice(subtotal);
     }
 
     function buildWhatsAppMessage() {
-      const lines = cart.map(i =>
-        `• ${i.nombre} x${i.qty} — ${formatPrice(i.precio * i.qty)}`
-      );
+      const lines = cart.map(i => `• ${i.nombre} x${i.qty} — ${formatPrice(i.precio * i.qty)}`);
       const subtotal = cart.reduce((sum, i) => sum + i.precio * i.qty, 0);
       return [
         '¡Hola ARTECARO! Quiero hacer el siguiente pedido:',
-        '',
-        ...lines,
-        '',
+        '', ...lines, '',
         `*Total: ${formatPrice(subtotal)}*`,
-        '',
-        '¿Cómo coordino el pago y envío?'
+        `*Con transferencia: ${formatPrice(transferPrice(subtotal))}* (10% OFF)`,
+        '', '¿Cómo coordino el pago y envío?'
       ].join('\n');
     }
 
@@ -507,10 +900,59 @@
     }
 
     function toggleCart() {
-      document.getElementById('cart-panel').classList.contains('open')
-        ? closeCart() : openCart();
+      document.getElementById('cart-panel').classList.contains('open') ? closeCart() : openCart();
     }
 
+    /* ── MODAL PRODUCTO ── */
+    function openProductModal(id) {
+      const p = productos.find(x => x.id === id);
+      if (!p) return;
+      modalProductId = id;
+      modalQty = 1;
+
+      document.getElementById('modal-img').src = p.imagen;
+      document.getElementById('modal-img').alt = p.nombre;
+      document.getElementById('modal-breadcrumb-nombre').textContent = p.nombre;
+      document.getElementById('modal-category').textContent = p.categoria;
+      document.getElementById('modal-nombre').textContent = p.nombre;
+      document.getElementById('modal-precio-main').textContent = formatPrice(p.precio);
+      document.getElementById('modal-precio-transfer').textContent =
+        formatPrice(transferPrice(p.precio)) + ' con transferencia';
+      document.getElementById('modal-descripcion').textContent = p.descripcion;
+      document.getElementById('modal-qty-num').textContent = 1;
+      document.getElementById('modal-material').textContent = p.material;
+      document.getElementById('modal-instalacion').textContent = p.instalacion;
+
+      const sizesEl = document.getElementById('modal-sizes');
+      sizesEl.innerHTML = p.medidas.map((m, i) =>
+        `<button class="size-pill${i === 0 ? ' selected' : ''}" onclick="selectModalSize(this)">${m}</button>`
+      ).join('');
+
+      const wspMsg = encodeURIComponent(`Hola ARTECARO! Me interesa la ${p.nombre}. ¿Está disponible?`);
+      document.getElementById('modal-btn-wsp').href = `https://wa.me/${WSP_NUMBER}?text=${wspMsg}`;
+
+      document.getElementById('modal-backdrop').classList.add('active');
+      document.getElementById('product-modal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeProductModal() {
+      document.getElementById('modal-backdrop').classList.remove('active');
+      document.getElementById('product-modal').classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    function selectModalSize(btn) {
+      document.querySelectorAll('#modal-sizes .size-pill').forEach(el => el.classList.remove('selected'));
+      btn.classList.add('selected');
+    }
+
+    function changeModalQty(delta) {
+      modalQty = Math.max(1, modalQty + delta);
+      document.getElementById('modal-qty-num').textContent = modalQty;
+    }
+
+    /* ── INIT ── */
     document.addEventListener('DOMContentLoaded', () => {
       renderProducts();
 
@@ -527,8 +969,22 @@
           alert('Tu carrito está vacío. Agrega productos antes de continuar.');
           return;
         }
-        const msg = buildWhatsAppMessage();
-        window.open(`https://wa.me/${WSP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+        window.open(`https://wa.me/${WSP_NUMBER}?text=${encodeURIComponent(buildWhatsAppMessage())}`, '_blank');
+      });
+
+      document.getElementById('modal-backdrop').addEventListener('click', closeProductModal);
+      document.getElementById('modal-close-btn').addEventListener('click', closeProductModal);
+
+      document.getElementById('modal-btn-agregar').addEventListener('click', () => {
+        const p = productos.find(x => x.id === modalProductId);
+        if (!p) return;
+        const existing = cart.find(i => i.id === p.id);
+        if (existing) { existing.qty += modalQty; }
+        else { cart.push({ ...p, qty: modalQty }); }
+        updateCartCounter();
+        renderCart();
+        closeProductModal();
+        openCart();
       });
     });
   </script>
