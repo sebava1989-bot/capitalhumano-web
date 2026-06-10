@@ -377,7 +377,160 @@
   </footer>
 
   <script>
-    /* JavaScript — Task 3 */
+    const WSP_NUMBER = '569XXXXXXXX';
+
+    const productos = [
+      { id: 1, nombre: 'Cortina Macramé Premium',   precio: 89990,  imagen: 'assets/producto-1.jpeg' },
+      { id: 2, nombre: 'Cenefa Macramé Ventana',     precio: 45990,  imagen: 'assets/producto-2.jpeg' },
+      { id: 3, nombre: 'Cortina Separador Boho',     precio: 119990, imagen: 'assets/producto-3.jpeg' },
+      { id: 4, nombre: 'Cortina de Baño Macramé',    precio: 79990,  imagen: 'assets/producto-4.jpeg' },
+      { id: 5, nombre: 'Cortina Macramé Diamante',   precio: 99990,  imagen: 'assets/producto-5.jpeg' },
+      { id: 6, nombre: 'Cortina Ambiente Camel',     precio: 89990,  imagen: 'assets/producto-6.jpeg' },
+      { id: 7, nombre: 'Cortina Baño Flecos',        precio: 69990,  imagen: 'assets/producto-7.jpeg' },
+      { id: 8, nombre: 'Cortina Clásica Crema',      precio: 59990,  imagen: 'assets/producto-8.jpeg' },
+    ];
+
+    let cart = [];
+
+    function formatPrice(num) {
+      return '$' + num.toLocaleString('es-CL');
+    }
+
+    function renderProducts() {
+      const grid = document.getElementById('products-grid');
+      grid.innerHTML = productos.map(p => `
+        <div class="product-card">
+          <div class="card-img">
+            <img src="${p.imagen}" alt="${p.nombre}" loading="lazy">
+          </div>
+          <div class="card-body">
+            <h3>${p.nombre}</h3>
+            <p class="precio">${formatPrice(p.precio)}</p>
+            <div class="card-actions">
+              <button class="btn-agregar" onclick="addToCart(${p.id})">Agregar al carrito</button>
+              <a class="btn-wsp-card"
+                 href="https://wa.me/${WSP_NUMBER}?text=${encodeURIComponent('Hola ARTECARO! Me interesa la ' + p.nombre + ' ¿Está disponible?')}"
+                 target="_blank" rel="noopener">💬 Consultar por WhatsApp</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addToCart(id) {
+      const producto = productos.find(p => p.id === id);
+      const existing = cart.find(i => i.id === id);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ ...producto, qty: 1 });
+      }
+      updateCartCounter();
+      renderCart();
+      openCart();
+    }
+
+    function removeFromCart(id) {
+      cart = cart.filter(i => i.id !== id);
+      updateCartCounter();
+      renderCart();
+    }
+
+    function changeQty(id, delta) {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      item.qty += delta;
+      if (item.qty <= 0) { removeFromCart(id); return; }
+      updateCartCounter();
+      renderCart();
+    }
+
+    function updateCartCounter() {
+      const total = cart.reduce((sum, i) => sum + i.qty, 0);
+      document.getElementById('cart-count').textContent = total;
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items');
+      const subtotalEl = document.getElementById('cart-subtotal-amount');
+
+      if (cart.length === 0) {
+        container.innerHTML = '<p id="cart-empty">Tu carrito está vacío</p>';
+        subtotalEl.textContent = '$0';
+        return;
+      }
+
+      container.innerHTML = cart.map(item => `
+        <div class="cart-item">
+          <img src="${item.imagen}" alt="${item.nombre}">
+          <div class="cart-item-info">
+            <h4>${item.nombre}</h4>
+            <p class="item-precio">${formatPrice(item.precio)}</p>
+            <div class="qty-controls">
+              <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
+              <span class="qty-num">${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+            </div>
+          </div>
+          <button class="cart-item-remove" onclick="removeFromCart(${item.id})">×</button>
+        </div>
+      `).join('');
+
+      const subtotal = cart.reduce((sum, i) => sum + i.precio * i.qty, 0);
+      subtotalEl.textContent = formatPrice(subtotal);
+    }
+
+    function buildWhatsAppMessage() {
+      const lines = cart.map(i =>
+        `• ${i.nombre} x${i.qty} — ${formatPrice(i.precio * i.qty)}`
+      );
+      const subtotal = cart.reduce((sum, i) => sum + i.precio * i.qty, 0);
+      return [
+        '¡Hola ARTECARO! Quiero hacer el siguiente pedido:',
+        '',
+        ...lines,
+        '',
+        `*Total: ${formatPrice(subtotal)}*`,
+        '',
+        '¿Cómo coordino el pago y envío?'
+      ].join('\n');
+    }
+
+    function openCart() {
+      document.getElementById('cart-panel').classList.add('open');
+      document.getElementById('cart-overlay').classList.add('active');
+    }
+
+    function closeCart() {
+      document.getElementById('cart-panel').classList.remove('open');
+      document.getElementById('cart-overlay').classList.remove('active');
+    }
+
+    function toggleCart() {
+      document.getElementById('cart-panel').classList.contains('open')
+        ? closeCart() : openCart();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts();
+
+      document.getElementById('cart-btn').addEventListener('click', toggleCart);
+      document.getElementById('cart-close').addEventListener('click', closeCart);
+      document.getElementById('cart-overlay').addEventListener('click', closeCart);
+
+      document.getElementById('btn-hero-cta').addEventListener('click', () => {
+        document.getElementById('coleccion').scrollIntoView({ behavior: 'smooth' });
+      });
+
+      document.getElementById('btn-checkout-wsp').addEventListener('click', () => {
+        if (cart.length === 0) {
+          alert('Tu carrito está vacío. Agrega productos antes de continuar.');
+          return;
+        }
+        const msg = buildWhatsAppMessage();
+        window.open(`https://wa.me/${WSP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+      });
+    });
   </script>
 </body>
 </html>
