@@ -11,7 +11,7 @@ interface Doc {
   created_at: string;
 }
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://brilliant-love-production.up.railway.app/api';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://capitalhumano-backend-production.up.railway.app/api';
 
 const TYPE_LABELS: Record<string, string> = {
   liquidacion: 'Liquidación',

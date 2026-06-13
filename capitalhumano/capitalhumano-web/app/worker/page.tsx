@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://brilliant-love-production.up.railway.app/api';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://capitalhumano-backend-production.up.railway.app/api';
 
 export default function WorkerLogin() {
   const router = useRouter();
